@@ -35,6 +35,11 @@ namespace os
         Thread();
         ~Thread();
 
+        // Allocate and Free manage os::Threads owned by the runtime, such as one adopted by a managed thread
+        // (Il2CppInternalThread::handle), which the managed thread finalizer frees. Never put such a thread on the stack.
+        static Thread* Allocate();
+        static void Free(Thread* thread);
+
         typedef void (*StartFunc) (void* arg);
         // Use STDCALL calling convention on Windows, as it will be called back directly from the OS. This is defined as nothing on other platforms.
         typedef void (STDCALL * APCFunc)(void* context);

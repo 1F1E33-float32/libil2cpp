@@ -3,6 +3,7 @@
 #include "utils/Memory.h"
 #include "os/Mutex.h"
 #include "os/Thread.h"
+#include "vm-utils/Debugger.h"
 
 namespace il2cpp
 {
@@ -25,7 +26,10 @@ namespace Threading
         IL2CPP_FREE(_this->name.chars);
         _this->name.chars = NULL;
 
-        delete reinterpret_cast<il2cpp::os::Thread*>(_this->handle);
+#if IL2CPP_MONO_DEBUGGER
+        il2cpp::utils::Debugger::OnThreadFreed(reinterpret_cast<il2cpp::os::Thread*>(_this->handle));
+#endif
+        il2cpp::os::Thread::Free(reinterpret_cast<il2cpp::os::Thread*>(_this->handle));
         _this->handle = NULL;
     }
 } // namespace Threading

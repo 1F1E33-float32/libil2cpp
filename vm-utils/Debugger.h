@@ -134,6 +134,7 @@ namespace utils
         static bool GetIsDebuggerAttached();
         static void SetIsDebuggerAttached(bool attached);
         static bool IsDebuggerThread(os::Thread* thread);
+        static void OnThreadFreed(os::Thread* thread);
         static void AllocateThreadLocalData();
         static void FreeThreadLocalData();
         static Il2CppSequencePoint* GetSequencePoint(const Il2CppImage* image, size_t id);

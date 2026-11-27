@@ -20,7 +20,13 @@
 /// ARM Intrisic support - ADVANCED SIMD (NEON)
 #if defined(__ARM_NEON__) || defined(__ARM_NEON)
 #  include <arm_neon.h>
-#  include <arm_acle.h>
+// Before GCC 10, including arm_acle.h miscompiles code with exceptions: its "+nothing+crc"
+// target pragma leaves v8-v15 marked as clobbered by calls, so GCC drops writes to locals it
+// keeps there that a catch handler reads (VM-3494). Those versions' arm_acle.h only provides
+// the CRC32 intrinsics, so skip it there unless they are available.
+#  if !defined(__GNUC__) || defined(__clang__) || __GNUC__ >= 10 || defined(__ARM_FEATURE_CRC32)
+#    include <arm_acle.h>
+#  endif
 
 // The ARM intrinsics below are written against clang and MSVC. Fill in the two
 // pieces GCC does not provide, so it can compile them too.

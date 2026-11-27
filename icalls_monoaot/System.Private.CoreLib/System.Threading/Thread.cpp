@@ -17,6 +17,7 @@
 #include "vm/StackTrace.h"
 #include "vm/String.h"
 #include "vm/Thread.h"
+#include "vm-utils/Debugger.h"
 #include <memory>
 
 namespace il2cpp
@@ -151,7 +152,10 @@ namespace Threading
         IL2CPP_FREE(thisPtr->name.chars);
         thisPtr->name.chars = NULL;
 
-        delete reinterpret_cast<il2cpp::os::Thread*>(thisPtr->handle);
+#if IL2CPP_MONO_DEBUGGER
+        il2cpp::utils::Debugger::OnThreadFreed(reinterpret_cast<il2cpp::os::Thread*>(thisPtr->handle));
+#endif
+        il2cpp::os::Thread::Free(reinterpret_cast<il2cpp::os::Thread*>(thisPtr->handle));
         thisPtr->handle = NULL;
     }
 
@@ -159,7 +163,7 @@ namespace Threading
     {
         // The os::Thread object is deallocated in the InternalThread::Thread_free_internal icall, which
         // is called from the managed thread finalizer.
-        vm::Thread::SetupInternalManagedThread(thread, new os::Thread());
+        vm::Thread::SetupInternalManagedThread(thread, os::Thread::Allocate());
         thread->state = vm::kThreadStateUnstarted;
     }
 

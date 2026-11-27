@@ -286,7 +286,7 @@ namespace Threading
     {
         // The os::Thread object is deallocated in the InternalThread::Thread_free_internal icall, which
         // is called from the managed thread finalizer.
-        vm::Thread::SetupInternalManagedThread(_this, new os::Thread());
+        vm::Thread::SetupInternalManagedThread(_this, os::Thread::Allocate());
         _this->GetInternalThread()->state = vm::kThreadStateUnstarted;
     }
 

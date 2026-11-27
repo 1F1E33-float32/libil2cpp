@@ -27,6 +27,14 @@ namespace CoreLib
 {
 namespace System
 {
+    // An InlineArray declares one field that the runtime repeats, so comparing or hashing the declared
+    // fields would only see the first element. CoreCLR and Mono both refuse, and so do we.
+    static void ThrowIfInlineArray(Il2CppClass* klass)
+    {
+        if (klass->has_inline_array)
+            vm::Exception::Raise(vm::Exception::GetNotSupportedException("Calling built-in Equals() or GetHashCode() on type marked as InlineArray is invalid."));
+    }
+
     bool ValueType::InternalEquals(Il2CppObject* thisPtr, Il2CppObject* that, Il2CppArray** fields)
     {
         Il2CppClass *klass;
@@ -42,6 +50,7 @@ namespace System
             return false;
 
         klass = vm::Object::GetClass(thisPtr);
+        ThrowIfInlineArray(klass);
 
         if (klass->enumtype && vm::Class::GetEnumBaseType(klass)->type == IL2CPP_TYPE_I4)
             return *(int32_t*)vm::Object::GetRawData(thisPtr) == *(int32_t*)vm::Object::GetRawData(that);
@@ -151,6 +160,8 @@ namespace System
         void* iter = NULL;
 
         Il2CppClass* klass = vm::Object::GetClass(o);
+        ThrowIfInlineArray(klass);
+
         int32_t result = (int32_t)il2cpp::utils::HashUtils::AlignedPointerHash(klass);
 
         if (vm::Class::GetNumFields(klass) == 0)

@@ -6,6 +6,7 @@
 #include "il2cpp-object-internals.h"
 #include "il2cpp-metadata.h"
 #include "Debugger.h"
+#include "os/Atomic.h"
 #include "os/Thread.h"
 #include "os/c-api/Allocator.h"
 #include "os/SocketBridge.h"
@@ -320,9 +321,10 @@ namespace utils
     void Debugger::StartDebuggerThread()
     {
 #if defined(RUNTIME_IL2CPP)
-        // This thread is allocated here once and never deallocated.
-        s_DebuggerContext->m_DebuggerThread = new os::Thread();
-        s_DebuggerContext->m_DebuggerThread->Run(mono_debugger_run_debugger_thread_func, NULL);
+        // The managed thread's finalizer frees this os::Thread after the debugger thread exits, see OnThreadFreed.
+        os::Thread* debuggerThread = os::Thread::Allocate();
+        os::Atomic::PublishPointer(&s_DebuggerContext->m_DebuggerThread, debuggerThread);
+        debuggerThread->Run(mono_debugger_run_debugger_thread_func, NULL);
 #else
         IL2CPP_ASSERT(0 && "The managed debugger is only supported for the libil2cpp runtime backend.");
 #endif
@@ -407,7 +409,17 @@ namespace utils
 
     bool Debugger::IsDebuggerThread(os::Thread* thread)
     {
-        return thread == s_DebuggerContext->m_DebuggerThread;
+        // m_DebuggerThread is also written by the GC finalizer thread (OnThreadFreed). It is only compared, never
+        // dereferenced, so a relaxed load is enough.
+        return thread == os::Atomic::ReadPointer(&s_DebuggerContext->m_DebuggerThread);
+    }
+
+    void Debugger::OnThreadFreed(os::Thread* thread)
+    {
+        // Forget the debugger thread once its os::Thread is freed. Otherwise IsDebuggerThread matches the next
+        // os::Thread allocated at the same address, and shutdown would skip aborting that thread (VM-3492).
+        // Compare-exchange, so a debugger thread restarted in the meantime is not forgotten.
+        os::Atomic::CompareExchangePointer<os::Thread>(&s_DebuggerContext->m_DebuggerThread, NULL, thread);
     }
 
     static void InitializeUnwindState(Il2CppThreadUnwindState* unwindState, uint32_t frameCapacity)
