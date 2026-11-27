@@ -154,7 +154,7 @@ namespace utils
                 else if (deserializeManagedObjects)
                 {
                     Il2CppClass* klass = il2cpp::vm::MetadataCache::GetTypeInfoFromTypeIndex(image, typeIndex);
-                    *(Il2CppReflectionType**)value = il2cpp::vm::Reflection::GetTypeObject(&klass->byval_arg);
+                    *(Il2CppReflectionType**)value = il2cpp::vm::Reflection::GetTypeObject(klass);
                     il2cpp::gc::GarbageCollector::SetWriteBarrier((void**)value);
                 }
                 else

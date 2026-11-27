@@ -22,7 +22,6 @@ namespace System
         static int32_t GetProcessorCount();
         static int32_t get_ExitCode();
         static Il2CppArray* GetCommandLineArgs();
-        static void Exit(int32_t exitCode);
         static void FailFast(Il2CppString* message, Il2CppException* exception, Il2CppString* errorSource);
         static void set_ExitCode(int32_t value);
     };

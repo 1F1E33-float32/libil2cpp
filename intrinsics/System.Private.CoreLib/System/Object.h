@@ -2,6 +2,7 @@
 #include "il2cpp-config.h"
 
 #include "codegen/il2cpp-codegen-metadata.h"
+#include "codegen/il2cpp-codegen.h"
 namespace il2cpp
 {
 namespace intrinsics
@@ -14,7 +15,10 @@ namespace System
         Method: System.Type System.Object::GetType()
         AssemblyName: System.Private.CoreLib
     */
-    Type_t* il2cpp_intrinsic_object_get_type(Il2CppObject* thisPtr);
+    inline Type_t* il2cpp_intrinsic_object_get_type(Il2CppObject* thisPtr)
+    {
+        return il2cpp_codegen_class_get_type_object(thisPtr->klass);
+    }
 
     /* METHOD MAPPING
         Method: System.Boolean System.Object::ReferenceEquals(System.Object,System.Object)

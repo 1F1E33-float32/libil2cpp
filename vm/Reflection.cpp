@@ -29,6 +29,7 @@
 #include "utils/dynamic_array.h"
 #include "utils/HashUtils.h"
 #include "gc/AppendOnlyGCHashMap.h"
+#include "os/Atomic.h"
 
 template<typename T>
 struct ReflectionMapHash
@@ -215,7 +216,7 @@ namespace vm
         }
         ret = (Il2CppReflectionMethod*)Object::New(klass);
         ret->method = method;
-        IL2CPP_OBJECT_SETREF(ret, reftype, GetTypeObject(&refclass->byval_arg));
+        IL2CPP_OBJECT_SETREF(ret, reftype, GetTypeObject(refclass));
 
         return s_MethodMap->GetOrAdd(key, ret);
     }
@@ -293,7 +294,7 @@ namespace vm
 
         Il2CppReflectionMonoEvent* monoEvent = reinterpret_cast<Il2CppReflectionMonoEvent*>(Object::New(s_System_Reflection_RuntimeEventInfoKlass));
         monoEvent->eventInfo = event;
-        monoEvent->reflectedType = Reflection::GetTypeObject(&klass->byval_arg);
+        monoEvent->reflectedType = Reflection::GetTypeObject(klass);
         result = reinterpret_cast<Il2CppReflectionEvent*>(monoEvent);
 
         return s_EventMap->GetOrAdd(key, result);
@@ -301,7 +302,14 @@ namespace vm
 
     Il2CppReflectionType* Reflection::GetTypeObject(const Il2CppClass* klass)
     {
-        return GetTypeObject(il2cpp::vm::Class::GetType(klass));
+        Il2CppReflectionType* typeObject = os::Atomic::LoadPointerAcquire(&klass->typeObject);
+        if (typeObject != NULL)
+            return typeObject;
+
+        // The map owns the canonical object and keeps it alive, the class only caches it
+        typeObject = GetTypeObject(il2cpp::vm::Class::GetType(klass));
+        os::Atomic::PublishPointer(&const_cast<Il2CppClass*>(klass)->typeObject, typeObject);
+        return typeObject;
     }
 
     Il2CppReflectionType* Reflection::GetTypeObject(const Il2CppType *type)

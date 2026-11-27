@@ -594,7 +594,7 @@ namespace System
 
         for (size_t i = 0; i < nestedTypeCount; i++)
         {
-            il2cpp_array_setref(result, i, vm::Reflection::GetTypeObject(&nestedTypes[i]->byval_arg));
+            il2cpp_array_setref(result, i, vm::Reflection::GetTypeObject(nestedTypes[i]));
         }
 
         return result;
@@ -812,7 +812,7 @@ namespace System
     Il2CppReflectionType* RuntimeType::get_DeclaringType(Il2CppReflectionRuntimeType* _this)
     {
         Il2CppClass* declaringClass = vm::Type::GetDeclaringType(_this->type.type);
-        return declaringClass == NULL ? NULL : il2cpp::vm::Reflection::GetTypeObject(vm::Class::GetType(declaringClass));
+        return declaringClass == NULL ? NULL : il2cpp::vm::Reflection::GetTypeObject(declaringClass);
     }
 
     void validate_make_array_type_inputs(Il2CppReflectionType* type, int32_t rank)
@@ -854,7 +854,7 @@ namespace System
         else
             arrayClass = il2cpp_bounded_array_class_get(klass, rank, true);
 
-        return arrayClass != NULL ? vm::Reflection::GetTypeObject(&arrayClass->byval_arg) : NULL;
+        return arrayClass != NULL ? vm::Reflection::GetTypeObject(arrayClass) : NULL;
     }
 
     Il2CppReflectionType* RuntimeType::make_byref_type(Il2CppReflectionRuntimeType* _type)
@@ -908,14 +908,14 @@ namespace System
             return NULL;
         }
 
-        return vm::Reflection::GetTypeObject(&genericInstanceTypeClass->byval_arg);
+        return vm::Reflection::GetTypeObject(genericInstanceTypeClass);
     }
 
     Il2CppReflectionType* RuntimeType::MakePointerType(Il2CppReflectionType* type)
     {
         Il2CppClass* pointerType = vm::Class::GetPtrClass(type->type);
 
-        return vm::Reflection::GetTypeObject(&pointerType->byval_arg);
+        return vm::Reflection::GetTypeObject(pointerType);
     }
 
     Il2CppArray* RuntimeType::GetGenericArgumentsInternal(Il2CppReflectionRuntimeType* _this, bool runtimeArray)

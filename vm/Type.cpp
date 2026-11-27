@@ -1071,7 +1071,7 @@ namespace vm
             for (uint32_t i = 0; i < type_argc; ++i)
             {
                 pklass = Class::FromGenericParameter(GenericContainer::GetGenericParameter(klass->genericContainerHandle, i));
-                il2cpp_array_setref(res, i, Reflection::GetTypeObject(&pklass->byval_arg));
+                il2cpp_array_setref(res, i, Reflection::GetTypeObject(pklass));
             }
         }
         else if (klass->generic_class)
@@ -1102,7 +1102,7 @@ namespace vm
         // And perhaps it affects other types, but it is not clear why this was added
         Il2CppClass* klass = vm::Class::FromIl2CppType(type);
 
-        return il2cpp::vm::Reflection::GetTypeObject(vm::Class::GetType(klass));
+        return il2cpp::vm::Reflection::GetTypeObject(klass);
     }
 
     uint32_t Type::GetToken(const Il2CppType *type)

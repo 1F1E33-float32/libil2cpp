@@ -443,7 +443,7 @@ namespace Reflection
         {
             Il2CppMetadataGenericParameterHandle  param = vm::GenericContainer::GetGenericParameter(containerHandle, i);
             Il2CppClass *pklass = vm::Class::FromGenericParameter(param);
-            il2cpp_array_setref(res, i, il2cpp::vm::Reflection::GetTypeObject(&pklass->byval_arg));
+            il2cpp_array_setref(res, i, il2cpp::vm::Reflection::GetTypeObject(pklass));
         }
 
         return res;

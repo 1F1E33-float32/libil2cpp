@@ -3,11 +3,15 @@
 #include "gc_wrapper.h"
 #include "il2cpp-config.h"
 #include "il2cpp-api.h"
+#include "il2cpp-object-internals.h"
+#include "il2cpp-tabledefs.h"
 #include "gc/WriteBarrierValidation.h"
 #include "gc/GarbageCollector.h"
 #include "os/Console.h"
 #include "os/Mutex.h"
+#include "vm/Field.h"
 #include "vm/StackTrace.h"
+#include "vm/Type.h"
 #include <algorithm>
 #include <functional>
 #include <map>
@@ -54,6 +58,8 @@ namespace gc
         int frameCount;
 #endif
         AllocationKind kind;
+        // Allocated by GC_gcj_vector_malloc
+        bool isVector;
     };
 
     static std::map<void*, AllocationInfo, std::greater<void*> > g_Allocations;
@@ -87,7 +93,7 @@ namespace gc
 
 #endif
 
-    void* GC_malloc_wrapper(size_t size, AllocationKind kind)
+    void* GC_malloc_wrapper(size_t size, AllocationKind kind, bool isVector = false)
     {
         void* ptr = (char*)GC_malloc_kind(size, kind);
         memset(ptr, 0, size);
@@ -104,6 +110,7 @@ namespace gc
             AllocationInfo& allocation = g_Allocations[ptr];
             allocation.size = size;
             allocation.kind = kind;
+            allocation.isVector = isVector;
             allocation.stacktrace = stackScope.Copy();
 
 #if HAS_POSIX_BACKTRACE
@@ -149,7 +156,7 @@ namespace gc
 
     extern "C" void* GC_CALL GC_gcj_vector_malloc(size_t size, void * ptr_to_struct_containing_descr)
     {
-        void ** ptr = (void**)GC_malloc_wrapper(size, kObject);
+        void ** ptr = (void**)GC_malloc_wrapper(size, kObject, true);
         *ptr = ptr_to_struct_containing_descr;
         return ptr;
     }
@@ -164,34 +171,25 @@ namespace gc
         return GC_malloc_wrapper(size, kPtrFree);
     }
 
-    static std::string ObjectName(void* object, AllocationKind kind)
+    static std::string ClassName(Il2CppClass* klass)
     {
-        if (kind != kObject)
+        return vm::Type::GetName(&klass->byval_arg, IL2CPP_TYPE_NAME_FORMAT_FULL_NAME);
+    }
+
+    // klass is the class of a kObject allocation, or the owner of kUncollectable static field storage
+    static std::string ObjectName(AllocationKind kind, Il2CppClass* klass)
+    {
+        switch (kind)
         {
-            switch (kind)
-            {
-                case kPtrFree: return "Kind: kPtrFree";
-                case kNormal: return "Kind: kNormal";
-                case kUncollectable: return "Kind: kUncollectable";
-                default: return "?";
-            }
+            case kPtrFree: return "Kind: kPtrFree";
+            case kNormal: return "Kind: kNormal";
+            case kUncollectable:
+                if (klass != NULL)
+                    return "Kind: kUncollectable, static fields of " + ClassName(klass);
+                return "Kind: kUncollectable";
+            case kObject: return klass != NULL ? ClassName(klass) : "";
+            default: return "?";
         }
-
-        Il2CppClass* klass = il2cpp_object_get_class((Il2CppObject*)(object));
-
-        if (klass == NULL)
-            return "";
-
-        std::string name = il2cpp_class_get_name(klass);
-        Il2CppClass* parent = il2cpp_class_get_declaring_type(klass);
-        while (parent != NULL)
-        {
-            klass = parent;
-            parent = il2cpp_class_get_declaring_type(klass);
-            name = std::string(il2cpp_class_get_name(klass)) + "/" + name;
-        }
-
-        return std::string(il2cpp_class_get_namespace(klass)) + "::" + name;
     }
 
     static std::string GetReadableStackTrace(const StackFrames &stackTrace)
@@ -210,19 +208,21 @@ namespace gc
         return str;
     }
 
-    static std::string LogError(std::pair<void*, AllocationInfo> const & object, void** reference, void *refObject)
+    static std::string LogError(std::pair<void*, AllocationInfo> const & object, Il2CppClass* objectClass, void** reference, std::pair<void*, AllocationInfo> const & refObject)
     {
         std::string msg;
         char chbuf[1024];
-        snprintf(chbuf, 1024, "In object %p (%s) with size %zx at offset %zx, allocated at \n%s\n", object.first, ObjectName(object.first, object.second.kind).c_str(), object.second.size, (size_t)((char*)reference - (char*)object.first),
-#if HAS_POSIX_BACKTRACE
-            GetStackPosix(object.second).c_str()
-#else
-            GetReadableStackTrace(object.second.stacktrace).c_str()
-#endif
-        );
+        snprintf(chbuf, 1024, "In object %p (%s) with size %zx at offset %zx, allocated at \n", object.first, ObjectName(object.second.kind, objectClass).c_str(), object.second.size, (size_t)((char*)reference - (char*)object.first));
         msg += chbuf;
-        snprintf(chbuf, 1024, "Points to object %p of type (%s)\n", refObject, ObjectName(refObject, kPtrFree).c_str());
+        // Appended separately, as the stack is often longer than chbuf
+#if HAS_POSIX_BACKTRACE
+        msg += GetStackPosix(object.second);
+#else
+        msg += GetReadableStackTrace(object.second.stacktrace);
+#endif
+        msg += "\n";
+        Il2CppClass* refClass = refObject.second.kind == kObject ? il2cpp_object_get_class((Il2CppObject*)refObject.first) : NULL;
+        snprintf(chbuf, 1024, "Points to object %p of type (%s)\n", refObject.first, ObjectName(refObject.second.kind, refClass).c_str());
         msg += chbuf;
         return msg;
     }
@@ -368,6 +368,142 @@ namespace gc
         GarbageCollector::Disable();
     }
 
+    enum SlotKind
+    {
+        kSlotUnknown,
+        kSlotNotReference,
+        kSlotReference
+    };
+
+    static bool IsManagedReferenceType(const Il2CppType* type)
+    {
+        switch (il2cpp_type_get_type(type))
+        {
+            case IL2CPP_TYPE_STRING:
+            case IL2CPP_TYPE_SZARRAY:
+            case IL2CPP_TYPE_CLASS:
+            case IL2CPP_TYPE_OBJECT:
+            case IL2CPP_TYPE_ARRAY:
+                return true;
+            case IL2CPP_TYPE_VAR:
+            case IL2CPP_TYPE_MVAR:
+                // Allocated types are always fully instantiated
+                IL2CPP_ASSERT(0 && "Unexpected generic parameter type in write barrier validation");
+                return false;
+            case IL2CPP_TYPE_GENERICINST:
+                return !il2cpp_class_is_valuetype(il2cpp_class_from_type(type));
+            default:
+                return false;
+        }
+    }
+
+    // A bitmap descriptor only describes the first words of an object; the rest hold no references
+    static bool DescriptorMayHavePointerAt(intptr_t desc, size_t index)
+    {
+        if (index >= sizeof(void*) * 8 - GC_DS_TAG_BITS)
+            return false;
+        return ((desc >> (sizeof(void*) * 8 - index - 1)) & 1) != 0;
+    }
+
+    static bool IsValueTypeWithReferences(Il2CppClass* klass)
+    {
+        return il2cpp_class_is_valuetype(klass) && il2cpp_class_has_references(klass);
+    }
+
+    static SlotKind GetSlotKind(Il2CppClass* klass, size_t offset);
+
+    // Merges the kind of the slot at offset, as covered by field, into slotKind
+    static void ClassifyFieldAtSlot(FieldInfo* field, size_t offset, SlotKind& slotKind)
+    {
+        const Il2CppType* fieldType = il2cpp_field_get_type(field);
+        size_t fieldOffset = il2cpp_field_get_offset(field);
+        int typeEnum = il2cpp_type_get_type(fieldType);
+        bool isReference = fieldType->byref || IsManagedReferenceType(fieldType);
+
+        Il2CppClass* fieldClass = NULL;
+        size_t fieldSize = sizeof(void*);
+        if (!isReference && typeEnum != IL2CPP_TYPE_PTR && typeEnum != IL2CPP_TYPE_FNPTR)
+        {
+            fieldClass = il2cpp_class_from_type(fieldType);
+            fieldSize = (size_t)il2cpp_class_value_size(fieldClass, NULL);
+        }
+
+        if (offset + sizeof(void*) <= fieldOffset || offset >= fieldOffset + fieldSize)
+            return;
+
+        SlotKind fieldKind = isReference ? kSlotReference : kSlotNotReference;
+
+        // References are pointer aligned, so a struct starting inside the slot can't hold one there
+        if (fieldClass != NULL && offset >= fieldOffset && IsValueTypeWithReferences(fieldClass))
+        {
+            // Value type field offsets include the object header
+            fieldKind = GetSlotKind(fieldClass, offset - fieldOffset + sizeof(Il2CppObject));
+        }
+
+        if (fieldKind == kSlotUnknown)
+            return;
+
+        // A reference may only overlap other references
+        IL2CPP_ASSERT(slotKind == kSlotUnknown || slotKind == fieldKind);
+        slotKind = fieldKind;
+    }
+
+    // Uses the declared field types to decide whether the slot at offset holds a managed reference.
+    // Returns kSlotUnknown when no field covers the slot.
+    static SlotKind GetSlotKind(Il2CppClass* klass, size_t offset)
+    {
+        if (il2cpp_class_get_rank(klass) > 0)
+        {
+            // The array header holds no references
+            if (offset < kIl2CppSizeOfArray)
+                return kSlotNotReference;
+
+            Il2CppClass* elementClass = il2cpp_class_get_element_class(klass);
+            const Il2CppType* elementType = il2cpp_class_get_type(elementClass);
+            if (IsManagedReferenceType(elementType))
+                return kSlotReference;
+
+            if (!IsValueTypeWithReferences(elementClass))
+                return kSlotNotReference;
+
+            size_t elementSize = (size_t)il2cpp_class_value_size(elementClass, NULL);
+            return GetSlotKind(elementClass, (offset - kIl2CppSizeOfArray) % elementSize + sizeof(Il2CppObject));
+        }
+
+        SlotKind slotKind = kSlotUnknown;
+        for (Il2CppClass* currentClass = klass; currentClass != NULL; currentClass = il2cpp_class_get_parent(currentClass))
+        {
+            void* iter = NULL;
+            while (FieldInfo* field = il2cpp_class_get_fields(currentClass, &iter))
+            {
+                if (vm::Field::IsInstance(field))
+                    ClassifyFieldAtSlot(field, offset, slotKind);
+            }
+        }
+
+        return slotKind;
+    }
+
+    // Like GetSlotKind, for the slot at offset in the static field storage of klass
+    static SlotKind GetStaticSlotKind(Il2CppClass* klass, size_t offset)
+    {
+        SlotKind slotKind = kSlotUnknown;
+        void* iter = NULL;
+        while (FieldInfo* field = il2cpp_class_get_fields(klass, &iter))
+        {
+            if (vm::Field::IsNormalStatic(field))
+                ClassifyFieldAtSlot(field, offset, slotKind);
+        }
+
+        return slotKind;
+    }
+
+    static void AddStaticFieldsOwner(Il2CppClass* klass, void* staticFieldsOwners)
+    {
+        if (klass->static_fields != NULL)
+            (*(std::map<void*, Il2CppClass*>*)staticFieldsOwners)[klass->static_fields] = klass;
+    }
+
     void WriteBarrierValidation::Run()
     {
         if (g_ExternalAllocationTrackerFunction != NULL)
@@ -375,31 +511,75 @@ namespace gc
         std::string msg;
         msg = "<TestResult Name='WriteBarrierValidation'>\n<![CDATA[\n";
         size_t errors = 0;
+
+        std::map<void*, Il2CppClass*> staticFieldsOwners;
+        il2cpp_class_for_each(AddStaticFieldsOwner, &staticFieldsOwners);
+
         for (std::map<void*, AllocationInfo>::iterator i = g_Allocations.begin(); i != g_Allocations.end(); i++)
         {
             if (i->second.kind == kPtrFree)
                 continue;
 
             intptr_t desc = (intptr_t)GC_NO_DESCRIPTOR;
+            Il2CppClass* klass = NULL;
             if (i->second.kind == kObject)
             {
+                klass = il2cpp_object_get_class((Il2CppObject*)i->first);
                 desc = *(intptr_t*)(((char*)(*(void**)i->first)) + MARK_DESCR_OFFSET);
                 if ((desc & GC_DS_TAGS) != GC_DS_BITMAP)
                     desc = (intptr_t)GC_NO_DESCRIPTOR;
             }
 
+            Il2CppClass* staticFieldsOwner = NULL;
+            if (i->second.kind == kUncollectable)
+            {
+                std::map<void*, Il2CppClass*>::iterator owner = staticFieldsOwners.find(i->first);
+                if (owner != staticFieldsOwners.end())
+                    staticFieldsOwner = owner->second;
+            }
+
+            // The GC scans each element with the element type's descriptor, and skips the header
+            intptr_t elementDesc = (intptr_t)GC_NO_DESCRIPTOR;
+            size_t wordsPerElement = 0;
+            void** vectorStart = NULL;
+            void** vectorEnd = NULL;
+            if (i->second.isVector)
+            {
+                elementDesc = (intptr_t)klass->element_class->gc_desc;
+                IL2CPP_ASSERT((elementDesc & GC_DS_TAGS) == GC_DS_BITMAP);
+                wordsPerElement = klass->element_size / sizeof(void*);
+                vectorStart = (void**)((char*)i->first + kIl2CppSizeOfArray);
+                vectorEnd = vectorStart + ((Il2CppArray*)i->first)->max_length * wordsPerElement;
+            }
+
             for (void** ptr = ((void**)i->first) + 2; ptr < (void**)((char*)i->first + i->second.size); ptr++)
             {
-                if (desc != (intptr_t)GC_NO_DESCRIPTOR)
+                if (i->second.isVector)
+                {
+                    if (ptr < vectorStart || ptr >= vectorEnd)
+                        continue;
+
+                    // The element descriptor includes the object header
+                    size_t element_index = (ptr - vectorStart) % wordsPerElement + sizeof(Il2CppObject) / sizeof(void*);
+                    if (!DescriptorMayHavePointerAt(elementDesc, element_index))
+                        continue;
+                }
+                else if (desc != (intptr_t)GC_NO_DESCRIPTOR)
                 {
                     // if we have a GC descriptor bitmap, check if this address can be a pointer, skip otherwise.
                     size_t ptr_index = ptr - (void**)i->first;
-                    if (((desc >> (sizeof(void*) * 8 - ptr_index - 1)) & 1) == 0)
+                    if (!DescriptorMayHavePointerAt(desc, ptr_index))
                         continue;
                 }
 
                 void* ref = *ptr;
                 if (ref < g_MinHeap || ref >= g_MaxHeap)
+                    continue;
+
+                if (klass != NULL && GetSlotKind(klass, (char*)ptr - (char*)i->first) == kSlotNotReference)
+                    continue;
+
+                if (staticFieldsOwner != NULL && GetStaticSlotKind(staticFieldsOwner, (char*)ptr - (char*)i->first) == kSlotNotReference)
                     continue;
 
                 std::map<void*, AllocationInfo>::iterator j = g_Allocations.lower_bound(ref);
@@ -414,7 +594,7 @@ namespace gc
                             snprintf(chbuf, 1024, "\n%p looks like a reference to %p, but was not found in tracked references\n", ptr, ref);
                             msg += chbuf;
                             errors++;
-                            msg += LogError(*i, ptr, j->first);
+                            msg += LogError(*i, klass != NULL ? klass : staticFieldsOwner, ptr, *j);
                         }
                         else if (trackedRef->second != ref)
                         {
@@ -422,7 +602,7 @@ namespace gc
                             snprintf(chbuf, 1024, "\n%p does not match tracked value (%p!=%p).\n", ptr, trackedRef->second, ref);
                             msg += chbuf;
                             errors++;
-                            msg += LogError(*i, ptr, j->first);
+                            msg += LogError(*i, klass != NULL ? klass : staticFieldsOwner, ptr, *j);
                         }
                     }
                 }
@@ -430,7 +610,10 @@ namespace gc
         }
         msg += "]]>\n</TestResult>\n";
         if (errors > 0)
+        {
             il2cpp_console_printf_error("%s", msg.c_str());
+            exit(1);
+        }
     }
 } /* gc */
 } /* il2cpp */

@@ -10,11 +10,6 @@
 #include "vm/Runtime.h"
 #include "vm/Reflection.h"
 
-Type_t* il2cpp_codegen_object_get_type(RuntimeObject* obj)
-{
-    return il2cpp_codegen_type_get_object(il2cpp::vm::Class::GetType(il2cpp::vm::Object::GetClass(obj)));
-}
-
 intptr_t il2cpp_codegen_get_com_interface_for_object(Il2CppObject* object, Type_t* type)
 {
     return reinterpret_cast<intptr_t>(il2cpp::vm::CCW::GetCCW(object, reinterpret_cast<Il2CppReflectionType*>(type)));

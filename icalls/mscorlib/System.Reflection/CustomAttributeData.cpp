@@ -24,7 +24,7 @@ namespace Reflection
     static void SetCustomAttributeTypeArgument(const MethodInfo* ctor, void* argBuffer, const il2cpp::metadata::CustomAttributeArgument* inArg)
     {
         void* params[] = {
-            il2cpp::vm::Reflection::GetTypeObject(&inArg->klass->byval_arg),
+            il2cpp::vm::Reflection::GetTypeObject(inArg->klass),
             il2cpp::vm::Class::IsValuetype(inArg->klass) ? vm::Object::Box(inArg->klass, (void*)&inArg->data) : reinterpret_cast<Il2CppObject*>(inArg->data.obj)
         };
         il2cpp::vm::Runtime::Invoke(ctor, argBuffer, params, NULL);

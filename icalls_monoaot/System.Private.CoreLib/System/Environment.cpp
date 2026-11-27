@@ -57,13 +57,6 @@ namespace System
         return res;
     }
 
-    void Environment::Exit(int32_t exitCode)
-    {
-        set_ExitCode(exitCode);
-        il2cpp::vm::Runtime::Shutdown();
-        il2cpp::os::Environment::Exit(exitCode);
-    }
-
     void Environment::FailFast(Il2CppString* message, Il2CppException* exception, Il2CppString* errorSource)
     {
         bool messageWritten = false;

@@ -27,6 +27,7 @@ typedef struct Il2CppNameToTypeHandleHashTable Il2CppNameToTypeHandleHashTable;
 typedef struct Il2CppCodeGenModule Il2CppCodeGenModule;
 typedef struct Il2CppMetadataRegistration Il2CppMetadataRegistration;
 typedef struct Il2CppCodeRegistration Il2CppCodeRegistration;
+typedef struct Il2CppReflectionType Il2CppReflectionType;
 
 typedef struct VirtualInvokeData
 {
@@ -312,6 +313,7 @@ typedef struct Il2CppClass
     // End initialization required fields
 
     void *unity_user_data;
+    Il2CppReflectionType* typeObject; // System.Type for byval_arg, published by Reflection::GetTypeObject
 
     Il2CppGCHandle initializationExceptionGCHandle;
 

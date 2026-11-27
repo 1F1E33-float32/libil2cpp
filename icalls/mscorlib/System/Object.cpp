@@ -26,7 +26,7 @@ namespace System
 
     Il2CppReflectionType* Object::GetType(Il2CppObject* obj)
     {
-        return il2cpp::vm::Reflection::GetTypeObject(&obj->klass->byval_arg);
+        return il2cpp::vm::Reflection::GetTypeObject(obj->klass);
     }
 } /* namespace System */
 } /* namespace mscorlib */

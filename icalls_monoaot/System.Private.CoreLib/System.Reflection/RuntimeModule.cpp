@@ -82,7 +82,7 @@ namespace Reflection
         if (globalType == NULL)
             return NULL;
 
-        return (Il2CppObject*)vm::Reflection::GetTypeObject(&globalType->byval_arg);
+        return (Il2CppObject*)vm::Reflection::GetTypeObject(globalType);
     }
 
     Il2CppArray* RuntimeModule::InternalGetTypes(intptr_t module)

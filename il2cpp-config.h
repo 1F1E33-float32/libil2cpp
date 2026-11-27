@@ -37,7 +37,7 @@
 #if defined(__GNUC__)
 #define IL2CPP_GCC_VERSION (__GNUC__ * 10000 \
                       + __GNUC_MINOR__ * 100 \
-                      + __GNU_PATCHLEVEL__)
+                      + __GNUC_PATCHLEVEL__)
 #endif
 
 typedef void (STDCALL *SynchronizationContextCallback)(intptr_t arg);
@@ -82,13 +82,6 @@ typedef void (STDCALL *CultureInfoChangedCallback)(const Il2CppChar* arg);
     #define ALIGN_OF(T) __alignof__(T)
     #define ALIGN_TYPE(val) __attribute__((aligned(val)))
     #define ALIGN_FIELD(val) ALIGN_TYPE(val)
-// GCC earlier than 12.2 are unable to compile properly with the always_inline attribute. Does not work with recursive functions.
-    #if (defined(__GNUC__) && IL2CPP_GCC_VERSION <= 120200)
-        #define IL2CPP_FORCE_INLINE inline
-    #else
-        #define IL2CPP_FORCE_INLINE inline __attribute__ ((always_inline))
-    #endif
-    #define IL2CPP_MANAGED_FORCE_INLINE IL2CPP_FORCE_INLINE
 #elif defined(_MSC_VER)
     #define ALIGN_OF(T) __alignof(T)
 #if _MSC_VER >= 1900 && defined(__cplusplus)
@@ -97,15 +90,14 @@ typedef void (STDCALL *CultureInfoChangedCallback)(const Il2CppChar* arg);
     #define ALIGN_TYPE(val) __declspec(align(val))
 #endif
     #define ALIGN_FIELD(val) __declspec(align(val))
-    #define IL2CPP_FORCE_INLINE __forceinline
-    #define IL2CPP_MANAGED_FORCE_INLINE inline
 #else
     #define ALIGN_TYPE(size)
     #define ALIGN_FIELD(size)
-    #define IL2CPP_FORCE_INLINE inline
-    #define IL2CPP_MANAGED_FORCE_INLINE IL2CPP_FORCE_INLINE
 #endif
 #endif
+
+// Plain C++ inline on every compiler; the compiler decides what to inline. The name is kept for existing users.
+#define IL2CPP_FORCE_INLINE inline
 
 /* Debugging */
 #ifndef IL2CPP_DEBUG

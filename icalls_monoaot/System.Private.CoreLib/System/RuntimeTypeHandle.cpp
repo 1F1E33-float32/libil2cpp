@@ -208,11 +208,11 @@ namespace System
         // GetElementType should only return a type for:
         // Array Pointer PassedByRef
         if (type->byref)
-            retVal = il2cpp::vm::Reflection::GetTypeObject(&klass->byval_arg);
+            retVal = il2cpp::vm::Reflection::GetTypeObject(klass);
         else if (klass->element_class && IL2CPP_CLASS_IS_ARRAY(klass))
-            retVal = il2cpp::vm::Reflection::GetTypeObject(&klass->element_class->byval_arg);
+            retVal = il2cpp::vm::Reflection::GetTypeObject(klass->element_class);
         else if (klass->element_class && type->type == IL2CPP_TYPE_PTR)
-            retVal = il2cpp::vm::Reflection::GetTypeObject(&klass->element_class->byval_arg);
+            retVal = il2cpp::vm::Reflection::GetTypeObject(klass->element_class);
 
         res = reinterpret_cast<Il2CppObject*>(retVal);
     }
@@ -236,7 +236,7 @@ namespace System
         if (klass->generic_class)
         {
             Il2CppClass* generic_class = vm::GenericClass::GetTypeDefinition(klass->generic_class);
-            res = (Il2CppObject*)vm::Reflection::GetTypeObject(&generic_class->byval_arg);
+            res = (Il2CppObject*)vm::Reflection::GetTypeObject(generic_class);
             return;
         }
 

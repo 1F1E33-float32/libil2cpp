@@ -23,8 +23,6 @@
 #define IL2CPP_NATIVEARRAY_GET_LENGTH(TLengthField) \
    (TLengthField)
 
-Type_t* il2cpp_codegen_object_get_type(RuntimeObject* obj);
-
 inline int32_t il2cpp_codegen_array_get_rank(RuntimeArray* array)
 {
     return array->klass->rank;

@@ -269,7 +269,6 @@ System.Math::Tanh(System.Double)|System::Private::CoreLib::System::Math::Tanh|do
 System.Environment::GetProcessorCount()|System::Private::CoreLib::System::Environment::GetProcessorCount|int32_t (*)()
 System.Environment::get_ExitCode()|System::Private::CoreLib::System::Environment::get_ExitCode|int32_t (*)()
 System.Environment::GetCommandLineArgs()|System::Private::CoreLib::System::Environment::GetCommandLineArgs|Il2CppArray* (*)()
-System.Environment::Exit(System.Int32)|System::Private::CoreLib::System::Environment::Exit|void (*)(int32_t)
 System.Environment::FailFast(System.String,System.Exception,System.String)|System::Private::CoreLib::System::Environment::FailFast|void (*)(Il2CppString*, Il2CppException*, Il2CppString*)
 System.Environment::set_ExitCode(System.Int32)|System::Private::CoreLib::System::Environment::set_ExitCode|void (*)(int32_t)
 
@@ -555,3 +554,11 @@ System.Runtime.Intrinsics.X86.X86Base::__cpuidex(System.Int32*,System.Int32,Syst
 // Unity.PathRemapper
 >icalls_monoaot/System.Private.CoreLib/Unity/PathRemapper.h
 Unity.PathRemapper::InvokeNativeRemapper(System.Byte*,System.Byte*,System.Int32)|il2cpp::icalls::System::Private::CoreLib::Unity::PathRemapper::InvokeNativeRemapper|int32_t(*)(uint8_t*, uint8_t*, int32_t)
+
+// System.Threading.ThreadPool
+>icalls_monoaot/System.Private.CoreLib/System.Threading/ThreadPool.h
+System.Threading.ThreadPool::MainThreadScheduleBackgroundJob(System.Void*)|System::Private::CoreLib::System::Threading::ThreadPool::MainThreadScheduleBackgroundJob|void (*)(void*)
+
+// System.Threading.TimerQueue
+>icalls_monoaot/System.Private.CoreLib/System.Threading/TimerQueue.h
+System.Threading.TimerQueue::MainThreadScheduleTimer(System.Void*,System.Int32)|System::Private::CoreLib::System::Threading::TimerQueue::MainThreadScheduleTimer|void (*)(void*, int32_t)

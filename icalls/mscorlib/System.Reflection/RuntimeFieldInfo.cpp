@@ -92,7 +92,7 @@ namespace Reflection
 
         parent = declaring ? field->field->parent : field->klass;
 
-        return il2cpp::vm::Reflection::GetTypeObject(&parent->byval_arg);
+        return il2cpp::vm::Reflection::GetTypeObject(parent);
     }
 
     Il2CppObject* RuntimeFieldInfo::ResolveType(Il2CppObject* thisPtr)

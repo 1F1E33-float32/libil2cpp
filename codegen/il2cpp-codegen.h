@@ -733,6 +733,24 @@ String_t* il2cpp_codegen_string_new_utf16(const il2cpp::utils::StringView<Il2Cpp
 
 Type_t* il2cpp_codegen_type_get_object(const RuntimeType* type);
 
+Type_t* il2cpp_codegen_class_get_type_object_slow(RuntimeClass* klass);
+
+inline Type_t* il2cpp_codegen_class_get_type_object(RuntimeClass* klass)
+{
+    Il2CppReflectionType* typeObject = il2cpp::os::Atomic::LoadPointerAcquire(&klass->typeObject);
+    if (typeObject != NULL)
+        return reinterpret_cast<Type_t*>(typeObject);
+    return il2cpp_codegen_class_get_type_object_slow(klass);
+}
+
+#if !MONO_NET_BCL
+inline Type_t* il2cpp_codegen_object_get_type(RuntimeObject* obj)
+{
+    return il2cpp_codegen_class_get_type_object(obj->klass);
+}
+
+#endif
+
 // Replace the managed bodies of RuntimeTypeHandle::Equals and GetHashCode.
 bool il2cpp_codegen_runtime_type_handle_equals_internal(intptr_t left, intptr_t right);
 inline bool il2cpp_codegen_runtime_type_handle_equals(intptr_t left, intptr_t right)
@@ -2155,52 +2173,29 @@ void il2cpp_codegen_delegate_invoke_open_generic_virtual(Il2CppMethodPointer met
 void il2cpp_codegen_delegate_invoke_open_generic_interface(Il2CppMethodPointer methodPtr, const MethodInfo* method, RuntimeDelegate* thisPtr, void** args, void* result);
 void il2cpp_codegen_delegate_invoke_multicast(Il2CppMethodPointer methodPtr, const MethodInfo* method, Il2CppMulticastDelegate* thisPtr, void** args, void* result);
 
-// This class relies on the behavior on the C++ compiler in release
-// to inline and optimize out these the redundant _init checks so that we end
-// up with only one call to init() initialization per function
-// This is defined out for debug build because it greater bloats the build size
-struct CheckedLocalInit
+// In release each checked local is a plain bool, tested in place, so that the C++ compiler can
+// optimize out the redundant checks and we end up with only one call to init() per function.
+// Keeping the test in the macro, rather than in a helper the compiler must choose to inline,
+// lets it keep the flag in a register however large the method is.
+// This is defined out for debug build because it greatly bloats the build size
+
+// One statement can hold two CHECKED_LOCAL_INIT_PARAM uses of the same flag (two RGCTX arguments to one call).
+// Setting the flag inside a function keeps that write sequenced with the other use's read.
+template<typename T, typename TInit>
+inline T* il2cpp_codegen_checked_local_init(bool& initialized, T* (*init)(TInit), TInit initParam)
 {
-    bool _init;
-    CheckedLocalInit() : _init(false) {}
-
-    template<typename T>
-    IL2CPP_FORCE_INLINE T* Init(T* expr, T* (*init)(T*))
-    {
-        if (_init)
-            return expr;
-        _init = true;
-        return init(expr);
-    }
-
-    template<typename T, typename TInit>
-    IL2CPP_FORCE_INLINE T* Init(T* expr, T* (*init)(TInit), TInit initParam)
-    {
-        if (_init)
-            return expr;
-        _init = true;
-        return init(initParam);
-    }
-
-    template<typename T>
-    IL2CPP_FORCE_INLINE void Init(T* expr, void (*init)(T*))
-    {
-        if (!_init)
-        {
-            init(expr);
-            _init = true;
-        }
-    }
-};
+    initialized = true;
+    return init(initParam);
+}
 
 #if IL2CPP_DEBUG
 #define CHECKED_LOCAL(name)
 #define CHECKED_LOCAL_INIT(name, expr, init) init(expr)
 #define CHECKED_LOCAL_INIT_PARAM(name, expr, init, initParam) init(initParam)
 #else
-#define CHECKED_LOCAL(name)    CheckedLocalInit name
-#define CHECKED_LOCAL_INIT(name, expr, init)  name.Init(expr, init)
-#define CHECKED_LOCAL_INIT_PARAM(name, expr, init, initParam)  name.Init(expr, init, initParam)
+#define CHECKED_LOCAL(name)    bool name = false
+#define CHECKED_LOCAL_INIT(name, expr, init)  ((void)((name) || (init(expr), (name) = true)))
+#define CHECKED_LOCAL_INIT_PARAM(name, expr, init, initParam)  ((name) ? (expr) : il2cpp_codegen_checked_local_init(name, init, initParam))
 #endif
 
 RuntimeObject* il2cpp_codegen_runtime_field_info_get_declaring_type(RuntimeObject* runtimeFieldInfo);

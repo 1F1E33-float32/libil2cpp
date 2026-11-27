@@ -33,7 +33,7 @@ namespace Reflection
 
     void RuntimeEventInfo::get_event_info(Il2CppReflectionMonoEvent* ev, Il2CppReflectionMonoEventInfo* info)
     {
-        info->declaringType = vm::Reflection::GetTypeObject(&ev->eventInfo->parent->byval_arg);
+        info->declaringType = vm::Reflection::GetTypeObject(ev->eventInfo->parent);
         info->reflectedType = ev->reflectedType;
         info->name = vm::String::New(ev->eventInfo->name);
 

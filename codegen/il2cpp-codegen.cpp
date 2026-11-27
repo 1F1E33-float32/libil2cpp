@@ -179,6 +179,11 @@ Type_t* il2cpp_codegen_type_get_object(const RuntimeType* type)
     return (Type_t*)il2cpp::vm::Reflection::GetTypeObject(type);
 }
 
+Type_t* il2cpp_codegen_class_get_type_object_slow(RuntimeClass* klass)
+{
+    return (Type_t*)il2cpp::vm::Reflection::GetTypeObject(klass);
+}
+
 bool il2cpp_codegen_runtime_type_handle_equals_internal(intptr_t left, intptr_t right)
 {
     // A default RuntimeTypeHandle is only equal to another default one.

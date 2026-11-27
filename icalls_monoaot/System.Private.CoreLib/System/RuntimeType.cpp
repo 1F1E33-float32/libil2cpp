@@ -892,7 +892,7 @@ namespace System
         Il2CppClass* klass = vm::Class::FromIl2CppType(il2CppType);
         Il2CppClass* parent = vm::Class::GetParent(klass);
         if (parent)
-            res = (Il2CppObject*)vm::Reflection::GetTypeObject(vm::Class::GetType(parent));
+            res = (Il2CppObject*)vm::Reflection::GetTypeObject(parent);
         else
             res = (Il2CppObject*)NULL;
     }
@@ -923,7 +923,7 @@ namespace System
         }
         else
         {
-            res = (Il2CppObject*)vm::Reflection::GetTypeObject(&genericInstanceTypeClass->byval_arg);
+            res = (Il2CppObject*)vm::Reflection::GetTypeObject(genericInstanceTypeClass);
         }
     }
 
@@ -992,7 +992,7 @@ namespace System
         else
             arrayClass = il2cpp_bounded_array_class_get(klass, rank, true);
 
-        res = (Il2CppObject*)(arrayClass != NULL ? vm::Reflection::GetTypeObject(&arrayClass->byval_arg) : NULL);
+        res = (Il2CppObject*)(arrayClass != NULL ? vm::Reflection::GetTypeObject(arrayClass) : NULL);
     }
 
     void RuntimeType::make_byref_type(Il2CppQCallTypeHandle type, Il2CppObjectHandleOnStack res)
