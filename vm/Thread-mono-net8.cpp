@@ -798,7 +798,7 @@ namespace vm
 
     bool Thread::SetApartmentState(Il2CppThread* thread, ThreadApartmentState state, bool throwOnError)
     {
-        if (thread->state != kThreadStateUnstarted)
+        if (!TestState(thread, kThreadStateUnstarted))
         {
             if (throwOnError)
                 vm::Exception::Raise(vm::Exception::GetThreadStateException("The apartment state on a thread cannot be changed after it has started"));
