@@ -15,6 +15,7 @@
 #include "os/Path.h"
 #include "utils/PathUtils.h"
 #include "utils/StringUtils.h"
+#include "utils/Environment.h"
 
 namespace il2cpp
 {
@@ -47,20 +48,68 @@ namespace os
     const HardcodedPInvokeDependencyLibrary* LibraryLoader::HardcodedPInvokeDependencies = NULL;
     const size_t LibraryLoader::HardcodedPInvokeDependenciesCount = 0;
 
+    static Baselib_DynamicLibrary_Handle LoadLibraryWithName(const char* name, std::string& detailedError)
+    {
+#if IL2CPP_TARGET_IOS
+        std::string dirName;
+        if (utils::Environment::GetNumMainArgs() > 0)
+        {
+            std::string main = utils::StringUtils::Utf16ToUtf8(utils::Environment::GetMainArgs()[0]);
+            dirName = utils::PathUtils::DirectoryName(main);
+        }
+
+        std::string libPath = utils::StringUtils::Printf("%s/%s", dirName.c_str(), name);
+        auto errorState = Baselib_ErrorState_Create();
+        auto handle = LibraryLoader::TryOpeningLibrary(libPath.c_str(), detailedError);
+        if (handle != Baselib_DynamicLibrary_Handle_Invalid)
+            return handle;
+
+        // Fallback to just using the name. This might be a system dylib.
+        return LibraryLoader::TryOpeningLibrary(name, detailedError);
+#else
+        return LibraryLoader::TryOpeningLibrary(name, detailedError);
+#endif
+    }
+
+#if IL2CPP_TARGET_LINUX
+    static Baselib_DynamicLibrary_Handle LoadLibraryRelativeToExecutableDirectory(const char* name, std::string& detailedError)
+    {
+        if (name == NULL || name[0] == '/')
+            return Baselib_DynamicLibrary_Handle_Invalid;
+
+        char exePath[PATH_MAX + 1];
+        int len;
+
+        if ((len = readlink("/proc/self/exe", exePath, sizeof(exePath))) == -1)
+        {
+            return Baselib_DynamicLibrary_Handle_Invalid;
+        }
+        exePath[len] = '\0'; // readlink does not terminate buffer
+        while (len > 0 && exePath[len] != '/')
+            len--;
+        exePath[len] = '\0';
+        std::string libPath = utils::StringUtils::Printf("%s/%s", exePath, name);
+
+        return LibraryLoader::TryOpeningLibrary(libPath.c_str(), detailedError);
+    }
+
+#endif
+
     static Baselib_DynamicLibrary_Handle CheckLibraryVariations(const std::string& name, std::string& detailedError)
     {
-        // The prefix belongs on the file name, not on any directory in front of it
-        const size_t fileNameStart = name.find_last_of('/') + 1;
-        const std::string directory = name.substr(0, fileNameStart);
-        const std::string fileName = name.substr(fileNameStart);
-
         const int numberOfVariations = sizeof(LibraryNamePrefixAndSuffixVariations) / sizeof(LibraryNamePrefixAndSuffixVariations[0]);
         for (int i = 0; i < numberOfVariations; ++i)
         {
-            std::string libraryName = directory + LibraryNamePrefixAndSuffixVariations[i].prefix + fileName + LibraryNamePrefixAndSuffixVariations[i].suffix;
-            auto handle = LibraryLoader::TryOpeningLibrary(libraryName.c_str(), detailedError);
+            std::string libraryName = LibraryNamePrefixAndSuffixVariations[i].prefix + name + LibraryNamePrefixAndSuffixVariations[i].suffix;
+            auto handle = LoadLibraryWithName(libraryName.c_str(), detailedError);
             if (handle != Baselib_DynamicLibrary_Handle_Invalid)
                 return handle;
+#if IL2CPP_TARGET_LINUX
+            // Linux does not search current directory by default
+            handle = LoadLibraryRelativeToExecutableDirectory(libraryName.c_str(), detailedError);
+            if (handle != Baselib_DynamicLibrary_Handle_Invalid)
+                return handle;
+#endif
         }
 
         return Baselib_DynamicLibrary_Handle_Invalid;
@@ -74,11 +123,11 @@ namespace os
         // Workaround the fact that on Linux, libc is actually named libc.so.6 instead of libc.so.
         // mscorlib P/Invokes into plain libc, so we need this for those P/Invokes to succeed
         if (strncasecmp(libraryName.c_str(), "libc", libraryName.size()) == 0)
-            handle = LibraryLoader::TryOpeningLibrary(LIBC_SO, detailedError);
+            handle = LoadLibraryWithName(LIBC_SO, detailedError);
 #endif
 
         if (handle == Baselib_DynamicLibrary_Handle_Invalid)
-            handle = LibraryLoader::TryOpeningLibrary(libraryName.c_str(), detailedError);
+            handle = LoadLibraryWithName(libraryName.c_str(), detailedError);
 
         if (handle == Baselib_DynamicLibrary_Handle_Invalid)
             handle = CheckLibraryVariations(libraryName.c_str(), detailedError);
@@ -103,21 +152,9 @@ namespace os
     {
         std::string libraryNameStr = utils::StringUtils::NativeStringToUtf8(libraryName, libraryNameLength);
 
+        // Probe the application directory first - this matches the expected P/Invoke behavior from Win32
         std::string applicationDir = os::Path::GetApplicationFolder();
         std::string libraryPath = utils::PathUtils::Combine(applicationDir, libraryNameStr);
-
-        // Absolute paths are tried as-is first so the real path and dlopen failure lead the error.
-        // The application directory is still probed afterwards because Combine turns "/foo" into
-        // "<appDir>//foo", and existing code may rely on that resolving inside the application directory.
-        if (libraryNameStr[0] == '/')
-        {
-            Baselib_DynamicLibrary_Handle handle = ProbeForLibraryImpl(libraryNameStr, detailedError);
-            if (handle == Baselib_DynamicLibrary_Handle_Invalid)
-                handle = ProbeForLibraryImpl(libraryPath, detailedError);
-            return handle;
-        }
-
-        // Probe the application directory first - this matches the expected P/Invoke behavior from Win32
         Baselib_DynamicLibrary_Handle handle = ProbeForLibraryImpl(libraryPath, detailedError);
 
         // Otherwise use the OS's search paths

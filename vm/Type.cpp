@@ -7,6 +7,7 @@
 
 #include "gc/WriteBarrier.h"
 #include "metadata/Il2CppTypeCompare.h"
+#include "metadata/GenericMetadata.h"
 #include "utils/StringUtils.h"
 #include "vm/Assembly.h"
 #include "vm/AssemblyName.h"
@@ -1019,6 +1020,14 @@ namespace vm
     bool Type::IsGenericParameter(const Il2CppType* type)
     {
         return type->type == IL2CPP_TYPE_VAR || type->type == IL2CPP_TYPE_MVAR;
+    }
+
+    bool Type::IsOpenConstructedType(const Il2CppType* type)
+    {
+        if (type->type == IL2CPP_TYPE_CLASS || type->type == IL2CPP_TYPE_VALUETYPE)
+            return Class::IsGenericTypeDefinition(Class::FromIl2CppType(type));
+
+        return il2cpp::metadata::GenericMetadata::ContainsGenericParameters(type);
     }
 
     Il2CppClass* Type::GetDeclaringType(const Il2CppType* type)

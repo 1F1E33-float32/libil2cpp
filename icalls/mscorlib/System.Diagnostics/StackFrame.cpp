@@ -16,7 +16,7 @@ namespace System
 {
 namespace Diagnostics
 {
-    static bool IsCalledFromSystemDiagnosticsStackTrace(const vm::StackFrames& stack)
+    static bool IsCalledFromSystemDiagnosticsStackTrace(const vm::BorrowedStackFrames& stack)
     {
         for (vm::StackFrames::const_iterator frame = stack.begin(); frame != stack.end(); ++frame)
             if (strcmp(frame->method->klass->namespaze, "System.Diagnostics") == 0 && strcmp(frame->method->klass->name, "StackTrace") == 0)
@@ -44,7 +44,7 @@ namespace Diagnostics
         const int kSkippedFramesFromMSCorlibStackFrameMethods = 2;
         const int kSkippedFramesFromMSCorlibStackTraceMethods = 2;
 
-        const vm::StackFrames& stack = *vm::StackTrace::GetCachedStackFrames(skip);
+        const auto stack = vm::StackTrace::GetCachedStackFrames(skip);
 
         // Always ignore the skipped frames from System.Diagnostics.StackFrame, as we know we are always called from it.
         // These frames might be inlined or optimized away by the C++ compiler, so we will inspect the actual stack

@@ -12,6 +12,15 @@ namespace il2cpp
 {
 namespace vm
 {
+    static Il2CppObject* BoxDefaultParameterValue(const Il2CppImage* image, Il2CppClass* boxedType, const Il2CppType* typeOfDefaultValue, const char* data)
+    {
+        Class::SetupFields(boxedType);
+        IL2CPP_ASSERT(boxedType->size_inited);
+        void* value = alloca(boxedType->instance_size - sizeof(Il2CppObject));
+        utils::BlobReader::GetConstantValueFromBlob(image, typeOfDefaultValue->type, data, value);
+        return Object::Box(boxedType, value);
+    }
+
     Il2CppObject* Parameter::GetDefaultParameterValueObject(const MethodInfo* method, int32_t parameterPosition, bool* isExplicitlySetNullDefaultValue)
     {
         const Il2CppType* typeOfDefaultValue;
@@ -28,12 +37,14 @@ namespace vm
                 typeOfDefaultValue = il2cpp::vm::Class::IsEnum(parameterType) ? il2cpp::vm::Class::GetEnumBaseType(parameterType) : &parameterType->byval_arg;
             }
 
-            Class::SetupFields(parameterType);
-            IL2CPP_ASSERT(parameterType->size_inited);
-            void* value = alloca(parameterType->instance_size - sizeof(Il2CppObject));
-            utils::BlobReader::GetConstantValueFromBlob(method->klass->image, typeOfDefaultValue->type, data, value);
-            return Object::Box(parameterType, value);
+            return BoxDefaultParameterValue(method->klass->image, parameterType, typeOfDefaultValue, data);
         }
+
+        // A reference type parameter can have a value type default value: [DefaultParameterValue(-1)] object x gives an object
+        // parameter an int, which is boxed as its own type.
+        Il2CppClass* defaultValueType = Class::FromIl2CppType(typeOfDefaultValue);
+        if (Class::IsValuetype(defaultValueType))
+            return BoxDefaultParameterValue(method->klass->image, defaultValueType, typeOfDefaultValue, data);
 
         Il2CppObject* value = NULL;
         utils::BlobReader::GetConstantValueFromBlob(method->klass->image, typeOfDefaultValue->type, data, &value);

@@ -97,7 +97,7 @@ namespace vm
 
     const Il2CppImage* Image::GetExecutingImage()
     {
-        const il2cpp::vm::StackFrames& stack = *StackTrace::GetStackFrames();
+        const auto stack = StackTrace::GetStackFrames();
         StackReverseIterator imageIt = GetNextImageFromStack(stack.rbegin(), stack.rend());
 
         if (imageIt != stack.rend())
@@ -111,7 +111,7 @@ namespace vm
 
     const Il2CppImage* Image::GetCallingImage()
     {
-        const il2cpp::vm::StackFrames& stack = *StackTrace::GetStackFrames();
+        const auto stack = StackTrace::GetStackFrames();
         StackReverseIterator imageIt = GetNextImageFromStack(stack.rbegin(), stack.rend());
 
         if (imageIt != stack.rend())
@@ -244,6 +244,11 @@ namespace vm
         return NULL;
     }
 
+    Il2CppClass* Image::GetGlobalType(const Il2CppImage* image)
+    {
+        return ClassFromName(image, "", Class::kGlobalModuleTypeName);
+    }
+
     static bool IsExported(const Il2CppClass* type)
     {
         if ((type->flags & TYPE_ATTRIBUTE_VISIBILITY_MASK) == TYPE_ATTRIBUTE_PUBLIC)
@@ -268,7 +273,7 @@ namespace vm
         for (uint32_t sourceIndex = 0; sourceIndex < typeCount; sourceIndex++)
         {
             const Il2CppClass* type = Image::GetType(image, sourceIndex);
-            if (strcmp(type->name, "<Module>") == 0)
+            if (Class::IsGlobalModuleClass(type))
             {
                 continue;
             }

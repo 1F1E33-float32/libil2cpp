@@ -6,6 +6,7 @@
 #include <vector>
 #include <atomic>
 
+#include "os/Generic/ThreadAPCQueue.h"
 #include "os/Generic/WaitObject.h"
 #include "os/ErrorCodes.h"
 #include "os/Mutex.h"
@@ -34,7 +35,7 @@ namespace il2cpp
 namespace os
 {
 /// POSIX threads implementation. Supports APCs and interruptible waits.
-    class ThreadImpl : public il2cpp::utils::NonCopyable
+    class ThreadImpl : public ThreadAPCQueue, public il2cpp::utils::NonCopyable
     {
     public:
 
@@ -47,20 +48,12 @@ namespace os
 
         uint64_t Id();
         ErrorCode Run(Thread::StartFunc func, void* arg, int64_t affinityMask);
-        void QueueUserAPC(Thread::APCFunc func, void* context);
         void SetName(const char* name);
         void SetPriority(ThreadPriority priority);
         ThreadPriority GetPriority();
         void SetStackSize(size_t newsize);
 
-        void ReleaseSemaphore() {m_ConditionSemaphore.Release(1);}
-        void AcquireSemaphore() {m_ConditionSemaphore.Acquire();}
-        bool TryTimedAcquireSemaphore(uint32_t timeout) { return m_ConditionSemaphore.TryTimedAcquire(baselib::timeout_ms(timeout));}
         static int GetMaxStackSize();
-
-        /// Handle any pending APCs.
-        /// NOTE: Can only be called on current thread.
-        void CheckForUserAPCAndHandle();
 
         static void Sleep(uint32_t milliseconds, bool interruptible);
         static uint64_t CurrentThreadId();
@@ -77,39 +70,13 @@ namespace os
 
     private:
 
-        friend class WaitObject; // SetWaitObject(), CheckForAPCAndHandle()
-
         std::atomic<pthread_t> m_Handle;
-
-        /// The synchronization primitive that this thread is currently blocked on.
-        /// Atomic to signal intent
-        baselib::atomic<WaitObject*> m_CurrentWaitObject;
 
         /// Start data.
         Thread::StartFunc m_StartFunc;
         void* m_StartArg;
 
-        /// List of APC requests for this thread.
-        struct APCRequest
-        {
-            Thread::APCFunc callback;
-            void* context;
-
-            APCRequest(Thread::APCFunc callback, void* context) :
-                callback(callback), context(context)
-            {
-            }
-        };
-
-        baselib::Lock m_PendingAPCsMutex;
-        std::vector<APCRequest> m_PendingAPCs;
-        baselib::CappedSemaphore m_ConditionSemaphore;
-
         size_t m_StackSize; // size of stack (can not be adjusted after thread creation)
-
-        /// Set the synchronization object the thread is about to wait on.
-        /// NOTE: This can only be called on the current thread.
-        void SetWaitObject(WaitObject* waitObject);
 
         static void* ThreadStartWrapper(void* arg);
     };

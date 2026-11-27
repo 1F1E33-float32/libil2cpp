@@ -108,7 +108,6 @@ MonoMethod* il2cpp_method_get_generic_definition(MonoMethodInflated *imethod);
 MonoGenericInst* il2cpp_method_get_generic_class_inst(MonoMethodInflated *imethod);
 MonoClass* il2cpp_generic_class_get_container_class(MonoGenericClass *gclass);
 Il2CppSequencePoint* il2cpp_get_sequence_point(MonoImage* image, int id);
-char* il2cpp_assembly_get_full_name(MonoAssembly *assembly);
 const MonoMethod* il2cpp_get_seq_point_method(Il2CppSequencePoint *seqPoint);
 const MonoClass* il2cpp_get_class_from_index(int index);
 const MonoType* il2cpp_get_type_from_method_context(MonoType* type, const MonoMethod* method);

@@ -115,7 +115,7 @@ namespace vm
         nativeName->revision = aname.revision;
 
         //Mono public key token is stored as hexadecimal characters
-        if (aname.public_key_token[0])
+        if (HasPublicKeyToken(aname.public_key_token))
         {
             int j = 0;
             for (int i = 0; i < kPublicKeyByteLength; ++i)
@@ -125,6 +125,17 @@ namespace vm
                 nativeName->public_key_token.padding[j++] = HexValueToLowercaseAscii(value & 0x0F);
             }
         }
+    }
+
+    bool AssemblyName::HasPublicKeyToken(const uint8_t* publicKeyToken)
+    {
+        for (int i = 0; i < kPublicKeyByteLength; ++i)
+        {
+            if (publicKeyToken[i])
+                return true;
+        }
+
+        return false;
     }
 
     static void PublicKeyTokenToCStringChunk(const uint8_t* public_key_token, void (*chunkReportFunc)(void* data, void* userData), void* userData)
@@ -183,7 +194,7 @@ namespace vm
         chunkReportFunction(const_cast<char*>((aname.culture != NULL && strlen(aname.culture) != 0 ? aname.culture : "neutral")), userData);
         literalPtr = ", PublicKeyToken=";
         chunkReportFunction(const_cast<char*>(literalPtr), userData);
-        if (aname.public_key_token[0])
+        if (HasPublicKeyToken(aname.public_key_token))
             PublicKeyTokenToCStringChunk(aname.public_key_token, chunkReportFunction, userData);
         else
         {
@@ -225,7 +236,7 @@ namespace vm
         culture = aname.culture;
         name += (culture != NULL && strlen(culture) != 0 ? culture : "neutral");
         name += ", PublicKeyToken=";
-        name += (aname.public_key_token[0] ? PublicKeyTokenToString(aname.public_key_token) : "null");
+        name += (HasPublicKeyToken(aname.public_key_token) ? PublicKeyTokenToString(aname.public_key_token) : "null");
         name += ((aname.flags & ASSEMBLYREF_RETARGETABLE_FLAG) ? ", Retargetable=Yes" : "");
 
         if (strcmp(aname.name, "WindowsRuntimeMetadata") == 0)

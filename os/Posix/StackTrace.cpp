@@ -1,16 +1,20 @@
 #include "il2cpp-config.h"
 
-#if IL2CPP_TARGET_POSIX && !IL2CPP_TARGET_JAVASCRIPT && !IL2CPP_TARGET_ANDROID && !IL2CPP_TARGET_QNX && !IL2CPP_USE_PLATFORM_SPECIFIC_STACKTRACE
+#if IL2CPP_TARGET_POSIX && !IL2CPP_TARGET_ANDROID && !IL2CPP_TARGET_QNX && !IL2CPP_USE_PLATFORM_SPECIFIC_STACKTRACE
 
 #include "os/StackTrace.h"
+#include <cstdlib>
+
+#if !IL2CPP_TARGET_JAVASCRIPT
 #include <execinfo.h>
 #include <cxxabi.h>
-#include <cstdlib>
+#endif
 
 namespace il2cpp
 {
 namespace os
 {
+#if !IL2CPP_TARGET_JAVASCRIPT
     const int kMaxStackFrames = 128;
 
     void StackTrace::WalkStackNative(WalkStackCallback callback, void* context, WalkOrder walkOrder)
@@ -56,6 +60,8 @@ namespace os
 
         return stackTrace;
     }
+
+#endif
 
     const void* StackTrace::GetStackPointer()
     {

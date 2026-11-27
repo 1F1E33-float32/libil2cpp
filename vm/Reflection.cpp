@@ -22,9 +22,11 @@
 #include "vm/Property.h"
 #include "vm/Reflection.h"
 #include "vm/String.h"
+#include "vm/Type.h"
 #include "vm/AssemblyName.h"
 #include "utils/Il2CppHashMap.h"
 #include "utils/StringUtils.h"
+#include "utils/dynamic_array.h"
 #include "utils/HashUtils.h"
 #include "gc/AppendOnlyGCHashMap.h"
 
@@ -100,6 +102,7 @@ namespace vm
  */
     static Il2CppClass *s_System_Reflection_MethodInfo;
     static Il2CppClass *s_System_Reflection_ConstructorInfo;
+    static Il2CppClass *s_System_AttributeUsageAttribute;
 
     static il2cpp::metadata::CustomAttributeFilter GetFilter(Il2CppClass*& attributeClass)
     {
@@ -138,6 +141,14 @@ namespace vm
         res->assembly = assembly;
 
         return s_AssemblyMap->GetOrAdd(key, res);
+    }
+
+    const Il2CppAssembly* Reflection::GetAssembly(const Il2CppReflectionAssembly* assembly)
+    {
+        if (assembly == NULL || assembly->object.klass != s_System_Reflection_Assembly)
+            return NULL;
+
+        return assembly->assembly;
     }
 
     Il2CppReflectionAssemblyName* Reflection::GetAssemblyNameObject(const Il2CppAssemblyName *assemblyName)
@@ -555,7 +566,7 @@ namespace vm
         {
             Il2CppException* exc = NULL;
             il2cpp::metadata::CustomAttributeCreator creator;
-            if (reader.VisitCustomAttributeData(&iter, &creator, &exc))
+            if (reader.VisitCustomAttributeData(&iter, &creator, &exc, il2cpp::metadata::ManagedObjectHandling::DeserializeManagedObjects))
             {
                 il2cpp_array_setref(attrArray, i, creator.GetAttribute(&exc));
                 if (exc != NULL)
@@ -626,7 +637,7 @@ namespace vm
         il2cpp::metadata::CustomAttributeDataIterator iter = reader.GetDataIterator(filter);
         Il2CppException* exc = NULL;
         il2cpp::metadata::CustomAttributeCreator creator;
-        if (reader.VisitCustomAttributeData(&iter, &creator, &exc))
+        if (reader.VisitCustomAttributeData(&iter, &creator, &exc, il2cpp::metadata::ManagedObjectHandling::DeserializeManagedObjects))
         {
             if (exc == NULL)
                 attr = creator.GetAttribute(&exc);
@@ -677,6 +688,9 @@ namespace vm
         IL2CPP_ASSERT(s_System_Reflection_RuntimeEventInfoKlass != NULL);
         s_System_Reflection_RuntimePropertyInfoKlass = Class::FromName(il2cpp_defaults.corlib, "System.Reflection", "RuntimePropertyInfo");
         IL2CPP_ASSERT(s_System_Reflection_RuntimePropertyInfoKlass != NULL);
+
+        s_System_AttributeUsageAttribute = Class::FromName(il2cpp_defaults.corlib, "System", "AttributeUsageAttribute");
+        IL2CPP_ASSERT(s_System_AttributeUsageAttribute != NULL);
     }
 
     bool Reflection::HasAttribute(FieldInfo *field, Il2CppClass *attributeClass)
@@ -783,6 +797,215 @@ namespace vm
 
         s_System_Reflection_MethodInfo = NULL;
         s_System_Reflection_ConstructorInfo = NULL;
+
+        s_System_AttributeUsageAttribute = NULL;
+    }
+
+    // The blob reader writes each argument at its own native width, so a narrow argument only
+    // occupies the low bytes of the storage. Widen it into the member the embedding API documents,
+    // sign extending signed types, so that callers do not have to know the declared width.
+    static void StoreArgumentValue(Il2CppClass* klass, const il2cpp::metadata::CustomAttributeDataStorage& data, Il2CppCustomAttributeDataStorage& value)
+    {
+        memset(&value, 0, sizeof(value));
+
+        const void* raw = &data;
+        const Il2CppTypeEnum type = klass != NULL ? Type::GetUnderlyingType(&klass->byval_arg)->type : IL2CPP_TYPE_OBJECT;
+
+        switch (type)
+        {
+            case IL2CPP_TYPE_BOOLEAN:
+            case IL2CPP_TYPE_U1:
+                value.i = *(const uint8_t*)raw;
+                break;
+            case IL2CPP_TYPE_I1:
+                value.i = *(const int8_t*)raw;
+                break;
+            case IL2CPP_TYPE_CHAR:
+            case IL2CPP_TYPE_U2:
+                value.i = *(const uint16_t*)raw;
+                break;
+            case IL2CPP_TYPE_I2:
+                value.i = *(const int16_t*)raw;
+                break;
+            case IL2CPP_TYPE_U4:
+                value.i = *(const uint32_t*)raw;
+                break;
+            case IL2CPP_TYPE_I4:
+                value.i = *(const int32_t*)raw;
+                break;
+            case IL2CPP_TYPE_U8:
+            case IL2CPP_TYPE_I8:
+                value.i = *(const int64_t*)raw;
+                break;
+            case IL2CPP_TYPE_R4:
+                value.f = *(const float*)raw;
+                break;
+            case IL2CPP_TYPE_R8:
+                value.d = *(const double*)raw;
+                break;
+            default:
+                // Strings, arrays and objects are not deserialized and report NULL, a System.Type
+                // argument reports its Il2CppType*. Both are pointer sized.
+                value.p = *(void* const*)raw;
+                break;
+        }
+    }
+
+    struct CustomAttrArgsCollector : public il2cpp::metadata::CustomAttributeReaderVisitor
+    {
+        virtual void MoveNext(const MethodInfo* ctor)
+        {
+            Classes.push_back(ctor->klass);
+        }
+
+        virtual void VisitArgumentSizes(uint32_t argumentCount, uint32_t fieldCount, uint32_t propertyCount)
+        {
+            ArgCounts.push_back(argumentCount);
+        }
+
+        virtual void VisitArgument(const il2cpp::metadata::CustomAttributeArgument& argument, uint32_t index)
+        {
+            Il2CppCustomAttributeArg& arg = Args.push_back();
+            arg.klass = argument.klass;
+            StoreArgumentValue(argument.klass, argument.data, arg.value);
+        }
+
+        il2cpp::utils::dynamic_array<Il2CppClass*> Classes;
+        il2cpp::utils::dynamic_array<uint32_t> ArgCounts;
+        il2cpp::utils::dynamic_array<Il2CppCustomAttributeArg> Args;
+    };
+
+    static bool VisitCustomAttributes(const Il2CppImage* image, uint32_t token, Il2CppClass* attributeClass, il2cpp::metadata::CustomAttributeReaderVisitor* visitor)
+    {
+        il2cpp::metadata::CustomAttributeDataReader reader = MetadataCache::GetCustomAttributeDataReader(image, token);
+
+        if (reader.GetCount() == 0)
+            return false;
+
+        auto filter = GetFilter(attributeClass);
+
+        if (reader.GetCount(filter) == 0)
+            return false;
+
+        Il2CppException* exc = NULL;
+        il2cpp::metadata::CustomAttributeDataIterator iter = reader.GetDataIterator(filter);
+        while (reader.VisitCustomAttributeData(&iter, visitor, &exc, il2cpp::metadata::ManagedObjectHandling::SkipManagedObjects))
+        {
+        }
+
+        // These back embedding APIs, whose callers do not expect a managed exception.
+        // exc is only set for invalid metadata, so report nothing found instead.
+        if (exc != NULL)
+        {
+            IL2CPP_ASSERT(0 && "Invalid custom attribute data");
+            return false;
+        }
+
+        return true;
+    }
+
+    static Il2CppCustomAttrArgsInfo* CustomAttrsArgsInfo(const Il2CppImage* image, uint32_t token, Il2CppClass* attributeClass, int32_t* count)
+    {
+        *count = 0;
+
+        CustomAttrArgsCollector collector;
+        if (!VisitCustomAttributes(image, token, attributeClass, &collector))
+            return NULL;
+
+        size_t attributeCount = collector.ArgCounts.size();
+        if (attributeCount == 0)
+            return NULL;
+
+        // A single allocation holding the info array followed by the arguments it points into,
+        // so that callers release everything with one il2cpp_free.
+        size_t headerSize = attributeCount * sizeof(Il2CppCustomAttrArgsInfo);
+        Il2CppCustomAttrArgsInfo* argInfos = (Il2CppCustomAttrArgsInfo*)IL2CPP_CALLOC(1, headerSize + collector.Args.size() * sizeof(Il2CppCustomAttributeArg));
+        Il2CppCustomAttributeArg* args = (Il2CppCustomAttributeArg*)((uint8_t*)argInfos + headerSize);
+
+        memcpy(args, collector.Args.begin(), collector.Args.size() * sizeof(Il2CppCustomAttributeArg));
+
+        for (size_t i = 0; i < attributeCount; i++)
+        {
+            argInfos[i].arg_count = collector.ArgCounts[i];
+            argInfos[i].args = args;
+            argInfos[i].klass = collector.Classes[i];
+            args += collector.ArgCounts[i];
+        }
+
+        *count = (int32_t)attributeCount;
+        return argInfos;
+    }
+
+    Il2CppCustomAttrArgsInfo* Reflection::CustomAttrsArgsInfoFromClass(Il2CppClass * klass, Il2CppClass * attributeClass, int32_t* count)
+    {
+        return CustomAttrsArgsInfo(klass->image, klass->token, attributeClass, count);
+    }
+
+    Il2CppCustomAttrArgsInfo* Reflection::CustomAttrsArgsInfoFromMethod(const MethodInfo * method, Il2CppClass * attributeClass, int32_t* count)
+    {
+        return CustomAttrsArgsInfo(method->klass->image, method->token, attributeClass, count);
+    }
+
+    Il2CppCustomAttrArgsInfo* Reflection::CustomAttrsArgsInfoFromField(const FieldInfo * field, Il2CppClass * attributeClass, int32_t* count)
+    {
+        return CustomAttrsArgsInfo(field->parent->image, field->token, attributeClass, count);
+    }
+
+    Il2CppCustomAttrArgsInfo* Reflection::CustomAttrsArgsInfoFromAssembly(const Il2CppAssembly * assembly, Il2CppClass * attributeClass, int32_t* count)
+    {
+        return CustomAttrsArgsInfo(assembly->image, assembly->token, attributeClass, count);
+    }
+
+    struct AttributeUsageAttributeVisitor : public il2cpp::metadata::CustomAttributeReaderVisitor
+    {
+        AttributeUsageAttributeVisitor() : AllowMultiple(false), Inherited(true), ValidOn(32767 /* All */) {}
+
+        static int64_t ArgumentValue(const il2cpp::metadata::CustomAttributeArgument& argument)
+        {
+            Il2CppCustomAttributeDataStorage value;
+            StoreArgumentValue(argument.klass, argument.data, value);
+            return value.i;
+        }
+
+        // ValidOn is a constructor argument, AllowMultiple and Inherited are properties
+        virtual void VisitArgument(const il2cpp::metadata::CustomAttributeArgument& argument, uint32_t index)
+        {
+            if (index == 0)
+                ValidOn = (int32_t)ArgumentValue(argument);
+        }
+
+        virtual void VisitProperty(const il2cpp::metadata::CustomAttributePropertyArgument& prop, uint32_t index)
+        {
+            if (!strcmp(prop.prop->name, "AllowMultiple"))
+                AllowMultiple = ArgumentValue(prop.arg) != 0;
+            else if (!strcmp(prop.prop->name, "Inherited"))
+                Inherited = ArgumentValue(prop.arg) != 0;
+            else if (!strcmp(prop.prop->name, "ValidOn"))
+                ValidOn = (int32_t)ArgumentValue(prop.arg);
+        }
+
+        bool AllowMultiple;
+        bool Inherited;
+        int32_t ValidOn;
+    };
+
+    bool Reflection::ClassGetAttributeUsage(Il2CppClass * klass, bool* allowMultiple, bool* inherited, int* attributeTargets)
+    {
+        if (klass == NULL || s_System_AttributeUsageAttribute == NULL)
+            return false;
+
+        AttributeUsageAttributeVisitor visitor;
+        if (!VisitCustomAttributes(klass->image, klass->token, s_System_AttributeUsageAttribute, &visitor))
+            return false;
+
+        if (allowMultiple)
+            *allowMultiple = visitor.AllowMultiple;
+        if (inherited)
+            *inherited = visitor.Inherited;
+        if (attributeTargets)
+            *attributeTargets = visitor.ValidOn;
+
+        return true;
     }
 } /* namespace vm */
 } /* namespace il2cpp */

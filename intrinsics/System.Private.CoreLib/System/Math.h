@@ -284,12 +284,10 @@ namespace System
         Method: System.Double System.Math::Pow(System.Double,System.Double)
         AssemblyName: System.Private.CoreLib
     */
-    // inline double il2cpp_intrinsic_math_pow(double x, double y)
-    // {
-    //     IL2CPP_NOT_IMPLEMENTED_INTRINSIC(il2cpp_intrinsic_math_pow);
-    //     IL2CPP_UNREACHABLE;
-    //     return {};
-    // }
+    inline double il2cpp_intrinsic_math_pow(double x, double y)
+    {
+        return pow(x, y);
+    }
 
     /* METHOD MAPPING
         Method: System.Double System.Math::Sin(System.Double)

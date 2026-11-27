@@ -4,7 +4,7 @@
 #if IL2CPP_SUPPORT_THREADS
 
 #include "os/Atomic.h"
-#if IL2CPP_TARGET_WINDOWS || IL2CPP_TARGET_POSIX
+#if IL2CPP_THREADS_GENERIC_WAIT_OBJECT
 #include "os/Generic/SemaphoreImpl.h"
 #else
 #include "os/SemaphoreImpl.h"

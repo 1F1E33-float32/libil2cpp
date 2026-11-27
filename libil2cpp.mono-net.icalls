@@ -107,7 +107,7 @@ System.Reflection.RuntimeMethodInfo::GetPInvoke(System.Reflection.PInvokeAttribu
 // System.Runtime.CompilerServices.RuntimeHelpers
 >icalls_monoaot/System.Private.CoreLib/System.Runtime.CompilerServices/RuntimeHelpers.h
 System.Runtime.CompilerServices.RuntimeHelpers::SufficientExecutionStack()|System::Private::CoreLib::System::Runtime::CompilerServices::RuntimeHelpers::SufficientExecutionStack|bool (*)()
-System.Runtime.CompilerServices.RuntimeHelpers::GetSpanDataFrom(System.IntPtr,System.IntPtr,System.IntPtr)|System::Private::CoreLib::System::Runtime::CompilerServices::RuntimeHelpers::GetSpanDataFrom|void* (*)(FieldInfo*, Il2CppType*, int32_t*)
+System.Runtime.CompilerServices.RuntimeHelpers::GetSpanDataFrom(FieldInfo*,Il2CppType*,int32_t*)|System::Private::CoreLib::System::Runtime::CompilerServices::RuntimeHelpers::GetSpanDataFrom|void* (*)(FieldInfo*, Il2CppType*, int32_t*)
 System.Runtime.CompilerServices.RuntimeHelpers::InternalGetHashCode(System.Object)|System::Private::CoreLib::System::Runtime::CompilerServices::RuntimeHelpers::InternalGetHashCode|int32_t (*)(Il2CppObject*)
 System.Runtime.CompilerServices.RuntimeHelpers::SizeOf(System.Runtime.CompilerServices.QCallTypeHandle)|System::Private::CoreLib::System::Runtime::CompilerServices::RuntimeHelpers::SizeOf|int32_t (*)(Il2CppQCallTypeHandle)
 System.Runtime.CompilerServices.RuntimeHelpers::GetObjectValue(System.Object)|System::Private::CoreLib::System::Runtime::CompilerServices::RuntimeHelpers::GetObjectValue|Il2CppObject* (*)(Il2CppObject*)

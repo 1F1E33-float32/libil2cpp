@@ -79,9 +79,11 @@ namespace Reflection
 
     Il2CppObject* RuntimeModule::GetGlobalType(intptr_t module)
     {
-        NOT_SUPPORTED_IL2CPP(Module::GetGlobalType, "This icall is not supported by il2cpp.");
+        Il2CppClass* globalType = vm::Image::GetGlobalType((const Il2CppImage*)module);
+        if (globalType == NULL)
+            return NULL;
 
-        return 0;
+        return (Il2CppObject*)vm::Reflection::GetTypeObject(&globalType->byval_arg);
     }
 
     Il2CppArray* RuntimeModule::InternalGetTypes(const Il2CppImage* image)

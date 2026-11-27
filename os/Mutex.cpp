@@ -4,11 +4,13 @@
 #if IL2CPP_SUPPORT_THREADS
 
 #include "os/Atomic.h"
-#if IL2CPP_THREADS_WIN32 || IL2CPP_THREADS_PTHREAD
+#if IL2CPP_THREADS_GENERIC_WAIT_OBJECT
     #if IL2CPP_THREADS_WIN32
         #include "os/Win32/MutexImpl.h"
     #elif IL2CPP_THREADS_PTHREAD
         #include "os/Posix/MutexImpl.h"
+    #else
+        #include "os/MutexImpl.h"
     #endif
 #include "os/Generic/MutexImpl.h"
 #elif IL2CPP_TARGET_PSP2

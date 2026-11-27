@@ -1,6 +1,6 @@
 #pragma once
 
-#if (IL2CPP_THREADS_PTHREAD || IL2CPP_THREADS_WIN32)
+#if IL2CPP_THREADS_GENERIC_WAIT_OBJECT
 
 #include "os/ErrorCodes.h"
 #include "os/WaitStatus.h"

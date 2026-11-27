@@ -14,8 +14,9 @@
 #include "vm-utils/DebugSymbolReader.h"
 #include "vm-utils/Debugger.h"
 
-#include <map>
+#include <limits>
 #include <cstdio>
+#include <type_traits>
 
 namespace il2cpp
 {
@@ -25,130 +26,93 @@ namespace vm
 
     class CachedInfo
     {
-        int32_t m_depth;
-        const void* m_stackPointer;
+        const void* m_StackPointer;
+        int32_t m_Depth;
+        bool m_IsBorrowed;
+
     public:
-        CachedInfo() : m_depth(INT_MAX), m_stackPointer(NULL) {}
-        void Update(int32_t depth, const void *stackPointer)
+        CachedInfo()
         {
-            m_depth = depth;
-            m_stackPointer = stackPointer;
+            Invalidate();
         }
 
-        bool CheckCondition(int32_t depth, const void *stackPointer) const
+        bool Borrow(int32_t depth)
+        {
+            auto stackPointer = os::StackTrace::GetStackPointer();
+            bool canReuse = CheckCondition(depth, stackPointer);
+
+            m_Depth = depth;
+            m_StackPointer = stackPointer;
+            m_IsBorrowed = true;
+
+            return canReuse;
+        }
+
+        void RecordBorrowedReturn()
+        {
+            if (!m_IsBorrowed)
+            {
+                // Someone is returning a buffer that wasn't from the cached path
+                // That means cached path is no longer valid, and we must thus invalidate it
+                Invalidate();
+            }
+            else
+            {
+                m_IsBorrowed = false;
+            }
+        }
+
+        void Invalidate()
+        {
+            m_Depth = std::numeric_limits<int32_t>::max();
+            m_StackPointer = nullptr;
+            m_IsBorrowed = false;
+        }
+
+    private:
+        bool CheckCondition(int32_t depth, const void* stackPointer) const
         {
             // We can use cached value if stack pointer is the same and not NULL, and 'depth' has been incremented since previous call
-            return m_stackPointer != NULL && stackPointer == m_stackPointer && depth - 1 == m_depth;
-        }
-    };
-
-    class MethodStack
-    {
-    protected:
-        os::ThreadLocalValue s_StackFrames;
-        os::ThreadLocalValue s_StoredCachedInfo;
-
-        inline StackFrames* GetStackFramesRaw()
-        {
-            StackFrames* stackFrames = NULL;
-
-            os::ErrorCode result = s_StackFrames.GetValue(reinterpret_cast<void**>(&stackFrames));
-            Assert(result == os::kErrorCodeSuccess);
-
-            return stackFrames;
-        }
-
-        inline CachedInfo* GetStoredCachedInfoRaw()
-        {
-            CachedInfo* storedCachedInfo = NULL;
-
-            os::ErrorCode result = s_StoredCachedInfo.GetValue(reinterpret_cast<void**>(&storedCachedInfo));
-            Assert(result == os::kErrorCodeSuccess);
-
-            return storedCachedInfo;
-        }
-
-    public:
-        inline void InitializeForCurrentThread()
-        {
-            if (GetStackFramesRaw() != NULL)
-                return;
-
-            StackFrames* stackFrames = new StackFrames();
-            stackFrames->reserve(64);
-
-            os::ErrorCode result = s_StackFrames.SetValue(stackFrames);
-            Assert(result == os::kErrorCodeSuccess);
-
-            CachedInfo* cachedInfo = new CachedInfo();
-            result = s_StoredCachedInfo.SetValue(cachedInfo);
-            Assert(result == os::kErrorCodeSuccess);
-        }
-
-        inline void CleanupForCurrentThread()
-        {
-            StackFrames* frames = GetStackFramesRaw();
-
-            if (frames == NULL)
-                return;
-
-            delete frames;
-
-            CachedInfo* cachedInfo = GetStoredCachedInfoRaw();
-
-            if (cachedInfo == NULL)
-                return;
-
-            delete cachedInfo;
-
-            os::ErrorCode result = s_StackFrames.SetValue(NULL);
-            Assert(result == os::kErrorCodeSuccess);
-            result = s_StoredCachedInfo.SetValue(NULL);
-            Assert(result == os::kErrorCodeSuccess);
+            return m_StackPointer != nullptr && stackPointer == m_StackPointer && depth - 1 == m_Depth && !m_IsBorrowed;
         }
     };
 
 #if IL2CPP_ENABLE_STACKTRACE_SENTRIES
-
-    class StacktraceSentryMethodStack : public MethodStack
+    // StacktraceSentryMethodStack
+    class StackImplementation
     {
     public:
-        inline const StackFrames* GetStackFrames()
+        inline void GetStackFrames(StackFrames& stackFrames) const
         {
-            return GetStackFramesRaw();
+            stackFrames.assign(m_Stack.begin(), m_Stack.end());
         }
 
-        inline const StackFrames* GetCachedStackFrames(int32_t depth, const void* stackPointer)
+        inline bool GetStackFrameAt(int32_t depth, Il2CppStackFrameInfo& frame) const
         {
-            return GetStackFrames();
-        }
-
-        inline bool GetStackFrameAt(int32_t depth, Il2CppStackFrameInfo& frame)
-        {
-            const StackFrames& frames = *GetStackFramesRaw();
-
-            if (static_cast<int>(frames.size()) + depth < 1)
+            if (static_cast<int>(m_Stack.size()) + depth < 1)
                 return false;
 
-            frame = frames[frames.size() - 1 + depth];
+            frame = m_Stack[m_Stack.size() - 1 + depth];
             return true;
+        }
+
+        inline size_t GetStackDepth() const
+        {
+            return m_Stack.size();
         }
 
         inline void PushFrame(Il2CppStackFrameInfo& frame)
         {
-            GetStackFramesRaw()->push_back(frame);
+            m_Stack.push_back(frame);
         }
 
         inline void PopFrame()
         {
-            StackFrames* stackFrames = GetStackFramesRaw();
-            stackFrames->pop_back();
+            m_Stack.pop_back();
         }
 
-        inline const void* GetStackPointer()
-        {
-            return nullptr;
-        }
+    private:
+        StackFrames m_Stack;
     };
 
 #endif // IL2CPP_ENABLE_STACKTRACE_SENTRIES
@@ -156,56 +120,39 @@ namespace vm
 #if IL2CPP_ENABLE_NATIVE_STACKTRACES
 
 #if IL2CPP_MONO_DEBUGGER
-    class DebuggerMethodStack : public MethodStack
+    // DebuggerMethodStack
+    class StackImplementation
     {
     public:
-        inline const StackFrames* GetStackFrames()
+        inline static void GetStackFrames(StackFrames& stackFrames)
         {
-            StackFrames* stackFrames = GetStackFramesRaw();
-            if (stackFrames == NULL)
-                return stackFrames;
-            stackFrames->clear();
-
-            utils::Debugger::GetStackFrames(stackFrames);
-
-            return stackFrames;
+            stackFrames.clear();
+            utils::Debugger::GetStackFrames(&stackFrames);
         }
 
-        inline const StackFrames* GetCachedStackFrames(int32_t depth, const void* stackPointer)
+        inline static bool GetStackFrameAt(int32_t depth, Il2CppStackFrameInfo& frame)
         {
-            CachedInfo* cachedInfo = GetStoredCachedInfoRaw();
-            const StackFrames* stackFrames = cachedInfo->CheckCondition(depth, stackPointer) ? GetStackFramesRaw() : GetStackFrames();
-            cachedInfo->Update(depth, stackPointer);
-            return stackFrames;
+            return utils::Debugger::GetStackFrameAt(depth, frame);
         }
 
-        inline bool GetStackFrameAt(int32_t depth, Il2CppStackFrameInfo& frame)
+        inline static size_t GetStackDepth()
         {
-            const StackFrames& frames = *GetStackFrames();
-
-            if (static_cast<int>(frames.size()) + depth < 1)
-                return false;
-
-            frame = frames[frames.size() - 1 + depth];
-            return true;
+            return utils::Debugger::GetStackDepth();
         }
 
-        inline void PushFrame(Il2CppStackFrameInfo& frame)
+        inline static void PushFrame(Il2CppStackFrameInfo& frame)
         {
         }
 
-        inline void PopFrame()
+        inline static void PopFrame()
         {
-        }
-
-        inline const void* GetStackPointer()
-        {
-            return nullptr;
         }
     };
 #else
-    class NativeMethodStack : public MethodStack
+    // NativeMethodStack
+    class StackImplementation
     {
+    public:
         static bool GetStackFramesCallback(Il2CppMethodPointer frame, void* context)
         {
             const MethodInfo* method = il2cpp::utils::NativeSymbol::GetMethodFromNativeSymbol(frame);
@@ -230,7 +177,7 @@ namespace vm
         struct GetStackFrameAtContext
         {
             int32_t currentDepth;
-            const MethodInfo* method;
+            Il2CppStackFrameInfo frameInfo;
         };
 
         static bool GetStackFrameAtCallback(Il2CppMethodPointer frame, void* context)
@@ -240,78 +187,245 @@ namespace vm
 
             if (method != NULL)
             {
-                if (ctx->currentDepth == 0)
-                {
-                    ctx->method = method;
+                auto depth = ctx->currentDepth;
+                bool frameFound = il2cpp::utils::DebugSymbolReader::GetStackFrameAt(reinterpret_cast<void*>(frame), depth, ctx->frameInfo);
+                if (frameFound)
                     return false;
-                }
 
-                ctx->currentDepth++;
+                // depth wasn't incremented, so GetStackFrameAt didn't run out of frames: it failed to locate the first one
+                if (depth == ctx->currentDepth)
+                {
+                    if (ctx->currentDepth == 0)
+                    {
+                        ctx->frameInfo = Il2CppStackFrameInfo {};
+                        ctx->frameInfo.method = method;
+                        ctx->frameInfo.raw_ip = reinterpret_cast<uintptr_t>(frame) - reinterpret_cast<uintptr_t>(os::Image::GetImageBase());
+                        return false;
+                    }
+
+                    ctx->currentDepth++;
+                }
+                else
+                {
+                    ctx->currentDepth = depth;
+                }
             }
 
             return true;
         }
 
     public:
-        inline const StackFrames* GetStackFrames()
+        inline static void GetStackFrames(StackFrames& stackFrames)
         {
-            StackFrames* stackFrames = GetStackFramesRaw();
-            if (stackFrames == NULL)
-                return stackFrames;
-            stackFrames->clear();
-
-            os::StackTrace::WalkStack(&NativeMethodStack::GetStackFramesCallback, stackFrames, os::StackTrace::kFirstCalledToLastCalled);
-
-            return stackFrames;
+            stackFrames.clear();
+            os::StackTrace::WalkStack(&StackImplementation::GetStackFramesCallback, &stackFrames, os::StackTrace::kFirstCalledToLastCalled);
         }
 
-        // Avoiding calling GetStackFrames() method for the same stack trace with incremented 'depth' value
-        inline const StackFrames* GetCachedStackFrames(int32_t depth, const void* stackPointer)
+        inline static bool GetStackFrameAt(int32_t depth, Il2CppStackFrameInfo& frame)
         {
-            CachedInfo* cachedInfo = GetStoredCachedInfoRaw();
-            const StackFrames* stackFrames = cachedInfo->CheckCondition(depth, stackPointer) ? GetStackFramesRaw() : GetStackFrames();
-            cachedInfo->Update(depth, stackPointer);
-            return stackFrames;
-        }
+            GetStackFrameAtContext context = { depth, {} };
 
-        inline bool GetStackFrameAt(int32_t depth, Il2CppStackFrameInfo& frame)
-        {
-            GetStackFrameAtContext context = { depth, NULL };
+            os::StackTrace::WalkStack(&StackImplementation::GetStackFrameAtCallback, &context, os::StackTrace::kLastCalledToFirstCalled);
 
-            os::StackTrace::WalkStack(&NativeMethodStack::GetStackFrameAtCallback, &context, os::StackTrace::kLastCalledToFirstCalled);
-
-            if (context.method != NULL)
+            if (context.frameInfo.method != NULL)
             {
-                frame.method = context.method;
+                frame = context.frameInfo;
                 return true;
             }
 
             return false;
         }
 
-        inline void PushFrame(Il2CppStackFrameInfo& frame)
+        inline static size_t GetStackDepth()
+        {
+            GetStackFrameAtContext context = { std::numeric_limits<int32_t>::min(), {} };
+            os::StackTrace::WalkStack(&StackImplementation::GetStackFrameAtCallback, &context, os::StackTrace::kLastCalledToFirstCalled);
+
+            IL2CPP_ASSERT(context.currentDepth < 0);
+            return static_cast<size_t>(context.currentDepth - std::numeric_limits<int32_t>::min());
+        }
+
+        inline static void PushFrame(Il2CppStackFrameInfo& frame)
         {
         }
 
-        inline void PopFrame()
+        inline static void PopFrame()
         {
-        }
-
-        // Returns SP value or nullptr if not implemented
-        inline const void* GetStackPointer()
-        {
-            return os::StackTrace::GetStackPointer();
         }
     };
 #endif // IL2CPP_MONO_DEBUGGER
 
 #endif // IL2CPP_ENABLE_NATIVE_STACKTRACES
 
+    class CachedStackImplementation : public StackImplementation
+    {
+    public:
+        CachedStackImplementation()
+            : m_MaxPoolCapacity(0)
+        {
+        }
+
+        inline BorrowedStackFrames GetStackFrames()
+        {
+            auto stackFrames = GetStackFramesRaw();
+            m_CachedInfo.Invalidate();
+            StackImplementation::GetStackFrames(stackFrames);
+            return BorrowedStackFrames(std::move(stackFrames));
+        }
+
+        // Avoiding calling GetStackFrames() method for the same stack trace with incremented 'depth' value
+        inline BorrowedStackFrames GetCachedStackFrames(int32_t depth)
+        {
+            auto stackFrames = GetStackFramesRaw();
+            if (!m_CachedInfo.Borrow(depth))
+                StackImplementation::GetStackFrames(stackFrames);
+
+            return BorrowedStackFrames(std::move(stackFrames));
+        }
+
+        inline void ReturnBorrowedStackFrames(StackFrames&& frames)
+        {
+            m_CachedInfo.RecordBorrowedReturn();
+            m_StackFramePool.push_back(std::move(frames));
+        }
+
+    private:
+        inline StackFrames GetStackFramesRaw()
+        {
+            StackFrames frames;
+            if (!m_StackFramePool.empty())
+            {
+                frames = std::move(m_StackFramePool.back());
+                m_StackFramePool.pop_back();
+            }
+            else
+            {
+                // Reserve space for return now, so that we couldn't ever
+                // throw from BorrowedStackFrames destructor
+                m_StackFramePool.reserve(++m_MaxPoolCapacity);
+                frames.reserve(64);
+            }
+
+            return frames;
+        }
+
+    private:
+        std::vector<StackFrames> m_StackFramePool;
+        size_t m_MaxPoolCapacity;
+        CachedInfo m_CachedInfo;
+    };
+
+#if IL2CPP_ENABLE_NATIVE_STACKTRACES
+    static_assert(std::is_empty<StackImplementation>::value, "Native stacktrace implementation class was expected to be empty");
+    static_assert(sizeof(std::vector<StackFrames>) + sizeof(CachedInfo) + sizeof(size_t) == sizeof(CachedStackImplementation), "Empty base class optimization failed");
+#endif
+
+    class MethodStack
+    {
+    private:
+        os::ThreadLocalValue s_StackImplementation;
+
+        inline CachedStackImplementation* GetStackImplementation()
+        {
+            CachedStackImplementation* stack = nullptr;
+
+            os::ErrorCode result = s_StackImplementation.GetValue(reinterpret_cast<void**>(&stack));
+            Assert(result == os::kErrorCodeSuccess);
+
+            return stack;
+        }
+
+    public:
+        inline void InitializeForCurrentThread()
+        {
+            if (GetStackImplementation() != nullptr)
+                return;
+
+            os::ErrorCode result = s_StackImplementation.SetValue(new CachedStackImplementation());
+            Assert(result == os::kErrorCodeSuccess);
+        }
+
+        inline void CleanupForCurrentThread()
+        {
+            auto stack = GetStackImplementation();
+            if (stack == nullptr)
+                return;
+
+            delete stack;
+
+            os::ErrorCode result = s_StackImplementation.SetValue(nullptr);
+            Assert(result == os::kErrorCodeSuccess);
+        }
+
+        inline BorrowedStackFrames GetStackFrames()
+        {
+            auto stack = GetStackImplementation();
+            if (stack == nullptr)
+                return BorrowedStackFrames(nullptr);
+
+            return stack->GetStackFrames();
+        }
+
+        inline BorrowedStackFrames GetCachedStackFrames(int32_t depth)
+        {
+            auto stack = GetStackImplementation();
+            if (stack == nullptr)
+            {
+                // This should really never happen, as cached stack frames are
+                // only called from icalls and by the time, the thread should
+                // be fully initialized
+                IL2CPP_ASSERT(false);
+                return BorrowedStackFrames(nullptr);
+            }
+
+            return stack->GetCachedStackFrames(depth);
+        }
+
+        inline void ReturnBorrowedStackFrames(StackFrames&& frames)
+        {
+            auto stack = GetStackImplementation();
+            if (stack == nullptr)
+                return;
+
+            stack->ReturnBorrowedStackFrames(std::move(frames));
+        }
+
+        inline bool GetStackFrameAt(int32_t depth, Il2CppStackFrameInfo& frame)
+        {
+            auto stack = GetStackImplementation();
+            if (stack == nullptr)
+                return false;
+
+            return stack->GetStackFrameAt(depth, frame);
+        }
+
+        inline size_t GetStackDepth()
+        {
+            auto stack = GetStackImplementation();
+            if (stack == nullptr)
+                return 0;
+
+            return stack->GetStackDepth();
+        }
+
+        inline void PushFrame(Il2CppStackFrameInfo& frame)
+        {
+            auto stack = GetStackImplementation();
+            IL2CPP_ASSERT(stack != nullptr);
+            stack->PushFrame(frame);
+        }
+
+        inline void PopFrame()
+        {
+            auto stack = GetStackImplementation();
+            IL2CPP_ASSERT(stack != nullptr);
+            stack->PopFrame();
+        }
+    };
+
 #else
 
-    static StackFrames s_EmptyStack;
-
-    class NoOpMethodStack
+    class MethodStack
     {
     public:
         inline void InitializeForCurrentThread()
@@ -322,19 +436,28 @@ namespace vm
         {
         }
 
-        inline const StackFrames* GetStackFrames()
+        inline BorrowedStackFrames GetStackFrames()
         {
-            return &s_EmptyStack;
+            return BorrowedStackFrames(nullptr);
         }
 
-        inline const StackFrames* GetCachedStackFrames(int32_t depth, const void* stackPointer)
+        inline BorrowedStackFrames GetCachedStackFrames(int32_t depth)
         {
-            return GetStackFrames();
+            return BorrowedStackFrames(nullptr);
+        }
+
+        inline void ReturnBorrowedStackFrames(StackFrames&& frames)
+        {
         }
 
         inline bool GetStackFrameAt(int32_t depth, Il2CppStackFrameInfo& frame)
         {
             return false;
+        }
+
+        inline size_t GetStackDepth()
+        {
+            return 0;
         }
 
         inline void PushFrame(Il2CppStackFrameInfo& frame)
@@ -344,36 +467,11 @@ namespace vm
         inline void PopFrame()
         {
         }
-
-        inline const void* GetStackPointer()
-        {
-            return nullptr;
-        }
     };
 
 #endif // IL2CPP_ENABLE_STACKTRACES
 
-#if IL2CPP_ENABLE_STACKTRACES
-
-#if IL2CPP_ENABLE_STACKTRACE_SENTRIES
-
-    StacktraceSentryMethodStack s_MethodStack;
-
-#elif IL2CPP_ENABLE_NATIVE_STACKTRACES
-
-#if IL2CPP_MONO_DEBUGGER
-    DebuggerMethodStack s_MethodStack;
-#else
-    NativeMethodStack s_MethodStack;
-#endif
-
-#endif
-
-#else
-
-    NoOpMethodStack s_MethodStack;
-
-#endif // IL2CPP_ENABLE_STACKTRACES
+    static MethodStack s_MethodStack;
 
 // Current thread functions
 
@@ -387,14 +485,20 @@ namespace vm
         s_MethodStack.CleanupForCurrentThread();
     }
 
-    const StackFrames* StackTrace::GetStackFrames()
+    BorrowedStackFrames StackTrace::GetStackFrames()
     {
         return s_MethodStack.GetStackFrames();
     }
 
-    const StackFrames* StackTrace::GetCachedStackFrames(int32_t depth)
+    BorrowedStackFrames StackTrace::GetCachedStackFrames(int32_t depth)
     {
-        return s_MethodStack.GetCachedStackFrames(depth, GetStackPointer());
+        return s_MethodStack.GetCachedStackFrames(depth);
+    }
+
+    BorrowedStackFrames::~BorrowedStackFrames()
+    {
+        if (m_OwnsFrames)
+            s_MethodStack.ReturnBorrowedStackFrames(std::move(m_Frames));
     }
 
     bool StackTrace::GetStackFrameAt(int32_t depth, Il2CppStackFrameInfo& frame)
@@ -405,10 +509,15 @@ namespace vm
 
     void StackTrace::WalkFrameStack(Il2CppFrameWalkFunc callback, void* context)
     {
-        const StackFrames& frames = *GetStackFrames();
+        const auto frames = GetStackFrames();
 
-        for (StackFrames::const_iterator it = frames.begin(); it != frames.end(); it++)
-            callback(&*it, context);
+        for (const auto& frame : frames)
+            callback(&frame, context);
+    }
+
+    size_t StackTrace::GetStackDepth()
+    {
+        return s_MethodStack.GetStackDepth();
     }
 
     void StackTrace::PushFrame(Il2CppStackFrameInfo& frame)
@@ -419,11 +528,6 @@ namespace vm
     void StackTrace::PopFrame()
     {
         s_MethodStack.PopFrame();
-    }
-
-    const void* StackTrace::GetStackPointer()
-    {
-        return s_MethodStack.GetStackPointer();
     }
 
 // Remote thread functions

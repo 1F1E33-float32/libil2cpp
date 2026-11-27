@@ -21,6 +21,12 @@ namespace metadata
 
     typedef std::function<bool(const MethodInfo*)> CustomAttributeFilter;
 
+    enum class ManagedObjectHandling
+    {
+        DeserializeManagedObjects,
+        SkipManagedObjects
+    };
+
     struct CustomAttributeArgument
     {
         Il2CppClass* klass;
@@ -138,10 +144,11 @@ namespace metadata
 
         // Iterate through all of the custom attribute data and get all of the custom attribute ctor arguments, fields, and parameter info
         // On each call the CustomAttributeReaderVisitor will be called with the information for the current custom attribute
-        // If any of the arguments are managed types (e.g. string, object, arrays) this method will allocate them on the GC heap
+        // With DeserializeManagedObjects, managed arguments (e.g. string, object, arrays) are allocated on the GC heap
+        // With SkipManagedObjects they are reported as NULL, and arrays report System.Array rather than the array class
         // Call GetDataIterator to get the iterator and call this function until it returns false
         // If this function returns false *exc may be non-null if an exception occurred
-        bool VisitCustomAttributeData(CustomAttributeDataIterator* iter, CustomAttributeReaderVisitor* visitor, Il2CppException** exc) const;
+        bool VisitCustomAttributeData(CustomAttributeDataIterator* iter, CustomAttributeReaderVisitor* visitor, Il2CppException** exc, ManagedObjectHandling managedObjectHandling) const;
 
         // Get the custom attribute ctor arguments, fields, and parameter info for a single custom attribute
         // The CustomAttributeReaderVisitor will be called with the information for this custom attribute
@@ -165,8 +172,7 @@ namespace metadata
 
         bool IterateAttributeCtorsImpl(const MethodInfo** attributeCtor, const char** ctorBuffer) const;
         bool ReadPastCustomAttribute(const MethodInfo* ctor, CustomAttributeDataIterator* iter, Il2CppException** exc) const;
-        bool ReadAndVisitCustomAttributeData(const MethodInfo* ctor, CustomAttributeDataIterator* iter, CustomAttributeReaderVisitor* visitor, Il2CppException** exc) const;
-        bool ReadAndVisitCustomAttributeImpl(const MethodInfo* ctor, CustomAttributeDataIterator* iter, CustomAttributeReaderVisitor* visitor, Il2CppException** exc, bool deserializedManagedObjects) const;
+        bool ReadAndVisitCustomAttributeData(const MethodInfo* ctor, CustomAttributeDataIterator* iter, CustomAttributeReaderVisitor* visitor, Il2CppException** exc, ManagedObjectHandling managedObjectHandling) const;
 
         const Il2CppImage* image;
         const char* bufferStart;

@@ -21317,7 +21317,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     1
                     ), ret, 0);
-                return INTRINSIC_CAST(uint8x8_t, TRet, ret);
+                return INTRINSIC_CAST(int8x8_t, TRet, ret);
             }
             case 2:
             {
@@ -21326,7 +21326,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     2
                     ), ret, 0);
-                return INTRINSIC_CAST(uint8x8_t, TRet, ret);
+                return INTRINSIC_CAST(int8x8_t, TRet, ret);
             }
             case 3:
             {
@@ -21335,7 +21335,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     3
                     ), ret, 0);
-                return INTRINSIC_CAST(uint8x8_t, TRet, ret);
+                return INTRINSIC_CAST(int8x8_t, TRet, ret);
             }
             case 4:
             {
@@ -21344,7 +21344,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     4
                     ), ret, 0);
-                return INTRINSIC_CAST(uint8x8_t, TRet, ret);
+                return INTRINSIC_CAST(int8x8_t, TRet, ret);
             }
             case 5:
             {
@@ -21353,7 +21353,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     5
                     ), ret, 0);
-                return INTRINSIC_CAST(uint8x8_t, TRet, ret);
+                return INTRINSIC_CAST(int8x8_t, TRet, ret);
             }
             case 6:
             {
@@ -21362,7 +21362,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     6
                     ), ret, 0);
-                return INTRINSIC_CAST(uint8x8_t, TRet, ret);
+                return INTRINSIC_CAST(int8x8_t, TRet, ret);
             }
             case 7:
             {
@@ -21371,7 +21371,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     7
                     ), ret, 0);
-                return INTRINSIC_CAST(uint8x8_t, TRet, ret);
+                return INTRINSIC_CAST(int8x8_t, TRet, ret);
             }
             case 8:
             {
@@ -21380,7 +21380,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     8
                     ), ret, 0);
-                return INTRINSIC_CAST(uint8x8_t, TRet, ret);
+                return INTRINSIC_CAST(int8x8_t, TRet, ret);
             }
             default:
                 il2cpp_codegen_raise_argument_out_of_range_exception(NULL);
@@ -21404,7 +21404,7 @@ namespace AdvSimd
             vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
             TArg2Value
             ), ret, 0);
-        return INTRINSIC_CAST(uint8x8_t, TRet, ret);
+        return INTRINSIC_CAST(int8x8_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -21430,7 +21430,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     1
                     ), ret, 0);
-                return INTRINSIC_CAST(uint8x8_t, TRet, ret);
+                return INTRINSIC_CAST(int8x8_t, TRet, ret);
             }
             case 2:
             {
@@ -21439,7 +21439,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     2
                     ), ret, 0);
-                return INTRINSIC_CAST(uint8x8_t, TRet, ret);
+                return INTRINSIC_CAST(int8x8_t, TRet, ret);
             }
             case 3:
             {
@@ -21448,7 +21448,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     3
                     ), ret, 0);
-                return INTRINSIC_CAST(uint8x8_t, TRet, ret);
+                return INTRINSIC_CAST(int8x8_t, TRet, ret);
             }
             case 4:
             {
@@ -21457,7 +21457,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     4
                     ), ret, 0);
-                return INTRINSIC_CAST(uint8x8_t, TRet, ret);
+                return INTRINSIC_CAST(int8x8_t, TRet, ret);
             }
             case 5:
             {
@@ -21466,7 +21466,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     5
                     ), ret, 0);
-                return INTRINSIC_CAST(uint8x8_t, TRet, ret);
+                return INTRINSIC_CAST(int8x8_t, TRet, ret);
             }
             case 6:
             {
@@ -21475,7 +21475,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     6
                     ), ret, 0);
-                return INTRINSIC_CAST(uint8x8_t, TRet, ret);
+                return INTRINSIC_CAST(int8x8_t, TRet, ret);
             }
             case 7:
             {
@@ -21484,7 +21484,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     7
                     ), ret, 0);
-                return INTRINSIC_CAST(uint8x8_t, TRet, ret);
+                return INTRINSIC_CAST(int8x8_t, TRet, ret);
             }
             case 8:
             {
@@ -21493,7 +21493,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     8
                     ), ret, 0);
-                return INTRINSIC_CAST(uint8x8_t, TRet, ret);
+                return INTRINSIC_CAST(int8x8_t, TRet, ret);
             }
             default:
                 il2cpp_codegen_raise_argument_out_of_range_exception(NULL);
@@ -21517,7 +21517,7 @@ namespace AdvSimd
             vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
             TArg2Value
             ), ret, 0);
-        return INTRINSIC_CAST(uint8x8_t, TRet, ret);
+        return INTRINSIC_CAST(int8x8_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -22698,7 +22698,7 @@ namespace AdvSimd
 #if IL2CPP_ADVSIMD_ARM64_IS_SUPPORTED
         int16x4_t ret = {};
         ret = vset_lane_s16(vqabsh_s16(vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0)), ret, 0);
-        return INTRINSIC_CAST(uint8x8_t, TRet, ret);
+        return INTRINSIC_CAST(int16x4_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -22752,7 +22752,7 @@ namespace AdvSimd
 #if IL2CPP_ADVSIMD_ARM64_IS_SUPPORTED
         int16x4_t ret = {};
         ret = vset_lane_s16(vaddlvq_s8(INTRINSIC_CAST(TArg1, int8x16_t, arg1)), ret, 0);
-        return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+        return INTRINSIC_CAST(int16x4_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -23627,7 +23627,7 @@ namespace AdvSimd
 #if IL2CPP_ADVSIMD_ARM64_IS_SUPPORTED
         int16x4_t ret = {};
         ret = vset_lane_s16(vqdmulhh_s16(vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0), vget_lane_s16(INTRINSIC_CAST(TArg2, int16x4_t, arg2), 0)), ret, 0);
-        return INTRINSIC_CAST(float32x2_t, TRet, ret);
+        return INTRINSIC_CAST(int16x4_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -24340,7 +24340,7 @@ namespace AdvSimd
             vget_lane_u16(INTRINSIC_CAST(TArg1, uint16x4_t, arg1), 0),
             vget_lane_s16(INTRINSIC_CAST(TArg2, int16x4_t, arg2), 0)
             ), ret, 0);
-        return INTRINSIC_CAST(uint8x8_t, TRet, ret);
+        return INTRINSIC_CAST(uint16x4_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -25281,7 +25281,7 @@ namespace AdvSimd
 #if IL2CPP_ADVSIMD_ARM64_IS_SUPPORTED
         int32x2_t ret = {};
         ret = vset_lane_s32(vaddlvq_s16(INTRINSIC_CAST(TArg1, int16x8_t, arg1)), ret, 0);
-        return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+        return INTRINSIC_CAST(int32x2_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -25374,7 +25374,7 @@ namespace AdvSimd
 #if IL2CPP_ADVSIMD_ARM64_IS_SUPPORTED
         int32x2_t ret = {};
         ret = vset_lane_s32(vqmovnd_s64(vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0)), ret, 0);
-        return INTRINSIC_CAST(int64x1_t, TRet, ret);
+        return INTRINSIC_CAST(int32x2_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -25688,7 +25688,7 @@ namespace AdvSimd
 #if IL2CPP_ADVSIMD_ARM64_IS_SUPPORTED
         int32x2_t ret = {};
         ret = vset_lane_s32(vqdmulhs_s32(vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0), vget_lane_s32(INTRINSIC_CAST(TArg2, int32x2_t, arg2), 0)), ret, 0);
-        return INTRINSIC_CAST(float32x2_t, TRet, ret);
+        return INTRINSIC_CAST(int32x2_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -25850,7 +25850,7 @@ namespace AdvSimd
 #if IL2CPP_ADVSIMD_ARM64_IS_SUPPORTED
         int32x2_t ret = {};
         ret = vset_lane_s32(vqdmlalh_s16(vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0), vget_lane_s16(INTRINSIC_CAST(TArg2, int16x4_t, arg2), 0), vget_lane_s16(INTRINSIC_CAST(TArg3, int16x4_t, arg3), 0)), ret, 0);
-        return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+        return INTRINSIC_CAST(int32x2_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -27808,7 +27808,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     1
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 2:
             {
@@ -27817,7 +27817,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     2
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 3:
             {
@@ -27826,7 +27826,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     3
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 4:
             {
@@ -27835,7 +27835,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     4
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 5:
             {
@@ -27844,7 +27844,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     5
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 6:
             {
@@ -27853,7 +27853,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     6
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 7:
             {
@@ -27862,7 +27862,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     7
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 8:
             {
@@ -27871,7 +27871,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     8
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 9:
             {
@@ -27880,7 +27880,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     9
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 10:
             {
@@ -27889,7 +27889,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     10
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 11:
             {
@@ -27898,7 +27898,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     11
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 12:
             {
@@ -27907,7 +27907,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     12
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 13:
             {
@@ -27916,7 +27916,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     13
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 14:
             {
@@ -27925,7 +27925,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     14
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 15:
             {
@@ -27934,7 +27934,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     15
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 16:
             {
@@ -27943,7 +27943,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     16
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 17:
             {
@@ -27952,7 +27952,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     17
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 18:
             {
@@ -27961,7 +27961,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     18
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 19:
             {
@@ -27970,7 +27970,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     19
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 20:
             {
@@ -27979,7 +27979,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     20
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 21:
             {
@@ -27988,7 +27988,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     21
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 22:
             {
@@ -27997,7 +27997,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     22
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 23:
             {
@@ -28006,7 +28006,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     23
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 24:
             {
@@ -28015,7 +28015,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     24
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 25:
             {
@@ -28024,7 +28024,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     25
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 26:
             {
@@ -28033,7 +28033,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     26
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 27:
             {
@@ -28042,7 +28042,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     27
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 28:
             {
@@ -28051,7 +28051,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     28
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 29:
             {
@@ -28060,7 +28060,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     29
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 30:
             {
@@ -28069,7 +28069,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     30
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 31:
             {
@@ -28078,7 +28078,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     31
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 32:
             {
@@ -28087,7 +28087,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     32
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             default:
                 il2cpp_codegen_raise_argument_out_of_range_exception(NULL);
@@ -28111,7 +28111,7 @@ namespace AdvSimd
             vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
             TArg2Value
             ), ret, 0);
-        return INTRINSIC_CAST(int32x2_t, TRet, ret);
+        return INTRINSIC_CAST(uint32x2_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -28137,7 +28137,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     1
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 2:
             {
@@ -28146,7 +28146,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     2
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 3:
             {
@@ -28155,7 +28155,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     3
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 4:
             {
@@ -28164,7 +28164,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     4
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 5:
             {
@@ -28173,7 +28173,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     5
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 6:
             {
@@ -28182,7 +28182,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     6
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 7:
             {
@@ -28191,7 +28191,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     7
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 8:
             {
@@ -28200,7 +28200,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     8
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 9:
             {
@@ -28209,7 +28209,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     9
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 10:
             {
@@ -28218,7 +28218,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     10
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 11:
             {
@@ -28227,7 +28227,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     11
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 12:
             {
@@ -28236,7 +28236,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     12
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 13:
             {
@@ -28245,7 +28245,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     13
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 14:
             {
@@ -28254,7 +28254,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     14
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 15:
             {
@@ -28263,7 +28263,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     15
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 16:
             {
@@ -28272,7 +28272,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     16
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 17:
             {
@@ -28281,7 +28281,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     17
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 18:
             {
@@ -28290,7 +28290,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     18
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 19:
             {
@@ -28299,7 +28299,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     19
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 20:
             {
@@ -28308,7 +28308,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     20
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 21:
             {
@@ -28317,7 +28317,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     21
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 22:
             {
@@ -28326,7 +28326,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     22
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 23:
             {
@@ -28335,7 +28335,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     23
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 24:
             {
@@ -28344,7 +28344,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     24
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 25:
             {
@@ -28353,7 +28353,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     25
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 26:
             {
@@ -28362,7 +28362,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     26
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 27:
             {
@@ -28371,7 +28371,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     27
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 28:
             {
@@ -28380,7 +28380,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     28
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 29:
             {
@@ -28389,7 +28389,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     29
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 30:
             {
@@ -28398,7 +28398,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     30
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 31:
             {
@@ -28407,7 +28407,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     31
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             case 32:
             {
@@ -28416,7 +28416,7 @@ namespace AdvSimd
                     vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
                     32
                     ), ret, 0);
-                return INTRINSIC_CAST(int32x2_t, TRet, ret);
+                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
             }
             default:
                 il2cpp_codegen_raise_argument_out_of_range_exception(NULL);
@@ -28440,7 +28440,7 @@ namespace AdvSimd
             vget_lane_u64(INTRINSIC_CAST(TArg1, uint64x1_t, arg1), 0),
             TArg2Value
             ), ret, 0);
-        return INTRINSIC_CAST(int32x2_t, TRet, ret);
+        return INTRINSIC_CAST(uint32x2_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -28912,7 +28912,7 @@ namespace AdvSimd
 #if IL2CPP_ADVSIMD_ARM64_IS_SUPPORTED
         int64x1_t ret = {};
         ret = vset_lane_s64(vqdmlals_s32(vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0), vget_lane_s32(INTRINSIC_CAST(TArg2, int32x2_t, arg2), 0), vget_lane_s32(INTRINSIC_CAST(TArg3, int32x2_t, arg3), 0)), ret, 0);
-        return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+        return INTRINSIC_CAST(int64x1_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -29454,7 +29454,7 @@ namespace AdvSimd
 #if IL2CPP_ADVSIMD_ARM64_IS_SUPPORTED
         int8x8_t  ret = {};
         ret = vset_lane_s8(vqabsb_s8(vget_lane_s8(INTRINSIC_CAST(TArg1, int8x8_t, arg1), 0)), ret, 0);
-        return INTRINSIC_CAST(int32x2_t, TRet, ret);
+        return INTRINSIC_CAST(int8x8_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -31967,7 +31967,7 @@ namespace AdvSimd
 #if IL2CPP_ADVSIMD_ARM64_IS_SUPPORTED
         int8x8_t  ret = {};
         ret = vset_lane_s8(vminvq_s8(INTRINSIC_CAST(TArg1, int8x16_t, arg1)), ret, 0);
-        return INTRINSIC_CAST(int32x2_t, TRet, ret);
+        return INTRINSIC_CAST(int8x8_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -34543,7 +34543,7 @@ namespace AdvSimd
                     INTRINSIC_CAST(TArg2, float32x2_t, arg2),
                     0
                     ), ret, 0);
-                return INTRINSIC_CAST(int8x8_t, TRet, ret);
+                return INTRINSIC_CAST(float32x2_t, TRet, ret);
             }
             case 1:
             {
@@ -34553,7 +34553,7 @@ namespace AdvSimd
                     INTRINSIC_CAST(TArg2, float32x2_t, arg2),
                     1
                     ), ret, 0);
-                return INTRINSIC_CAST(int8x8_t, TRet, ret);
+                return INTRINSIC_CAST(float32x2_t, TRet, ret);
             }
             default:
                 il2cpp_codegen_raise_argument_out_of_range_exception(NULL);
@@ -34578,7 +34578,7 @@ namespace AdvSimd
             INTRINSIC_CAST(TArg2, float32x2_t, arg2),
             TArg3Value
             ), ret, 0);
-        return INTRINSIC_CAST(int8x8_t, TRet, ret);
+        return INTRINSIC_CAST(float32x2_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -35733,7 +35733,7 @@ namespace AdvSimd
 #if IL2CPP_ADVSIMD_ARM64_IS_SUPPORTED
         uint16x4_t ret = {};
         ret = vset_lane_u16(vminvq_u16(INTRINSIC_CAST(TArg1, uint16x8_t, arg1)), ret, 0);
-        return INTRINSIC_CAST(float32x2_t, TRet, ret);
+        return INTRINSIC_CAST(uint16x4_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -35962,7 +35962,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     0
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 1:
             {
@@ -35971,7 +35971,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     1
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 2:
             {
@@ -35980,7 +35980,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     2
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 3:
             {
@@ -35989,7 +35989,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     3
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 4:
             {
@@ -35998,7 +35998,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     4
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 5:
             {
@@ -36007,7 +36007,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     5
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 6:
             {
@@ -36016,7 +36016,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     6
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 7:
             {
@@ -36025,7 +36025,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     7
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 8:
             {
@@ -36034,7 +36034,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     8
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 9:
             {
@@ -36043,7 +36043,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     9
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 10:
             {
@@ -36052,7 +36052,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     10
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 11:
             {
@@ -36061,7 +36061,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     11
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 12:
             {
@@ -36070,7 +36070,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     12
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 13:
             {
@@ -36079,7 +36079,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     13
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 14:
             {
@@ -36088,7 +36088,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     14
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 15:
             {
@@ -36097,7 +36097,7 @@ namespace AdvSimd
                     vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
                     15
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             default:
                 il2cpp_codegen_raise_argument_out_of_range_exception(NULL);
@@ -36121,7 +36121,7 @@ namespace AdvSimd
             vget_lane_s16(INTRINSIC_CAST(TArg1, int16x4_t, arg1), 0),
             TArg2Value
             ), ret, 0);
-        return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+        return INTRINSIC_CAST(int16x4_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -36163,7 +36163,7 @@ namespace AdvSimd
             vget_lane_u16(INTRINSIC_CAST(TArg1, uint16x4_t, arg1), 0),
             vget_lane_s16(INTRINSIC_CAST(TArg2, int16x4_t, arg2), 0)
             ), ret, 0);
-        return INTRINSIC_CAST(uint8x8_t, TRet, ret);
+        return INTRINSIC_CAST(uint16x4_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -36189,7 +36189,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     1
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 2:
             {
@@ -36198,7 +36198,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     2
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 3:
             {
@@ -36207,7 +36207,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     3
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 4:
             {
@@ -36216,7 +36216,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     4
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 5:
             {
@@ -36225,7 +36225,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     5
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 6:
             {
@@ -36234,7 +36234,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     6
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 7:
             {
@@ -36243,7 +36243,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     7
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 8:
             {
@@ -36252,7 +36252,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     8
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 9:
             {
@@ -36261,7 +36261,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     9
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 10:
             {
@@ -36270,7 +36270,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     10
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 11:
             {
@@ -36279,7 +36279,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     11
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 12:
             {
@@ -36288,7 +36288,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     12
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 13:
             {
@@ -36297,7 +36297,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     13
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 14:
             {
@@ -36306,7 +36306,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     14
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 15:
             {
@@ -36315,7 +36315,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     15
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 16:
             {
@@ -36324,7 +36324,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     16
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             default:
                 il2cpp_codegen_raise_argument_out_of_range_exception(NULL);
@@ -36348,7 +36348,7 @@ namespace AdvSimd
             vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
             TArg2Value
             ), ret, 0);
-        return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+        return INTRINSIC_CAST(int16x4_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -36374,7 +36374,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     1
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 2:
             {
@@ -36383,7 +36383,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     2
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 3:
             {
@@ -36392,7 +36392,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     3
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 4:
             {
@@ -36401,7 +36401,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     4
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 5:
             {
@@ -36410,7 +36410,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     5
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 6:
             {
@@ -36419,7 +36419,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     6
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 7:
             {
@@ -36428,7 +36428,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     7
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 8:
             {
@@ -36437,7 +36437,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     8
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 9:
             {
@@ -36446,7 +36446,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     9
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 10:
             {
@@ -36455,7 +36455,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     10
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 11:
             {
@@ -36464,7 +36464,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     11
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 12:
             {
@@ -36473,7 +36473,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     12
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 13:
             {
@@ -36482,7 +36482,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     13
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 14:
             {
@@ -36491,7 +36491,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     14
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 15:
             {
@@ -36500,7 +36500,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     15
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             case 16:
             {
@@ -36509,7 +36509,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     16
                     ), ret, 0);
-                return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+                return INTRINSIC_CAST(int16x4_t, TRet, ret);
             }
             default:
                 il2cpp_codegen_raise_argument_out_of_range_exception(NULL);
@@ -36533,7 +36533,7 @@ namespace AdvSimd
             vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
             TArg2Value
             ), ret, 0);
-        return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+        return INTRINSIC_CAST(int16x4_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -37086,7 +37086,7 @@ namespace AdvSimd
 #if IL2CPP_ADVSIMD_ARM64_IS_SUPPORTED
         uint32x2_t ret = {};
         ret = vset_lane_u32(vaddlvq_u16(INTRINSIC_CAST(TArg1, uint16x8_t, arg1)), ret, 0);
-        return INTRINSIC_CAST(uint16x4_t, TRet, ret);
+        return INTRINSIC_CAST(uint32x2_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -37848,7 +37848,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     0
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 1:
             {
@@ -37857,7 +37857,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     1
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 2:
             {
@@ -37866,7 +37866,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     2
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 3:
             {
@@ -37875,7 +37875,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     3
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 4:
             {
@@ -37884,7 +37884,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     4
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 5:
             {
@@ -37893,7 +37893,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     5
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 6:
             {
@@ -37902,7 +37902,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     6
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 7:
             {
@@ -37911,7 +37911,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     7
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 8:
             {
@@ -37920,7 +37920,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     8
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 9:
             {
@@ -37929,7 +37929,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     9
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 10:
             {
@@ -37938,7 +37938,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     10
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 11:
             {
@@ -37947,7 +37947,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     11
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 12:
             {
@@ -37956,7 +37956,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     12
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 13:
             {
@@ -37965,7 +37965,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     13
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 14:
             {
@@ -37974,7 +37974,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     14
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 15:
             {
@@ -37983,7 +37983,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     15
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 16:
             {
@@ -37992,7 +37992,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     16
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 17:
             {
@@ -38001,7 +38001,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     17
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 18:
             {
@@ -38010,7 +38010,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     18
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 19:
             {
@@ -38019,7 +38019,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     19
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 20:
             {
@@ -38028,7 +38028,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     20
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 21:
             {
@@ -38037,7 +38037,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     21
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 22:
             {
@@ -38046,7 +38046,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     22
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 23:
             {
@@ -38055,7 +38055,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     23
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 24:
             {
@@ -38064,7 +38064,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     24
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 25:
             {
@@ -38073,7 +38073,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     25
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 26:
             {
@@ -38082,7 +38082,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     26
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 27:
             {
@@ -38091,7 +38091,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     27
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 28:
             {
@@ -38100,7 +38100,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     28
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 29:
             {
@@ -38109,7 +38109,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     29
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 30:
             {
@@ -38118,7 +38118,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     30
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 31:
             {
@@ -38127,7 +38127,7 @@ namespace AdvSimd
                     vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
                     31
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             default:
                 il2cpp_codegen_raise_argument_out_of_range_exception(NULL);
@@ -38151,7 +38151,7 @@ namespace AdvSimd
             vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0),
             TArg2Value
             ), ret, 0);
-        return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+        return INTRINSIC_CAST(int32x2_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -38219,7 +38219,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     1
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 2:
             {
@@ -38228,7 +38228,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     2
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 3:
             {
@@ -38237,7 +38237,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     3
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 4:
             {
@@ -38246,7 +38246,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     4
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 5:
             {
@@ -38255,7 +38255,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     5
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 6:
             {
@@ -38264,7 +38264,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     6
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 7:
             {
@@ -38273,7 +38273,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     7
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 8:
             {
@@ -38282,7 +38282,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     8
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 9:
             {
@@ -38291,7 +38291,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     9
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 10:
             {
@@ -38300,7 +38300,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     10
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 11:
             {
@@ -38309,7 +38309,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     11
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 12:
             {
@@ -38318,7 +38318,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     12
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 13:
             {
@@ -38327,7 +38327,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     13
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 14:
             {
@@ -38336,7 +38336,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     14
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 15:
             {
@@ -38345,7 +38345,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     15
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 16:
             {
@@ -38354,7 +38354,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     16
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 17:
             {
@@ -38363,7 +38363,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     17
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 18:
             {
@@ -38372,7 +38372,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     18
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 19:
             {
@@ -38381,7 +38381,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     19
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 20:
             {
@@ -38390,7 +38390,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     20
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 21:
             {
@@ -38399,7 +38399,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     21
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 22:
             {
@@ -38408,7 +38408,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     22
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 23:
             {
@@ -38417,7 +38417,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     23
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 24:
             {
@@ -38426,7 +38426,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     24
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 25:
             {
@@ -38435,7 +38435,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     25
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 26:
             {
@@ -38444,7 +38444,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     26
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 27:
             {
@@ -38453,7 +38453,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     27
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 28:
             {
@@ -38462,7 +38462,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     28
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 29:
             {
@@ -38471,7 +38471,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     29
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 30:
             {
@@ -38480,7 +38480,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     30
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 31:
             {
@@ -38489,7 +38489,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     31
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 32:
             {
@@ -38498,7 +38498,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     32
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
 
             default:
@@ -38523,7 +38523,7 @@ namespace AdvSimd
             vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
             TArg2Value
             ), ret, 0);
-        return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+        return INTRINSIC_CAST(int32x2_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -38549,7 +38549,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     1
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 2:
             {
@@ -38558,7 +38558,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     2
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 3:
             {
@@ -38567,7 +38567,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     3
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 4:
             {
@@ -38576,7 +38576,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     4
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 5:
             {
@@ -38585,7 +38585,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     5
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 6:
             {
@@ -38594,7 +38594,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     6
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 7:
             {
@@ -38603,7 +38603,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     7
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 8:
             {
@@ -38612,7 +38612,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     8
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 9:
             {
@@ -38621,7 +38621,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     9
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 10:
             {
@@ -38630,7 +38630,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     10
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 11:
             {
@@ -38639,7 +38639,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     11
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 12:
             {
@@ -38648,7 +38648,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     12
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 13:
             {
@@ -38657,7 +38657,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     13
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 14:
             {
@@ -38666,7 +38666,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     14
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 15:
             {
@@ -38675,7 +38675,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     15
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 16:
             {
@@ -38684,7 +38684,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     16
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 17:
             {
@@ -38693,7 +38693,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     17
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 18:
             {
@@ -38702,7 +38702,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     18
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 19:
             {
@@ -38711,7 +38711,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     19
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 20:
             {
@@ -38720,7 +38720,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     20
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 21:
             {
@@ -38729,7 +38729,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     21
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 22:
             {
@@ -38738,7 +38738,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     22
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 23:
             {
@@ -38747,7 +38747,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     23
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 24:
             {
@@ -38756,7 +38756,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     24
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 25:
             {
@@ -38765,7 +38765,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     25
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 26:
             {
@@ -38774,7 +38774,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     26
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 27:
             {
@@ -38783,7 +38783,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     27
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 28:
             {
@@ -38792,7 +38792,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     28
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 29:
             {
@@ -38801,7 +38801,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     29
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 30:
             {
@@ -38810,7 +38810,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     30
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 31:
             {
@@ -38819,7 +38819,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     31
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             case 32:
             {
@@ -38828,7 +38828,7 @@ namespace AdvSimd
                     vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
                     32
                     ), ret, 0);
-                return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+                return INTRINSIC_CAST(int32x2_t, TRet, ret);
             }
             default:
                 il2cpp_codegen_raise_argument_out_of_range_exception(NULL);
@@ -38852,7 +38852,7 @@ namespace AdvSimd
             vget_lane_s64(INTRINSIC_CAST(TArg1, int64x1_t, arg1), 0),
             TArg2Value
             ), ret, 0);
-        return INTRINSIC_CAST(uint32x2_t, TRet, ret);
+        return INTRINSIC_CAST(int32x2_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};

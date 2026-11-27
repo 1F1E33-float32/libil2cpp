@@ -42,6 +42,8 @@ namespace vm
 // exported
     public:
         static Il2CppReflectionAssembly* GetAssemblyObject(const Il2CppAssembly *assembly);
+        // NULL unless assembly is a RuntimeAssembly.
+        static const Il2CppAssembly* GetAssembly(const Il2CppReflectionAssembly* assembly);
         static Il2CppReflectionAssemblyName* GetAssemblyNameObject(const Il2CppAssemblyName *assemblyName);
         static Il2CppReflectionField* GetFieldObject(Il2CppClass *klass, ::FieldInfo *field);
         static const ::FieldInfo* GetField(const Il2CppReflectionField* field);
@@ -74,6 +76,13 @@ namespace vm
         static bool IsEvent(Il2CppObject *obj);
 
         static void ClearStatics();
+
+        static Il2CppCustomAttrArgsInfo* CustomAttrsArgsInfoFromClass(Il2CppClass * klass, Il2CppClass * attr_klass, int32_t* count);
+        static Il2CppCustomAttrArgsInfo* CustomAttrsArgsInfoFromMethod(const MethodInfo * method, Il2CppClass * attr_klass, int32_t* count);
+        static Il2CppCustomAttrArgsInfo* CustomAttrsArgsInfoFromField(const FieldInfo * field, Il2CppClass * attr_klass, int32_t* count);
+        static Il2CppCustomAttrArgsInfo* CustomAttrsArgsInfoFromAssembly(const Il2CppAssembly * assembly, Il2CppClass * attr_klass, int32_t* count);
+
+        static bool ClassGetAttributeUsage(Il2CppClass * klass, bool* allowMultiple, bool* inherited, int* attributeTargets);
 
 // internal
     public:

@@ -306,6 +306,12 @@
 #define IL2CPP_THREADS_SWITCH (!IL2CPP_THREADS_STD && IL2CPP_TARGET_SWITCH)
 #define IL2CPP_THREADS_SWITCH2 (!IL2CPP_THREADS_STD && IL2CPP_TARGET_SWITCH2)
 
+// Platforms which implement the os synchronization primitives with the generic
+// WaitObject-based implementations in os/Generic instead of using the kernel
+// primitives directly. These require the platform's ThreadImpl to provide the
+// APC and condition semaphore machinery that WaitObject relies on.
+#define IL2CPP_THREADS_GENERIC_WAIT_OBJECT (IL2CPP_THREADS_PTHREAD || IL2CPP_THREADS_WIN32 || IL2CPP_THREADS_SWITCH || IL2CPP_THREADS_SWITCH2)
+
 // Set to 1 to use the baselib based version of the FastReaderReaderWriterLock
 // Use if the baselib::Lock implementation on the platform is faster than the il2cpp::os based version
 #ifndef IL2CPP_USE_BASELIB_FAST_READER_RWL

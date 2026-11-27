@@ -252,12 +252,10 @@ namespace System
         Method: System.Single System.MathF::Pow(System.Single,System.Single)
         AssemblyName: System.Private.CoreLib
     */
-    // inline float il2cpp_intrinsic_mathf_pow(float x, float y)
-    // {
-    //     IL2CPP_NOT_IMPLEMENTED_INTRINSIC(il2cpp_intrinsic_mathf_pow);
-    //     IL2CPP_UNREACHABLE;
-    //     return {};
-    // }
+    inline float il2cpp_intrinsic_mathf_pow(float x, float y)
+    {
+        return powf(x, y);
+    }
 
     /* METHOD MAPPING
         Method: System.Single System.MathF::Sin(System.Single)

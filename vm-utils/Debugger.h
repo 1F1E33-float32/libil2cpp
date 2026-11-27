@@ -204,6 +204,8 @@ namespace utils
         // The context parameter here is really il2cpp::vm::StackFrames*. We don't want to include vm/StackTrace.h in this file,
         // as this one is included in generated code.
         static void GetStackFrames(void* context);
+        static bool GetStackFrameAt(int32_t depth, Il2CppStackFrameInfo& frame);
+        static size_t GetStackDepth();
 
         static void AcquireLoaderLock();
         static void ReleaseLoaderLock();

@@ -36,6 +36,11 @@ DO_API(int, il2cpp_array_element_size, (const Il2CppClass * array_class));
 // assembly
 DO_API(const Il2CppImage*, il2cpp_assembly_get_image, (const Il2CppAssembly * assembly));
 DO_API(Il2CppObject*, il2cpp_assembly_get_object, (const Il2CppAssembly * assembly));
+DO_API(const Il2CppAssembly*, il2cpp_assembly_get_from_reflection, (const Il2CppReflectionAssembly * assembly));
+DO_API(bool, il2cpp_assembly_references_assembly, (const Il2CppAssembly * assembly, const Il2CppAssembly * reference));
+DO_API(bool, il2cpp_assembly_has_attribute, (const Il2CppAssembly * assembly, Il2CppClass * attr_class));
+DO_API(char*, il2cpp_assembly_get_full_name, (const Il2CppAssembly * assembly));
+DO_API(const uint8_t*, il2cpp_assembly_get_pubkeytoken, (const Il2CppAssembly * assembly));
 
 // class
 DO_API(void, il2cpp_class_for_each, (void(*klassReportFunc)(Il2CppClass* klass, void* userData), void* userData));
@@ -84,6 +89,11 @@ DO_API(const char*, il2cpp_class_get_assemblyname, (const Il2CppClass * klass));
 DO_API(int, il2cpp_class_get_rank, (const Il2CppClass * klass));
 DO_API(uint32_t, il2cpp_class_get_data_size, (const Il2CppClass * klass));
 DO_API(void*, il2cpp_class_get_static_field_data, (const Il2CppClass * klass));
+DO_API(bool, il2cpp_class_has_default_constructor, (Il2CppClass * klass, bool public_only));
+DO_API(bool, il2cpp_class_get_attribute_usage, (Il2CppClass * klass, bool* allowMultiple, bool* inherited, int* attributeTargets));
+DO_API(int, il2cpp_class_get_generic_argument_count, (Il2CppClass * klass));
+DO_API(const Il2CppType*, il2cpp_class_get_generic_argument_type, (Il2CppClass * klass, int index));
+DO_API(Il2CppClass*, il2cpp_class_get_generic_type_definition, (Il2CppClass * klass));
 
 // stats
 DO_API(bool, il2cpp_stats_dump_to_file, (const char *path));
@@ -268,8 +278,11 @@ DO_API(uint32_t, il2cpp_type_get_attrs, (const Il2CppType * type));
 DO_API(bool, il2cpp_type_equals, (const Il2CppType * type, const Il2CppType * otherType));
 DO_API(char*, il2cpp_type_get_assembly_qualified_name, (const Il2CppType * type));
 DO_API(char*, il2cpp_type_get_reflection_name, (const Il2CppType * type));
+DO_API(char*, il2cpp_type_get_full_name, (const Il2CppType * type));
 DO_API(bool, il2cpp_type_is_static, (const Il2CppType * type));
 DO_API(bool, il2cpp_type_is_pointer_type, (const Il2CppType * type));
+DO_API(bool, il2cpp_type_is_open_constructed_type, (const Il2CppType * t));
+DO_API(bool, il2cpp_type_is_unmanaged, (const Il2CppType * type));
 
 // image
 DO_API(const Il2CppAssembly*, il2cpp_image_get_assembly, (const Il2CppImage * image));
@@ -311,6 +324,13 @@ DO_API(bool, il2cpp_custom_attrs_has_attr, (Il2CppCustomAttrInfo * ainfo, Il2Cpp
 DO_API(Il2CppArray*,  il2cpp_custom_attrs_construct, (Il2CppCustomAttrInfo * cinfo, Il2CppException** exc));
 
 DO_API(void, il2cpp_custom_attrs_free, (Il2CppCustomAttrInfo * ainfo));
+
+// The returned pointer is a single allocation; the args arrays point into it. Free it with il2cpp_free.
+// Returns NULL with *count set to 0 if no attribute matches or the attribute data is invalid.
+DO_API(Il2CppCustomAttrArgsInfo*, il2cpp_custom_attrs_args_info_from_class, (Il2CppClass * klass, Il2CppClass * attr_klass, int32_t * count));
+DO_API(Il2CppCustomAttrArgsInfo*, il2cpp_custom_attrs_args_info_from_method, (const MethodInfo * method, Il2CppClass * attr_klass, int32_t * count));
+DO_API(Il2CppCustomAttrArgsInfo*, il2cpp_custom_attrs_args_info_from_field, (const FieldInfo * field, Il2CppClass * attr_klass, int32_t * count));
+DO_API(Il2CppCustomAttrArgsInfo*, il2cpp_custom_attrs_args_info_from_assembly, (const Il2CppAssembly * assembly, Il2CppClass * attr_klass, int32_t * count));
 
 // Il2CppClass user data for GetComponent optimization
 DO_API(void, il2cpp_class_set_userdata, (Il2CppClass * klass, void* userdata));

@@ -15,7 +15,6 @@
 #include "metadata/GenericMetadata.h"
 #include "vm/Array.h"
 #include "vm/Assembly.h"
-#include "vm/AssemblyName.h"
 #include "vm/Class.h"
 #include "vm/ClassInlines.h"
 #include "vm/Field.h"
@@ -274,12 +273,6 @@ extern "C" {
 #endif
     }
 
-    char* il2cpp_assembly_get_full_name(MonoAssembly *assembly)
-    {
-        std::string s = il2cpp::vm::AssemblyName::AssemblyNameToString(((Il2CppAssembly*)assembly)->aname);
-        return il2cpp::utils::StringUtils::StringDuplicate(s.c_str());
-    }
-
     const MonoMethod* il2cpp_get_seq_point_method(Il2CppSequencePoint *seqPoint)
     {
 #if IL2CPP_MONO_DEBUGGER
@@ -418,7 +411,7 @@ extern "C" {
         il2cpp::metadata::CustomAttributeDataIterator iter = reader.GetDataIterator(IsFixedBufferAttribute);
         FixedBufferAttributeConstructorVisitor visitor;
         // Assume there is only one fixed buffer attribute - we will use the first one.
-        if (reader.VisitCustomAttributeData(&iter, &visitor, &exc))
+        if (reader.VisitCustomAttributeData(&iter, &visitor, &exc, il2cpp::metadata::ManagedObjectHandling::DeserializeManagedObjects))
         {
             if (exc == NULL)
                 return visitor.FixedArraySize;
@@ -532,7 +525,7 @@ extern "C" {
         il2cpp::metadata::CustomAttributeDataIterator iter = reader.GetDataIterator(filter);
         Il2CppException* exc = NULL;
         DebuggerCustomAttributeVisitor visitor(attrs);
-        while (reader.VisitCustomAttributeData(&iter, &visitor, &exc))
+        while (reader.VisitCustomAttributeData(&iter, &visitor, &exc, il2cpp::metadata::ManagedObjectHandling::DeserializeManagedObjects))
         {
             createdAttributes++;
         }

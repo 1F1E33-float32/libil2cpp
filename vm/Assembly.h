@@ -21,6 +21,7 @@ namespace vm
     public:
         static Il2CppImage* GetImage(const Il2CppAssembly* assembly);
         static void GetReferencedAssemblies(const Il2CppAssembly* assembly, AssemblyNameVector* target);
+        static bool ReferencesAssembly(const Il2CppAssembly* assembly, const Il2CppAssembly* reference);
     public:
         static AssemblyVector* GetAllAssemblies();
         static const Il2CppAssembly* GetLoadedAssembly(const char* name);

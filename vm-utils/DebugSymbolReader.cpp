@@ -320,6 +320,38 @@ namespace utils
         return true;
     }
 
+    static bool GetStackFrameAt(usymliteLine line, int32_t& depth, Il2CppStackFrameInfo& outStackFrame)
+    {
+        if (depth == 0)
+        {
+            const MethodInfo* methodInfo = vm::GlobalMetadata::GetMethodInfoFromMethodDefinitionIndex(line.methodIndex);
+
+            outStackFrame = Il2CppStackFrameInfo {};
+            outStackFrame.method = methodInfo;
+            outStackFrame.raw_ip = (uintptr_t)line.address;
+            outStackFrame.filePath = GetString(line.fileName);
+            outStackFrame.sourceCodeLineNumber = line.line;
+            return true;
+        }
+
+        depth++;
+        if (line.parent != noLine)
+            return GetStackFrameAt(s_usym.lines[line.parent], depth, outStackFrame);
+
+        return false;
+    }
+
+    bool DebugSymbolReader::GetStackFrameAt(void* nativeInstructionPointer, int32_t& depth, Il2CppStackFrameInfo& outStackFrame)
+    {
+        usymliteLine line;
+        if (!GetUsymLine(nativeInstructionPointer, line))
+        {
+            return false;
+        }
+
+        return utils::GetStackFrameAt(line, depth, outStackFrame);
+    }
+
     bool DebugSymbolReader::DebugSymbolsAvailable()
     {
         #if IL2CPP_MONO_DEBUGGER

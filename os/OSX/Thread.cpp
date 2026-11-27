@@ -23,7 +23,7 @@ namespace os
         *high = pthread_get_stackaddr_np(self);
         size_t stackSize = pthread_get_stacksize_np(self);
 
-        *low = (void*)((uintptr_t)high - stackSize);
+        *low = (void*)((uintptr_t)*high - stackSize);
 
         return true;
 #else

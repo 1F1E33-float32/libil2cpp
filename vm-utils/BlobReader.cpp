@@ -157,6 +157,11 @@ namespace utils
                     *(Il2CppReflectionType**)value = il2cpp::vm::Reflection::GetTypeObject(&klass->byval_arg);
                     il2cpp::gc::GarbageCollector::SetWriteBarrier((void**)value);
                 }
+                else
+                {
+                    const Il2CppType* type = il2cpp::vm::MetadataCache::GetIl2CppTypeFromIndex(image, typeIndex);
+                    *(const Il2CppType**)value = type;
+                }
                 break;
             }
             default:

@@ -68,17 +68,22 @@ static void SetInvalidDataException(Il2CppException** exc)
     il2cpp::gc::WriteBarrier::GenericStore(exc, il2cpp::vm::Exception::GetCustomAttributeFormatException("Binary format of the specified custom attribute was invalid."));
 }
 
-static bool ReadAttributeDataValue(const Il2CppImage* image, const char** buffer, il2cpp::metadata::CustomAttributeArgument* arg, Il2CppException** exc, bool deserializedManagedObjects)
+static bool ReadAttributeDataValue(const Il2CppImage* image, const char** buffer, il2cpp::metadata::CustomAttributeArgument* arg, Il2CppException** exc, il2cpp::metadata::ManagedObjectHandling managedObjectHandling)
 {
+    const bool deserializeManagedObjects = managedObjectHandling == il2cpp::metadata::ManagedObjectHandling::DeserializeManagedObjects;
+
     const Il2CppTypeEnum type = il2cpp::utils::BlobReader::ReadEncodedTypeEnum(image, buffer, &arg->klass);
 
-    if (!il2cpp::utils::BlobReader::GetConstantValueFromBlob(image, type, buffer, &arg->data, deserializedManagedObjects))
+    // Narrow types only write their own width, so clear the storage to keep the unused bytes deterministic
+    memset(&arg->data, 0, sizeof(arg->data));
+
+    if (!il2cpp::utils::BlobReader::GetConstantValueFromBlob(image, type, buffer, &arg->data, deserializeManagedObjects))
     {
         SetInvalidDataException(exc);
         return false;
     }
 
-    if (deserializedManagedObjects && type == IL2CPP_TYPE_SZARRAY && arg->data.obj != NULL)
+    if (deserializeManagedObjects && type == IL2CPP_TYPE_SZARRAY && arg->data.obj != NULL)
     {
         // For arrays get the actual array class, not just System.Array
         arg->klass = ((Il2CppArray*)arg->data.obj)->klass;
@@ -188,17 +193,17 @@ namespace metadata
     {
         CustomAttributeDataReader reader = CustomAttributeDataReader(image, (const char*)dataStart, dataLength);
         CustomAttributeDataIterator iter = CustomAttributeDataIterator(NULL, reader.bufferStart);
-        return reader.ReadAndVisitCustomAttributeData(ctor, &iter, visitor, exc);
+        return reader.ReadAndVisitCustomAttributeData(ctor, &iter, visitor, exc, ManagedObjectHandling::DeserializeManagedObjects);
     }
 
-    bool CustomAttributeDataReader::VisitCustomAttributeData(CustomAttributeDataIterator* iter, CustomAttributeReaderVisitor* visitor, Il2CppException** exc) const
+    bool CustomAttributeDataReader::VisitCustomAttributeData(CustomAttributeDataIterator* iter, CustomAttributeReaderVisitor* visitor, Il2CppException** exc, ManagedObjectHandling managedObjectHandling) const
     {
         const MethodInfo* ctor;
         while (IterateAttributeCtorsImpl(&ctor, &iter->ctorBuffer))
         {
             bool shouldProcessThisAttr = iter->filter(ctor);
             if (shouldProcessThisAttr)
-                return ReadAndVisitCustomAttributeData(ctor, iter, visitor, exc);
+                return ReadAndVisitCustomAttributeData(ctor, iter, visitor, exc, managedObjectHandling);
 
             if (!ReadPastCustomAttribute(ctor, iter, exc))
                 return false;
@@ -226,15 +231,10 @@ namespace metadata
     bool CustomAttributeDataReader::ReadPastCustomAttribute(const MethodInfo* ctor, CustomAttributeDataIterator* iter, Il2CppException** exc) const
     {
         CustomAttributeReaderVisitor nullVisitor;
-        return ReadAndVisitCustomAttributeImpl(ctor, iter, &nullVisitor, exc, false);
+        return ReadAndVisitCustomAttributeData(ctor, iter, &nullVisitor, exc, ManagedObjectHandling::SkipManagedObjects);
     }
 
-    bool CustomAttributeDataReader::ReadAndVisitCustomAttributeData(const MethodInfo* ctor, CustomAttributeDataIterator* iter, CustomAttributeReaderVisitor* visitor, Il2CppException** exc) const
-    {
-        return ReadAndVisitCustomAttributeImpl(ctor, iter, visitor, exc, true);
-    }
-
-    bool CustomAttributeDataReader::ReadAndVisitCustomAttributeImpl(const MethodInfo* ctor, CustomAttributeDataIterator* iter, CustomAttributeReaderVisitor* visitor, Il2CppException** exc, bool deserializedManagedObjects) const
+    bool CustomAttributeDataReader::ReadAndVisitCustomAttributeData(const MethodInfo* ctor, CustomAttributeDataIterator* iter, CustomAttributeReaderVisitor* visitor, Il2CppException** exc, ManagedObjectHandling managedObjectHandling) const
     {
         il2cpp::gc::WriteBarrier::GenericStoreNull(exc);
 
@@ -266,7 +266,7 @@ namespace metadata
 
         for (uint32_t i = 0; i < argumentCount; i++)
         {
-            if (!ReadAttributeDataValue(image, &iter->dataBuffer, args + i, exc, deserializedManagedObjects))
+            if (!ReadAttributeDataValue(image, &iter->dataBuffer, args + i, exc, managedObjectHandling))
                 return false;
 
             IL2CPP_ASSERT(iter->dataBuffer <= bufferEnd);
@@ -281,7 +281,7 @@ namespace metadata
         for (uint32_t i = 0; i < fieldCount; i++)
         {
             CustomAttributeFieldArgument field = { 0 };
-            if (!ReadAttributeDataValue(image, &iter->dataBuffer, &field.arg, exc, deserializedManagedObjects))
+            if (!ReadAttributeDataValue(image, &iter->dataBuffer, &field.arg, exc, managedObjectHandling))
                 return false;
 
             const Il2CppClass* klass;
@@ -298,7 +298,7 @@ namespace metadata
         for (uint32_t i = 0; i < propertyCount; i++)
         {
             CustomAttributePropertyArgument propArg = { 0 };
-            if (!ReadAttributeDataValue(image, &iter->dataBuffer, &propArg.arg, exc, deserializedManagedObjects))
+            if (!ReadAttributeDataValue(image, &iter->dataBuffer, &propArg.arg, exc, managedObjectHandling))
                 return false;
 
             Il2CppClass* klass;

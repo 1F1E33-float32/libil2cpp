@@ -11,6 +11,7 @@
 #include "vm/AndroidRuntime.h"
 #include "vm/Array.h"
 #include "vm/Assembly.h"
+#include "vm/AssemblyName.h"
 #include "vm/Class.h"
 #include "vm/Domain.h"
 #include "vm/Exception.h"
@@ -240,6 +241,22 @@ Il2CppObject* il2cpp_assembly_get_object(const Il2CppAssembly* assembly)
     return (Il2CppObject*)Reflection::GetAssemblyObject(assembly);
 }
 
+const Il2CppAssembly* il2cpp_assembly_get_from_reflection(const Il2CppReflectionAssembly* assembly)
+{
+    return Reflection::GetAssembly(assembly);
+}
+
+bool il2cpp_assembly_references_assembly(const Il2CppAssembly *assembly, const Il2CppAssembly *reference)
+{
+    return Assembly::ReferencesAssembly(assembly, reference);
+}
+
+bool il2cpp_assembly_has_attribute(const Il2CppAssembly *assembly, Il2CppClass *attr_class)
+{
+    auto handle = il2cpp::vm::MetadataCache::GetCustomAttributeTypeToken(assembly->image, assembly->token);
+    return Reflection::HasAttribute(handle, attr_class);
+}
+
 // class
 
 const Il2CppType* il2cpp_class_enum_basetype(Il2CppClass *klass)
@@ -463,6 +480,11 @@ uint32_t il2cpp_class_get_data_size(const Il2CppClass *klass)
 void* il2cpp_class_get_static_field_data(const Il2CppClass *klass)
 {
     return klass->static_fields;
+}
+
+bool il2cpp_class_has_default_constructor(Il2CppClass *klass, bool public_only)
+{
+    return Class::HasDefaultConstructor(klass, public_only);
 }
 
 // stats
@@ -1346,6 +1368,15 @@ char* il2cpp_type_get_reflection_name(const Il2CppType *type)
     return buffer;
 }
 
+char* il2cpp_type_get_full_name(const Il2CppType *type)
+{
+    std::string name = Type::GetName(type, IL2CPP_TYPE_NAME_FORMAT_FULL_NAME);
+    char* buffer = static_cast<char*>(il2cpp_alloc(name.length() + 1));
+    memcpy(buffer, name.c_str(), name.length() + 1);
+
+    return buffer;
+}
+
 bool il2cpp_type_is_byref(const Il2CppType *type)
 {
     return type->byref;
@@ -1369,6 +1400,30 @@ bool il2cpp_type_is_static(const Il2CppType *type)
 bool il2cpp_type_is_pointer_type(const Il2CppType *type)
 {
     return type->type == IL2CPP_TYPE_PTR;
+}
+
+bool il2cpp_type_is_open_constructed_type(const Il2CppType * t)
+{
+    return Type::IsOpenConstructedType(t);
+}
+
+bool il2cpp_type_is_unmanaged(const Il2CppType *type)
+{
+    // A managed reference is never unmanaged, and generic inflation keeps the value type flag of
+    // the argument on a byref type, so byref has to be rejected before looking at valuetype.
+    if (type->byref)
+        return false;
+
+    // Pointers and function pointers are unmanaged, but do not carry the value type flag
+    if (type->type == IL2CPP_TYPE_PTR || type->type == IL2CPP_TYPE_FNPTR)
+        return true;
+
+    if (!type->valuetype)
+        return false;
+
+    Il2CppClass* klass = il2cpp::vm::Class::FromIl2CppType(type);
+    il2cpp::vm::ClassInlines::InitFromCodegen(klass);
+    return !klass->has_references;
 }
 
 // image
@@ -1510,6 +1565,77 @@ Il2CppArray*  il2cpp_custom_attrs_construct(Il2CppCustomAttrInfo *ainfo, Il2CppE
 void il2cpp_custom_attrs_free(Il2CppCustomAttrInfo *ainfo)
 {
     // nothing to free, we cache everything
+}
+
+Il2CppCustomAttrArgsInfo* il2cpp_custom_attrs_args_info_from_class(Il2CppClass * klass, Il2CppClass * attr_klass, int32_t* count)
+{
+    return Reflection::CustomAttrsArgsInfoFromClass(klass, attr_klass, count);
+}
+
+Il2CppCustomAttrArgsInfo* il2cpp_custom_attrs_args_info_from_method(const MethodInfo * method, Il2CppClass * attr_klass, int32_t* count)
+{
+    return Reflection::CustomAttrsArgsInfoFromMethod(method, attr_klass, count);
+}
+
+Il2CppCustomAttrArgsInfo* il2cpp_custom_attrs_args_info_from_field(const FieldInfo * field, Il2CppClass * attr_klass, int32_t* count)
+{
+    return Reflection::CustomAttrsArgsInfoFromField(field, attr_klass, count);
+}
+
+Il2CppCustomAttrArgsInfo* il2cpp_custom_attrs_args_info_from_assembly(const Il2CppAssembly * assembly, Il2CppClass * attr_klass, int32_t* count)
+{
+    return Reflection::CustomAttrsArgsInfoFromAssembly(assembly, attr_klass, count);
+}
+
+bool il2cpp_class_get_attribute_usage(Il2CppClass * klass, bool* allowMultiple, bool* inherited, int* attributeTargets)
+{
+    return Reflection::ClassGetAttributeUsage(klass, allowMultiple, inherited, attributeTargets);
+}
+
+int il2cpp_class_get_generic_argument_count(Il2CppClass * klass)
+{
+    if (!Class::IsInflated(klass))
+        return 0;
+
+    auto inst = GenericClass::GetInstance(klass->generic_class);
+    return inst->type_argc;
+}
+
+const Il2CppType* il2cpp_class_get_generic_argument_type(Il2CppClass * klass, int index)
+{
+    if (!Class::IsInflated(klass))
+        return 0;
+
+    auto inst = GenericClass::GetInstance(klass->generic_class);
+    if (index < 0 || index >= (int)inst->type_argc)
+        return nullptr;
+
+    return inst->type_argv[index];
+}
+
+Il2CppClass* il2cpp_class_get_generic_type_definition(Il2CppClass* klass)
+{
+    if (!Class::IsInflated(klass))
+        return nullptr;
+
+    return GenericClass::GetTypeDefinition(klass->generic_class);
+}
+
+char* il2cpp_assembly_get_full_name(const Il2CppAssembly * assembly)
+{
+    auto name = AssemblyName::AssemblyNameToString(assembly->aname);
+    char* buffer = static_cast<char*>(il2cpp_alloc(name.length() + 1));
+    memcpy(buffer, name.c_str(), name.length() + 1);
+
+    return buffer;
+}
+
+const uint8_t* il2cpp_assembly_get_pubkeytoken(const Il2CppAssembly * assembly)
+{
+    if (!AssemblyName::HasPublicKeyToken(assembly->aname.public_key_token))
+        return NULL;
+
+    return assembly->aname.public_key_token;
 }
 
 void il2cpp_type_get_name_chunked(const Il2CppType * type, void(*chunkReportFunc)(void* data, void* userData), void* userData)

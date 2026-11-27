@@ -3,7 +3,7 @@
 
 #if IL2CPP_SUPPORT_THREADS
 
-#if IL2CPP_THREADS_WIN32 || IL2CPP_THREADS_PTHREAD
+#if IL2CPP_THREADS_GENERIC_WAIT_OBJECT
 #include "os/Generic/EventImpl.h"
 #else
 #include "os/EventImpl.h"

@@ -47,6 +47,22 @@ namespace vm
         }
     }
 
+    bool Assembly::ReferencesAssembly(const Il2CppAssembly* assembly, const Il2CppAssembly* reference)
+    {
+        for (int32_t sourceIndex = 0; sourceIndex < assembly->referencedAssemblyCount; sourceIndex++)
+        {
+            const Il2CppAssembly* refAssembly = MetadataCache::GetReferencedAssembly(assembly, sourceIndex);
+
+            // Identity, not name: every Il2CppAssembly, including the ones returned here, points
+            // into the single assemblies table, so pointer equality is exact. Comparing names would
+            // instead match a different assembly that happens to share the simple name.
+            if (refAssembly == reference)
+                return true;
+        }
+
+        return false;
+    }
+
     static bool ends_with(const char *str, const char *suffix)
     {
         if (!str || !suffix)

@@ -22,6 +22,7 @@ typedef struct Il2CppImage Il2CppImage;
 typedef struct Il2CppException Il2CppException;
 typedef struct Il2CppProfiler Il2CppProfiler;
 typedef struct Il2CppObject Il2CppObject;
+typedef struct Il2CppReflectionAssembly Il2CppReflectionAssembly;
 typedef struct Il2CppReflectionField Il2CppReflectionField;
 typedef struct Il2CppReflectionMethod Il2CppReflectionMethod;
 typedef struct Il2CppReflectionType Il2CppReflectionType;
@@ -212,3 +213,43 @@ typedef struct Il2CppCodeCoverageSequencePointInfo
 } Il2CppCodeCoverageSequencePointInfo;
 
 typedef void (*Il2CppCodeCoverageMethodWalkCallback)(const MethodInfo* method, void* context);
+
+// The member to read is determined by the argument type reported in klass below:
+//   i - bool, char, integer and enum arguments, widened to 64 bits from their encoded width
+//       (signed types are sign extended, unsigned types zero extended)
+//   f - System.Single arguments
+//   d - System.Double arguments
+//   p - the Il2CppType* of a System.Type argument, and NULL for arguments that are not deserialized
+typedef union Il2CppCustomAttributeDataStorage
+{
+    void* p;
+    int64_t i;
+    float f;
+    double d;
+} Il2CppCustomAttributeDataStorage;
+
+// klass is the type the argument is encoded with in the metadata, which is what the value member
+// above has to be read as. That is not always the declared parameter type of the attribute
+// constructor:
+//   - An argument of a declared type of System.Object reports the type of the value it holds, so
+//     a boxed int reports System.Int32.
+//   - An enum argument reports the enum type itself, with the value widened from the underlying type.
+//   - An array argument reports System.Array rather than the concrete array type, and its declared
+//     element type cannot be recovered from this API. The value is NULL, as arrays are not
+//     deserialized.
+//   - A string argument reports System.String with a NULL value, as strings are not deserialized.
+typedef struct Il2CppCustomAttributeArg
+{
+    Il2CppClass* klass;
+    Il2CppCustomAttributeDataStorage value;
+} Il2CppCustomAttributeArg;
+
+// The constructor arguments of one attribute, in declaration order. Named field and property
+// arguments are not reported. klass is the attribute's own class, which may derive from the class
+// the query asked for.
+typedef struct Il2CppCustomAttrArgsInfo
+{
+    int32_t arg_count;
+    Il2CppCustomAttributeArg* args;
+    Il2CppClass* klass;
+} Il2CppCustomAttrArgsInfo;

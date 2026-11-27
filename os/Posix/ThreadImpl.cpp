@@ -22,9 +22,6 @@ namespace il2cpp
 {
 namespace os
 {
-#define ASSERT_CALLED_ON_CURRENT_THREAD \
-    IL2CPP_ASSERT(pthread_equal (pthread_self (), m_Handle) && "Must be called on current thread!");
-
     static Event* s_ThreadSleepObject = nullptr;
 
     void ThreadImpl::AllocateStaticData()
@@ -42,9 +39,7 @@ namespace os
         : m_Handle(0)
         , m_StartFunc(NULL)
         , m_StartArg(NULL)
-        , m_CurrentWaitObject(NULL)
         , m_StackSize(IL2CPP_DEFAULT_STACK_SIZE)
-        , m_ConditionSemaphore(1)
     {
     }
 
@@ -194,62 +189,6 @@ namespace os
     {
         /// TODO
         return kThreadPriorityNormal;
-    }
-
-    void ThreadImpl::QueueUserAPC(Thread::APCFunc function, void* context)
-    {
-        IL2CPP_ASSERT(function != NULL);
-
-        // Put on queue.
-        {
-            m_PendingAPCsMutex.Acquire();
-            m_PendingAPCs.push_back(APCRequest(function, context));
-            m_PendingAPCsMutex.Release();
-        }
-
-        // Interrupt an ongoing wait, only interrupt if we have an object waiting
-        if (m_CurrentWaitObject.load())
-        {
-            m_ConditionSemaphore.Release(1);
-        }
-    }
-
-    void ThreadImpl::CheckForUserAPCAndHandle()
-    {
-        ASSERT_CALLED_ON_CURRENT_THREAD;
-        m_PendingAPCsMutex.Acquire();
-
-        while (!m_PendingAPCs.empty())
-        {
-            APCRequest apcRequest = m_PendingAPCs.front();
-
-            // Remove from list. Do before calling the function to make sure the list
-            // is up to date in case the function throws.
-            m_PendingAPCs.erase(m_PendingAPCs.begin());
-
-            // Release mutex while we call the function so that we don't deadlock
-            // if the function starts waiting on a thread that tries queuing an APC
-            // on us.
-            m_PendingAPCsMutex.Release();
-
-            // Call function.
-            apcRequest.callback(apcRequest.context);
-
-            // Re-acquire mutex.
-            m_PendingAPCsMutex.Acquire();
-        }
-
-        m_PendingAPCsMutex.Release();
-    }
-
-    void ThreadImpl::SetWaitObject(WaitObject* waitObject)
-    {
-        // Cannot set wait objects on threads other than the current thread.
-        ASSERT_CALLED_ON_CURRENT_THREAD;
-
-        // This is an unprotected write as write acccess is restricted to the
-        // current thread.
-        m_CurrentWaitObject = waitObject;
     }
 
     void ThreadImpl::Sleep(uint32_t milliseconds, bool interruptible)

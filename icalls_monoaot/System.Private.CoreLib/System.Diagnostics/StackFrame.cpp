@@ -21,7 +21,7 @@ namespace System
 {
 namespace Diagnostics
 {
-    static bool IsCalledFromSystemDiagnosticsStackTrace(const vm::StackFrames& stack)
+    static bool IsCalledFromSystemDiagnosticsStackTrace(const vm::BorrowedStackFrames& stack)
     {
         for (vm::StackFrames::const_iterator frame = stack.begin(); frame != stack.end(); ++frame)
         {
@@ -49,7 +49,7 @@ namespace Diagnostics
         // This should match the constant in StackTrace.InitializeForCurrentThread
         const int kSkippedFramesFromCorlibStackTraceMethods = 2;
 
-        const vm::StackFrames& stack = *vm::StackTrace::GetCachedStackFrames(skipFrames);
+        const auto stack = vm::StackTrace::GetCachedStackFrames(skipFrames);
 
         // Always ignore the skipped frames from System.Diagnostics.StackFrame, as we know we are always called from it.
         // These frames might be inlined or optimized away by the C++ compiler, so we will inspect the actual stack

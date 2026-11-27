@@ -96,15 +96,16 @@ namespace gc
             g_ExternalAllocationTrackerFunction(ptr, size, kind);
         else
         {
-            const StackFrames *trace = StackTrace::GetStackFrames();
+            // Capture before grabbing the lock
+            const auto stackScope = StackTrace::GetStackFrames();
 
             os::FastAutoLock lock(&s_AllocationMutex);
 
             AllocationInfo& allocation = g_Allocations[ptr];
             allocation.size = size;
             allocation.kind = kind;
-            if (trace != NULL)
-                allocation.stacktrace = *trace;
+            allocation.stacktrace = stackScope.Copy();
+
 #if HAS_POSIX_BACKTRACE
             allocation.frameCount = backtrace(&allocation.backtraceFrames[0], 128);
 #endif

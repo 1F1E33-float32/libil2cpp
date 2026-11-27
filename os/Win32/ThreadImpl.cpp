@@ -44,7 +44,6 @@ namespace os
 
     ThreadImpl::ThreadImpl()
         : m_ThreadHandle(0), m_ThreadId(0), m_StackSize(IL2CPP_DEFAULT_STACK_SIZE), m_ApartmentState(kApartmentStateUnknown), m_Priority(kThreadPriorityNormal)
-        , m_ConditionSemaphore(1)
     {
     }
 
@@ -161,58 +160,11 @@ namespace os
         s_ThreadSleepObject->Wait(ms, interruptible);
     }
 
-    void ThreadImpl::CheckForUserAPCAndHandle()
-    {
-        m_PendingAPCsMutex.Acquire();
-
-        while (!m_PendingAPCs.empty())
-        {
-            APCRequest apcRequest = m_PendingAPCs.front();
-
-            // Remove from list. Do before calling the function to make sure the list
-            // is up to date in case the function throws.
-            m_PendingAPCs.erase(m_PendingAPCs.begin());
-
-            // Release mutex while we call the function so that we don't deadlock
-            // if the function starts waiting on a thread that tries queuing an APC
-            // on us.
-            m_PendingAPCsMutex.Release();
-
-            // Call function.
-            apcRequest.callback(apcRequest.context);
-
-            // Re-acquire mutex.
-            m_PendingAPCsMutex.Acquire();
-        }
-
-        m_PendingAPCsMutex.Release();
-    }
-
-    void ThreadImpl::SetWaitObject(WaitObject* waitObject)
-    {
-        // This is an unprotected write as write acccess is restricted to the
-        // current thread.
-        m_CurrentWaitObject = waitObject;
-    }
-
     static void __stdcall NativeAPCCallback(ULONG_PTR context) {}
 
     void ThreadImpl::QueueUserAPC(Thread::APCFunc func, void* context)
     {
-        IL2CPP_ASSERT(func != NULL);
-
-        // Put on queue.
-        {
-            m_PendingAPCsMutex.Acquire();
-            m_PendingAPCs.push_back(APCRequest(func, context));
-            m_PendingAPCsMutex.Release();
-        }
-
-        // Interrupt an ongoing wait, only interrupt if we have an object waiting
-        if (m_CurrentWaitObject.load())
-        {
-            m_ConditionSemaphore.Release(1);
-        }
+        ThreadAPCQueue::QueueUserAPC(func, context);
 
         // Wake up any threads blocked on alertable waits. We do this after adding to pending APCs
         // above so that after the thread wakes up, it calls CheckForUserAPCAndHandle, and finds

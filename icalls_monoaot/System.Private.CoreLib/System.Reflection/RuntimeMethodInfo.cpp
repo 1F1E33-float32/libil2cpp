@@ -37,7 +37,7 @@ namespace System
 {
 namespace Reflection
 {
-    static Il2CppClass* il2cpp_class_get_generic_type_definition(Il2CppClass* klass)
+    static Il2CppClass* il2cpp_class_get_generic_type_definition_or_class(Il2CppClass* klass)
     {
         return klass->generic_class ? il2cpp::vm::GenericClass::GetTypeDefinition(klass->generic_class) : klass;
     }
@@ -248,7 +248,7 @@ namespace Reflection
         if (type_handle && genericCheck)
         {
             klass = il2cpp_class_from_il2cpp_type((Il2CppType*)type_handle);
-            if (il2cpp_class_get_generic_type_definition(method->klass) != il2cpp_class_get_generic_type_definition(klass))
+            if (il2cpp_class_get_generic_type_definition_or_class(method->klass) != il2cpp_class_get_generic_type_definition_or_class(klass))
                 return NULL;
 
             if (method->klass != klass)

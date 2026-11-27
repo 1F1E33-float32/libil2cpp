@@ -51,6 +51,13 @@ extern "C"
     {
         return FALSE;
     }
+
+    // There are no shell known folders on Windows Games, so every KNOWNFOLDERID is reported as not present
+    inline HRESULT WINAPI SHGetKnownFolderPath(const GUID* rfid, DWORD dwFlags, HANDLE hToken, PWSTR* ppszPath)
+    {
+        *ppszPath = NULL;
+        return E_INVALIDARG;
+    }
 }
 
 

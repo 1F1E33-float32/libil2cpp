@@ -20,6 +20,9 @@ namespace vm
         static std::string AssemblyNameToString(const Il2CppAssemblyName& aname);
         static bool ParseName(Il2CppReflectionAssemblyName* aname, std::string assemblyName);
         static void FillNativeAssemblyName(const Il2CppAssemblyName& aname, Il2CppMonoAssemblyName* nativeName, bool copyNames);
+        // Any byte of a public key token can be zero, so all of them have to be checked to tell
+        // a strong named assembly from an unsigned one.
+        static bool HasPublicKeyToken(const uint8_t* publicKeyToken);
     private:
     };
 } /* namespace vm */

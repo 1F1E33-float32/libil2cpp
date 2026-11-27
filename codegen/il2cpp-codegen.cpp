@@ -16,6 +16,7 @@
 #include "vm/COM.h"
 #include "vm/Class.h"
 #include "vm/ClassInlines.h"
+#include "vm/Coverage.h"
 #include "vm/Exception.h"
 #include "vm/Field.h"
 #include "vm/InternalCalls.h"
@@ -1011,6 +1012,14 @@ Il2CppMethodPointer il2cpp_codegen_resolve(const PInvokeArguments& pinvokeArgs)
     return il2cpp::vm::PlatformInvoke::Resolve(pinvokeArgs);
 }
 
+#if IL2CPP_ENABLE_COVERAGE
+void il2cpp_codegen_coverage_record_pinvoke(const char* assemblyName, const char* moduleName, const char* entryPoint)
+{
+    il2cpp::vm::Coverage::RecordPInvoke(assemblyName, moduleName, entryPoint);
+}
+
+#endif
+
 Il2CppHString il2cpp_codegen_create_hstring(String_t* str)
 {
     return il2cpp::vm::WindowsRuntime::CreateHString(reinterpret_cast<RuntimeString*>(str));
@@ -1294,3 +1303,15 @@ void il2cpp_codegen_code_coverage_ensure_sequence_point_hits_allocated(const Met
 }
 
 #endif
+
+RuntimeObject* il2cpp_codegen_runtime_field_info_get_declaring_type(RuntimeObject* runtimeFieldInfo)
+{
+    const FieldInfo* fieldInfo = il2cpp::vm::Reflection::GetField(reinterpret_cast<Il2CppReflectionField*>(runtimeFieldInfo));
+
+    const Il2CppClass* declaringKlass = fieldInfo->parent;
+
+    if (il2cpp::vm::Class::IsGlobalModuleClass(declaringKlass))
+        return NULL;
+
+    return &il2cpp::vm::Reflection::GetTypeObject(fieldInfo->parent)->object;
+}

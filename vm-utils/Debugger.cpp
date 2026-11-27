@@ -832,6 +832,28 @@ namespace utils
         *scopes = &debuggerMetadata->methodScopes[(*headerInfo)->startScope];
     }
 
+    static bool TryMakeFrameInfo(Il2CppSequencePointExecutionContext* executionContext, Il2CppStackFrameInfo& outFrameInfo)
+    {
+        const MethodInfo* method = executionContext->method;
+        if (method == nullptr)
+            return false;
+
+        outFrameInfo.method = method;
+        if (executionContext->currentSequencePoint != NULL)
+        {
+            const Il2CppDebuggerMetadataRegistration* debuggerMetadata = method->klass->image->codeGenModule->debuggerMetadata;
+            if (debuggerMetadata != NULL)
+            {
+                int32_t sourceFileIndex = executionContext->currentSequencePoint->sourceFileIndex;
+                outFrameInfo.filePath = debuggerMetadata->sequencePointSourceFiles[sourceFileIndex].file;
+                outFrameInfo.sourceCodeLineNumber = executionContext->currentSequencePoint->lineStart;
+                outFrameInfo.ilOffset = executionContext->currentSequencePoint->ilOffset;
+            }
+        }
+
+        return true;
+    }
+
     void Debugger::GetStackFrames(void* context)
     {
         il2cpp::vm::StackFrames* stackFrames = static_cast<il2cpp::vm::StackFrames*>(context);
@@ -842,25 +864,51 @@ namespace utils
 
         for (uint32_t i = 0; i < unwindState->frameCount; ++i)
         {
-            const MethodInfo* method = unwindState->executionContexts[i]->method;
-            if (method != NULL)
-            {
-                Il2CppStackFrameInfo frameInfo = { 0 };
-                frameInfo.method = method;
-                if (unwindState->executionContexts[i]->currentSequencePoint != NULL)
-                {
-                    const Il2CppDebuggerMetadataRegistration* debuggerMetadata = method->klass->image->codeGenModule->debuggerMetadata;
-                    if (debuggerMetadata != NULL)
-                    {
-                        int32_t sourceFileIndex = unwindState->executionContexts[i]->currentSequencePoint->sourceFileIndex;
-                        frameInfo.filePath = debuggerMetadata->sequencePointSourceFiles[sourceFileIndex].file;
-                        frameInfo.sourceCodeLineNumber = unwindState->executionContexts[i]->currentSequencePoint->lineStart;
-                        frameInfo.ilOffset = unwindState->executionContexts[i]->currentSequencePoint->ilOffset;
-                    }
-                }
+            Il2CppStackFrameInfo frameInfo = {};
+            if (TryMakeFrameInfo(unwindState->executionContexts[i], frameInfo))
                 stackFrames->push_back(frameInfo);
+        }
+    }
+
+    bool Debugger::GetStackFrameAt(int32_t depth, Il2CppStackFrameInfo& frame)
+    {
+        Il2CppThreadUnwindState* unwindState = GetThreadStatePointer();
+        if (unwindState == NULL)
+            return false; // There might not be any managed code executing yet.
+
+        for (uint32_t i = unwindState->frameCount; i-- > 0;)
+        {
+            Il2CppStackFrameInfo frameInfo = {};
+            if (TryMakeFrameInfo(unwindState->executionContexts[i], frameInfo))
+            {
+                if (depth == 0)
+                {
+                    frame = frameInfo;
+                    return true;
+                }
+
+                depth++;
             }
         }
+
+        return false;
+    }
+
+    size_t Debugger::GetStackDepth()
+    {
+        Il2CppThreadUnwindState* unwindState = GetThreadStatePointer();
+        if (unwindState == NULL)
+            return 0;
+
+        size_t depth = 0;
+        for (uint32_t i = 0; i < unwindState->frameCount; ++i)
+        {
+            const MethodInfo* method = unwindState->executionContexts[i]->method;
+            if (method != NULL)
+                depth++;
+        }
+
+        return depth;
     }
 
     void Debugger::AcquireLoaderLock()

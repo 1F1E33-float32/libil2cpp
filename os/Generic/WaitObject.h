@@ -1,6 +1,6 @@
 #pragma once
 
-#if (IL2CPP_THREADS_PTHREAD || IL2CPP_THREADS_WIN32)
+#if IL2CPP_THREADS_GENERIC_WAIT_OBJECT
 
 #include <stdint.h>
 #include <limits.h>
@@ -9,11 +9,6 @@
 #include "Baselib.h"
 #include "Cpp/Lock.h"
 #include "utils/dynamic_array.h"
-#if IL2CPP_THREADS_WIN32
-//#include "os/Win32/ThreadImpl.h"
-#else
-//#include "os/Posix/ThreadImpl.h"
-#endif
 
 
 namespace il2cpp
@@ -102,4 +97,4 @@ namespace os
 }
 }
 
-#endif // (IL2CPP_THREADS_PTHREAD || IL2CPP_THREADS_WIN32)
+#endif // IL2CPP_THREADS_GENERIC_WAIT_OBJECT

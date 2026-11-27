@@ -21,6 +21,36 @@
 #if defined(__ARM_NEON__) || defined(__ARM_NEON)
 #  include <arm_neon.h>
 #  include <arm_acle.h>
+
+// The ARM intrinsics below are written against clang and MSVC. Fill in the two
+// pieces GCC does not provide, so it can compile them too.
+#  if defined(__GNUC__) && !defined(__clang__) && defined(__aarch64__)
+// __builtin_bitreverse32/64 are clang builtins with no GCC counterpart. Both map
+// to the AArch64 RBIT instruction, which is in the ARMv8 base set, so emit it
+// directly rather than reaching for a library routine.
+static inline uint32_t __builtin_bitreverse32(uint32_t value)
+{
+    uint32_t result;
+    __asm__ ("rbit %w0, %w1" : "=r" (result) : "r" (value));
+    return result;
+}
+
+static inline uint64_t __builtin_bitreverse64(uint64_t value)
+{
+    uint64_t result;
+    __asm__ ("rbit %0, %1" : "=r" (result) : "r" (value));
+    return result;
+}
+
+// vrndns_f32 is the scalar form of FRINTN and is missing from this GCC's
+// arm_neon.h. The one-lane vector form is present, so round through that.
+static inline float32_t vrndns_f32(float32_t value)
+{
+    return vget_lane_f32(vrndn_f32(vdup_n_f32(value)), 0);
+}
+
+#  endif // GCC on AArch64
+
 #  define IL2CPP_NEON_IS_SUPPORTED 1
 #  define IL2CPP_ARMBASE_IS_SUPPORTED 1
 #  define IL2CPP_ADVSIMD_IS_SUPPORTED 1
@@ -68,6 +98,27 @@
 /// For now, to reduce complexity SSE Intrinsic includes and AVX includes will catch all with immintrin.h, which is part of GCC library
 #if defined(__SSE__) || defined(__SSE2__) || defined(__SSE3__) || defined(__SSE4_1__) || defined(__SSE4_2__) || defined(__AVX__) || defined(__AVX2__)
 #  include <immintrin.h>
+
+// GCC only gained _mm_loadu_si32 and _mm_storeu_si32 in GCC 11.
+// Both are defined by Intel as a 32-bit load/store into the low element of a
+// 128-bit vector, so express them that way for the older compilers.
+#if defined(__GNUC__) && !defined(__clang__) && (__GNUC__ < 11)
+#include <string.h>
+static inline __m128i _mm_loadu_si32(void const* mem_addr)
+{
+    int val;
+    memcpy(&val, mem_addr, sizeof(val));
+    return _mm_cvtsi32_si128(val);
+}
+
+static inline void _mm_storeu_si32(void* mem_addr, __m128i a)
+{
+    int val = _mm_cvtsi128_si32(a);
+    memcpy(mem_addr, &val, sizeof(val));
+}
+
+#  endif // GCC < 11
+
 #  ifndef IL2CPP_X86BASE_IS_SUPPORTED
 #    define IL2CPP_X86BASE_IS_SUPPORTED 1 //base instructions
 #  endif

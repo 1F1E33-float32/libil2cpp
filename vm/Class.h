@@ -48,6 +48,10 @@ namespace vm
     class LIBIL2CPP_CODEGEN_API Class
     {
     public:
+
+        // Special name for the global "<Module>" type
+        static const char* kGlobalModuleTypeName;
+
         static void AllocateStaticData();
         static void FreeStaticData();
         static Il2CppClass* FromIl2CppType(const Il2CppType* type, bool throwOnError = true);
@@ -97,7 +101,7 @@ namespace vm
             return klass->is_blittable;
         }
 
-        static bool HasDefaultConstructor(Il2CppClass* klass);
+        static bool HasDefaultConstructor(Il2CppClass* klass, bool public_only);
 
         inline static int GetFlags(const Il2CppClass* klass)
         {
@@ -212,6 +216,8 @@ namespace vm
 
         static void SetClassInitializationError(Il2CppClass* klass, Il2CppException* error);
         static void PublishInitialized(Il2CppClass* klass);
+
+        static bool IsGlobalModuleClass(const Il2CppClass* klass);
 
         static IL2CPP_FORCE_INLINE bool IsGenericClassAssignableFrom(const Il2CppClass* klass, const Il2CppClass* oklass, const Il2CppClass* implementingClass = il2cpp_defaults.missing_class)
         {

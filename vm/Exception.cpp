@@ -53,7 +53,11 @@ namespace vm
             // called with the original exception which already has the proper stack trace.
             // Getting the stack trace again here will lose the frames between the original throw
             // and the finally or catch block.
-            const StackFrames& frames = *StackTrace::GetStackFrames();
+            // The borrow is held until the arrays below have been filled. Sizing them allocates, and
+            // an allocation can walk the stack again - write barrier validation's allocation hook
+            // always does - which without the borrow would refill the buffer these frames live in and
+            // leave the arrays partly unwritten.
+            const auto frames = StackTrace::GetStackFrames();
 
             Il2CppArray* ips = NULL;
             Il2CppArray* raw_ips = NULL;
@@ -88,13 +92,12 @@ namespace vm
                 }
 
                 raw_ips = Array::New(il2cpp_defaults.int_class, numberOfFrames);
-                for (size_t frame = 0; frame != frames.size() && i >= 0; ++frame, --i)
-                {
-                    const Il2CppStackFrameInfo& stackFrameInfo = frames[frame];
 
+                for (const auto& stackFrameInfo : frames)
+                {
                     if (utils::DebugSymbolReader::DebugSymbolsAvailable())
                     {
-                        Il2CppMonoStackFrame*stackFrame = (Il2CppMonoStackFrame*)vm::Object::New(stackFrameClass);
+                        Il2CppMonoStackFrame* stackFrame = (Il2CppMonoStackFrame*)vm::Object::New(stackFrameClass);
 
                         IL2CPP_OBJECT_SETREF(stackFrame, method, vm::Reflection::GetMethodObject(stackFrameInfo.method, NULL));
                         stackFrame->line = stackFrameInfo.sourceCodeLineNumber;
@@ -109,7 +112,11 @@ namespace vm
                         il2cpp_array_set(ips, const MethodInfo*, i, stackFrameInfo.method);
                     }
                     il2cpp_array_set(raw_ips, uintptr_t, i, stackFrameInfo.raw_ip);
+
+                    i--;
                 }
+
+                IL2CPP_ASSERT(i == static_cast<size_t>(-1));
             }
 
             IL2CPP_ASSERT(ips != NULL);

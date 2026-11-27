@@ -1,13 +1,15 @@
 #include "il2cpp-config.h"
 
-#if (IL2CPP_THREADS_PTHREAD || IL2CPP_THREADS_WIN32)
+#if IL2CPP_THREADS_GENERIC_WAIT_OBJECT
 
 #include "WaitObject.h"
 #include "os/Time.h"
 #if IL2CPP_THREADS_WIN32
 #include "os/Win32/ThreadImpl.h"
-#else
+#elif IL2CPP_THREADS_PTHREAD
 #include "os/Posix/ThreadImpl.h"
+#else
+#include "os/ThreadImpl.h"
 #endif
 
 
@@ -289,4 +291,4 @@ namespace os
 }
 }
 
-#endif // IL2CPP_TARGET_POSIX
+#endif // IL2CPP_THREADS_GENERIC_WAIT_OBJECT

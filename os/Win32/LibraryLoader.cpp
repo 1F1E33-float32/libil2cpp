@@ -105,6 +105,11 @@ namespace os
     {
         HARDCODED_DEPENDENCY_FUNCTION(LoadStringW)
     };
+
+    const HardcodedPInvokeDependencyFunction kShell32Functions[] =
+    {
+        HARDCODED_DEPENDENCY_FUNCTION(SHGetKnownFolderPath)
+    };
 #endif
 
 // All these come without ".dll" extension!
@@ -118,7 +123,8 @@ namespace os
         HARDCODED_DEPENDENCY_LIBRARY(L"iphlpapi", kiphlpapiFunctions),
         HARDCODED_DEPENDENCY_LIBRARY(L"wintypes", kWinTypesFunctions)
 #else
-        HARDCODED_DEPENDENCY_LIBRARY(L"user32", kUser32Functions)
+        HARDCODED_DEPENDENCY_LIBRARY(L"user32", kUser32Functions),
+        HARDCODED_DEPENDENCY_LIBRARY(L"shell32", kShell32Functions)
 #endif
     };
 

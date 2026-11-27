@@ -97017,7 +97017,7 @@ namespace Arm
             vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0)
             ), ret, 0);
         return INTRINSIC_CAST(
-            int32x2_t, TRet, ret);
+            float32x2_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -97039,7 +97039,7 @@ namespace Arm
             vget_lane_s32(INTRINSIC_CAST(TArg1, int32x2_t, arg1), 0)
             ), ret, 0);
         return INTRINSIC_CAST(
-            int32x2_t, TRet, ret);
+            float32x2_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -104126,7 +104126,7 @@ namespace Arm
             vget_lane_f32(INTRINSIC_CAST(TArg1, float32x2_t, arg1), 0)
             ), ret, 0);
         return INTRINSIC_CAST(
-            int32x2_t, TRet, ret);
+            uint32x2_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -104168,7 +104168,7 @@ namespace Arm
             vget_lane_f32(INTRINSIC_CAST(TArg1, float32x2_t, arg1), 0)
             ), ret, 0);
         return INTRINSIC_CAST(
-            int32x2_t, TRet, ret);
+            uint32x2_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -104210,7 +104210,7 @@ namespace Arm
             vget_lane_f32(INTRINSIC_CAST(TArg1, float32x2_t, arg1), 0)
             ), ret, 0);
         return INTRINSIC_CAST(
-            int32x2_t, TRet, ret);
+            uint32x2_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -104252,7 +104252,7 @@ namespace Arm
             vget_lane_f32(INTRINSIC_CAST(TArg1, float32x2_t, arg1), 0)
             ), ret, 0);
         return INTRINSIC_CAST(
-            int32x2_t, TRet, ret);
+            uint32x2_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};
@@ -104294,7 +104294,7 @@ namespace Arm
             vget_lane_f32(INTRINSIC_CAST(TArg1, float32x2_t, arg1), 0)
             ), ret, 0);
         return INTRINSIC_CAST(
-            int32x2_t, TRet, ret);
+            uint32x2_t, TRet, ret);
 #else
         il2cpp_codegen_raise_platform_not_supported_exception(NULL);
         return {};

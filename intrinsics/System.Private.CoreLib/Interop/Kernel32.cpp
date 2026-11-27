@@ -2,6 +2,7 @@
 #include "os/LastError.h"
 #include "os/Time.h"
 #include "os/Win32/WindowsHeaders.h"
+#include "vm/Coverage.h"
 #include "vm/Exception.h"
 #include "vm/Thread.h"
 
@@ -28,39 +29,17 @@ namespace Interop
         os::LastError::SetLastError(lastError);
     }
 
-    bool il2cpp_intrinsic_interop_kernel32_get_queued_completion_status(intptr_t completionPort, uint32_t* numberOfBytesTransferred, uintptr_t* completionKey, intptr_t* overlapped, int32_t milliseconds)
+    // These intrinsics replace the class libraries' P/Invokes, which never run, so they record the calls the P/Invokes would have.
+    static void RecordKernel32PInvoke(const char* entryPoint)
     {
-#if IL2CPP_TARGET_WINDOWS
-        const int32_t numEntries = 1;
-        OVERLAPPED_ENTRY completionPortEntries[numEntries];
-        int32_t numEntriesRemoved;
-
-        bool result = il2cpp_intrinsic_interop_kernel32_get_queued_completion_status_ex(completionPort, completionPortEntries, numEntries, &numEntriesRemoved, milliseconds, false);
-
-        if (result)
-        {
-            IL2CPP_ASSERT(numEntriesRemoved == numEntries);
-
-            if (numberOfBytesTransferred != nullptr)
-                *numberOfBytesTransferred = completionPortEntries[0].dwNumberOfBytesTransferred;
-
-            if (completionKey != nullptr)
-                *completionKey = completionPortEntries[0].lpCompletionKey;
-
-            if (overlapped != nullptr)
-                *overlapped = (intptr_t)completionPortEntries[0].lpOverlapped;
-        }
-
-        return result;
-#else
-        NOT_SUPPORTED_IL2CPP(il2cpp_intrinsic_interop_kernel32_get_queued_completion_status, "This method should only be called on Windows");
-        return false;
+#if IL2CPP_ENABLE_COVERAGE
+        vm::Coverage::RecordPInvoke("System.Private.CoreLib", "kernel32.dll", entryPoint);
 #endif
     }
 
-    bool il2cpp_intrinsic_interop_kernel32_get_queued_completion_status_ex(intptr_t completionPort, void* completionPortEntries, int32_t count, int32_t* numEntriesRemoved, int32_t milliseconds, bool alertable)
-    {
 #if IL2CPP_TARGET_WINDOWS
+    static bool GetQueuedCompletionStatusExImpl(intptr_t completionPort, void* completionPortEntries, int32_t count, int32_t* numEntriesRemoved, int32_t milliseconds, bool alertable)
+    {
         bool result;
 
         uint32_t remainingWaitTimeMS = milliseconds;
@@ -97,6 +76,48 @@ namespace Interop
         }
 
         return result;
+    }
+
+#endif
+
+    bool il2cpp_intrinsic_interop_kernel32_get_queued_completion_status(intptr_t completionPort, uint32_t* numberOfBytesTransferred, uintptr_t* completionKey, intptr_t* overlapped, int32_t milliseconds)
+    {
+        RecordKernel32PInvoke("GetQueuedCompletionStatus");
+
+#if IL2CPP_TARGET_WINDOWS
+        const int32_t numEntries = 1;
+        OVERLAPPED_ENTRY completionPortEntries[numEntries];
+        int32_t numEntriesRemoved;
+
+        bool result = GetQueuedCompletionStatusExImpl(completionPort, completionPortEntries, numEntries, &numEntriesRemoved, milliseconds, false);
+
+        if (result)
+        {
+            IL2CPP_ASSERT(numEntriesRemoved == numEntries);
+
+            if (numberOfBytesTransferred != nullptr)
+                *numberOfBytesTransferred = completionPortEntries[0].dwNumberOfBytesTransferred;
+
+            if (completionKey != nullptr)
+                *completionKey = completionPortEntries[0].lpCompletionKey;
+
+            if (overlapped != nullptr)
+                *overlapped = (intptr_t)completionPortEntries[0].lpOverlapped;
+        }
+
+        return result;
+#else
+        NOT_SUPPORTED_IL2CPP(il2cpp_intrinsic_interop_kernel32_get_queued_completion_status, "This method should only be called on Windows");
+        return false;
+#endif
+    }
+
+    bool il2cpp_intrinsic_interop_kernel32_get_queued_completion_status_ex(intptr_t completionPort, void* completionPortEntries, int32_t count, int32_t* numEntriesRemoved, int32_t milliseconds, bool alertable)
+    {
+        RecordKernel32PInvoke("GetQueuedCompletionStatusEx");
+
+#if IL2CPP_TARGET_WINDOWS
+        return GetQueuedCompletionStatusExImpl(completionPort, completionPortEntries, count, numEntriesRemoved, milliseconds, alertable);
 #else
         NOT_SUPPORTED_IL2CPP(il2cpp_intrinsic_interop_kernel32_get_queued_completion_status_ex, "This method should only be called on Windows");
         return false;
@@ -105,6 +126,8 @@ namespace Interop
 
     uint32_t il2cpp_intrinsic_interop_kernel32_wait_for_multiple_objects_ex(uint32_t count, intptr_t handles, bool waitAll, uint32_t milliseconds, bool alertable)
     {
+        RecordKernel32PInvoke("WaitForMultipleObjectsEx");
+
 #if IL2CPP_TARGET_WINDOWS
         uint32_t result;
 

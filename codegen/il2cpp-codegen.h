@@ -412,6 +412,32 @@ inline typename pick_bigger<T, U>::type il2cpp_codegen_subtract(T left, U right)
     return left - right;
 }
 
+// IL pointer arithmetic is byte based and defined for any operand value; C++ pointer arithmetic is
+// not, but it is what lets clang's loop vectorizer prove that successive iterations touch
+// consecutive addresses. clang and gcc builds pass -fno-strict-overflow, which implies
+// -fwrapv-pointer and makes the wrapping and null base cases defined. MSVC offers no equivalent
+// guarantee, and its vectorizer needs canonical source loops that IL2CPP does not emit anyway, so
+// there the integer form is kept. See docs/il2cpp/POINTER_ARITHMETIC_VECTORIZATION.md.
+template<typename T>
+inline uint8_t* il2cpp_codegen_add_offset(uint8_t* ptr, T offset)
+{
+#if IL2CPP_COMPILER_MSVC
+    return (uint8_t*)((intptr_t)ptr + (intptr_t)offset);
+#else
+    return ptr + offset;
+#endif
+}
+
+template<typename T>
+inline uint8_t* il2cpp_codegen_subtract_offset(uint8_t* ptr, T offset)
+{
+#if IL2CPP_COMPILER_MSVC
+    return (uint8_t*)((intptr_t)ptr - (intptr_t)offset);
+#else
+    return ptr - offset;
+#endif
+}
+
 template<typename T>
 inline bool il2cpp_codegen_enum_has_flag(T enumValue, T flag)
 {
@@ -1085,6 +1111,10 @@ RuntimeObject* il2cpp_codegen_object_new(RuntimeClass *klass);
 Il2CppMethodPointer il2cpp_codegen_resolve_icall(const char* name);
 
 Il2CppMethodPointer il2cpp_codegen_resolve(const PInvokeArguments& pinvokeArgs);
+
+#if IL2CPP_ENABLE_COVERAGE
+void il2cpp_codegen_coverage_record_pinvoke(const char* assemblyName, const char* moduleName, const char* entryPoint);
+#endif
 
 template<typename FunctionPointerType, size_t dynamicLibraryLength, size_t entryPointLength>
 inline FunctionPointerType il2cpp_codegen_resolve_pinvoke(const Il2CppNativeChar(&nativeDynamicLibrary)[dynamicLibraryLength], const char(&entryPoint)[entryPointLength],
@@ -2063,61 +2093,6 @@ void il2cpp_codegen_set_generic_value_icall(THandleOnStack handle, int index, vo
     il2cpp::gc::GarbageCollector::SetWriteBarrier((void**)dest, elementSize);
 }
 
-// The RuntimeHelpers methods that read field RVA data. These are only called when the field handle came from
-// an ldtoken, so the conversion can load the RVA data directly - any other call goes to the managed method
-inline void il2cpp_codegen_runtime_helpers_initialize_array(RuntimeArray* array, const Il2CppFieldRvaData& rvaData)
-{
-    if (array == NULL)
-        il2cpp_codegen_raise_exception(il2cpp_codegen_get_argument_null_exception("array"));
-
-    IL2CPP_ASSERT(il2cpp_codegen_class_is_value_type(array->klass->element_class) && !array->klass->element_class->has_references);
-
-    // Like CoreCLR and Mono, fill exactly the array, and refuse a field that is too small to fill it
-    size_t arraySize = (size_t)array->max_length * array->klass->element_size;
-    if (arraySize > rvaData.size)
-        il2cpp_codegen_raise_exception(il2cpp_codegen_get_argument_exception("field_handle", "Field not large enough to fill array"));
-
-    memcpy(il2cpp_array_addr_with_size(array, 0, 0), rvaData.data, arraySize);
-}
-
-template<typename TReadOnlySpan>
-inline TReadOnlySpan il2cpp_codegen_runtime_helpers_create_span(const Il2CppFieldRvaData& rvaData, size_t elementSize)
-{
-#if IL2CPP_BYTE_ORDER != IL2CPP_LITTLE_ENDIAN
-    // The data is encoded little endian, if big endian support is needed a byte swap will be needed
-    IL2CPP_NOT_IMPLEMENTED_INTRINSIC(il2cpp_codegen_runtime_helpers_create_span)
-#endif
-    // Like CoreCLR and Mono, a size that is not a multiple of the element size rounds the length down
-
-    struct SpanData
-    {
-        const char* reference;
-        int32_t length;
-    };
-
-    static_assert(sizeof(SpanData) == sizeof(TReadOnlySpan), "Mismatch in SpanData layout");
-
-    SpanData d = {};
-    d.reference = rvaData.data;
-    d.length = (int32_t)(rvaData.size / elementSize);
-
-    TReadOnlySpan span;
-    memcpy(&span, &d, sizeof(TReadOnlySpan));
-    return span;
-}
-
-inline void* il2cpp_codegen_runtime_helpers_get_span_data_from(const Il2CppFieldRvaData& rvaData, size_t elementSize, int32_t* count)
-{
-#if IL2CPP_BYTE_ORDER != IL2CPP_LITTLE_ENDIAN
-    // The data is encoded little endian, if big endian support is needed a byte swap will be needed
-    IL2CPP_NOT_IMPLEMENTED_INTRINSIC(il2cpp_codegen_runtime_helpers_get_span_data_from)
-#endif
-    // Like CoreCLR and Mono, a size that is not a multiple of the element size rounds the length down
-
-    *count = (int32_t)(rvaData.size / elementSize);
-    return (void*)rvaData.data;
-}
-
 void il2cpp_codegen_delegate_invoke_open_inst(Il2CppMethodPointer methodPtr, const MethodInfo* method, RuntimeDelegate* thisPtr, void** args, void* result);
 void il2cpp_codegen_delegate_invoke_closed_static(Il2CppMethodPointer methodPtr, const MethodInfo* method, RuntimeObject* thisPtr, void** args, void* result);
 void il2cpp_codegen_delegate_invoke_open_virtual(Il2CppMethodPointer methodPtr, const MethodInfo* method, RuntimeDelegate* thisPtr, void** args, void* result);
@@ -2173,3 +2148,5 @@ struct CheckedLocalInit
 #define CHECKED_LOCAL_INIT(name, expr, init)  name.Init(expr, init)
 #define CHECKED_LOCAL_INIT_PARAM(name, expr, init, initParam)  name.Init(expr, init, initParam)
 #endif
+
+RuntimeObject* il2cpp_codegen_runtime_field_info_get_declaring_type(RuntimeObject* runtimeFieldInfo);

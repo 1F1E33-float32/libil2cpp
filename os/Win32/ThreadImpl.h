@@ -8,6 +8,7 @@
 #include "utils/NonCopyable.h"
 
 #include "WindowsHeaders.h"
+#include "os/Generic/ThreadAPCQueue.h"
 #include "os/Generic/WaitObject.h"
 #include "Baselib.h"
 #include "Cpp/CappedSemaphore.h"
@@ -19,7 +20,7 @@ namespace il2cpp
 {
 namespace os
 {
-    class ThreadImpl : public il2cpp::utils::NonCopyable
+    class ThreadImpl : public ThreadAPCQueue, public il2cpp::utils::NonCopyable
     {
     public:
         ThreadImpl();
@@ -46,14 +47,10 @@ namespace os
             m_StackSize = newsize;
         }
 
-        void CheckForUserAPCAndHandle();
-        void SetWaitObject(WaitObject* waitObject);
-        void ReleaseSemaphore() {m_ConditionSemaphore.Release(1);}
-        void AcquireSemaphore() {m_ConditionSemaphore.Acquire();}
-        bool TryTimedAcquireSemaphore(uint32_t timeout) { return m_ConditionSemaphore.TryTimedAcquire(baselib::timeout_ms(timeout));}
-
         static int GetMaxStackSize();
 
+        /// Extends the shared implementation to also break waits that are outside of a
+        /// WaitObject, which the cooperative queue on its own cannot reach.
         void QueueUserAPC(Thread::APCFunc func, void* context);
 
         ApartmentState GetApartment();
@@ -74,22 +71,6 @@ namespace os
         static void UnregisterCurrentThreadForCleanup();
         static void OnCurrentThreadExiting();
 #endif
-
-        baselib::atomic<WaitObject*> m_CurrentWaitObject;
-        struct APCRequest
-        {
-            Thread::APCFunc callback;
-            void* context;
-
-            APCRequest(Thread::APCFunc callback, void* context) :
-                callback(callback), context(context)
-            {
-            }
-        };
-
-        baselib::Lock m_PendingAPCsMutex;
-        std::vector<APCRequest> m_PendingAPCs;
-        baselib::CappedSemaphore m_ConditionSemaphore;
 
     private:
         HANDLE m_ThreadHandle;

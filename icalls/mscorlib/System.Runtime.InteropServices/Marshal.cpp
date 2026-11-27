@@ -197,7 +197,7 @@ namespace InteropServices
 
         Il2CppTypeEnum typeType = structureType->type->type;
 
-        if (typeType == IL2CPP_TYPE_STRING || typeType == IL2CPP_TYPE_SZARRAY || (typeType == IL2CPP_TYPE_CLASS && !vm::Class::HasDefaultConstructor(type)))
+        if (typeType == IL2CPP_TYPE_STRING || typeType == IL2CPP_TYPE_SZARRAY || (typeType == IL2CPP_TYPE_CLASS && !vm::Class::HasDefaultConstructor(type, false)))
         {
             vm::Exception::Raise(vm::Exception::GetMissingMethodException("No parameterless constructor defined for this object."));
         }
