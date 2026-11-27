@@ -148,7 +148,7 @@ namespace gc
 #if IL2CPP_SUPPORT_THREADS
         s_GarbageCollectorContext = new GarbageCollectorContext();
 
-        s_GarbageCollectorContext->m_FinalizerThread = il2cpp::os::Thread::Allocate();
+        s_GarbageCollectorContext->m_FinalizerThread = new il2cpp::os::Thread;
         s_GarbageCollectorContext->m_FinalizerThread->Run(&FinalizerThread, NULL);
         s_GarbageCollectorContext->m_FinalizersThreadStartedEvent.Wait();
 #endif
@@ -160,7 +160,7 @@ namespace gc
         s_GarbageCollectorContext->m_StopFinalizer = true;
         NotifyFinalizers();
         s_GarbageCollectorContext->m_FinalizerThread->Join();
-        il2cpp::os::Thread::Free(s_GarbageCollectorContext->m_FinalizerThread);
+        delete s_GarbageCollectorContext->m_FinalizerThread;
         s_GarbageCollectorContext->m_FinalizerThread = NULL;
         s_GarbageCollectorContext->m_StopFinalizer = false;
         s_GarbageCollectorContext->m_FinalizerThreadObject = NULL;
