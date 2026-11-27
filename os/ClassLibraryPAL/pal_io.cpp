@@ -129,7 +129,7 @@ struct DirectoryEntry
     int32_t InodeType; // The inode type as described in the NodeType enum
 };
 
-static void ConvertFileStatus(const struct stat_* src, struct FileStatus* dst)
+static void ConvertFileStatus(const struct stat* src, struct FileStatus* dst)
 {
     dst->Dev = (int64_t)src->st_dev;
     dst->Ino = (int64_t)src->st_ino;
@@ -174,7 +174,7 @@ static void ConvertFileStatus(const struct stat_* src, struct FileStatus* dst)
 // next coordinated System.Native changes
 int32_t SystemNative_Stat2(const char* path, struct FileStatus* output)
 {
-    struct stat_ result = {};
+    struct stat result = {};
     int ret;
     while ((ret = stat_(REMAP_PATH(path), &result)) < 0 && errno == EINTR)
         ;
@@ -189,7 +189,7 @@ int32_t SystemNative_Stat2(const char* path, struct FileStatus* output)
 
 int32_t SystemNative_LStat2(const char* path, struct FileStatus* output)
 {
-    struct stat_ result = {};
+    struct stat result = {};
     int ret = lstat_(REMAP_PATH(path), &result);
 
     if (ret == 0)
@@ -203,7 +203,7 @@ int32_t SystemNative_LStat2(const char* path, struct FileStatus* output)
 int32_t SystemNative_Unlink(const char* path)
 {
     int32_t result = 0;
-    while ((result = unlink(REMAP_PATH(path))) < 0 && errno == EINTR)
+    while ((result = unlink_(REMAP_PATH(path))) < 0 && errno == EINTR)
         ;
     return result;
 }
@@ -352,7 +352,7 @@ int32_t SystemNative_ReadDirR(struct DIRWrapper* dirWrapper, uint8_t* buffer, in
             rewinddir(dirWrapper->dir);
 #else
             closedir(dirWrapper->dir);
-            dirWrapper->dir = opendir(dirWrapper->dirPath);
+            dirWrapper->dir = opendir_(dirWrapper->dirPath);
 #endif
 
             // If we iterate fewer entries than exist because some files were deleted
@@ -409,7 +409,7 @@ struct DIRWrapper* SystemNative_OpenDir(const char* path)
     remapped_path = path;
 #endif
 
-    DIR* dir = opendir(remapped_path);
+    DIR* dir = opendir_(remapped_path);
 
     if (dir == NULL)
         return NULL;
@@ -448,7 +448,7 @@ int32_t SystemNative_CloseDir(struct DIRWrapper* dirWrapper)
 int32_t SystemNative_MkDir(const char* path, int32_t mode)
 {
     int32_t result = 0;
-    while ((result = mkdir(REMAP_PATH(path), (mode_t)mode)) < 0 && errno == EINTR)
+    while ((result = mkdir_(REMAP_PATH(path), (mode_t)mode)) < 0 && errno == EINTR)
         ;
     return result;
 }
@@ -494,7 +494,7 @@ int32_t SystemNative_ReadLink(const char* path, char* buffer, int32_t bufferSize
 int32_t SystemNative_Rename(const char* oldPath, const char* newPath)
 {
     int32_t result;
-    while ((result = rename(REMAP_PATH(oldPath), REMAP_PATH(newPath))) < 0 && errno == EINTR)
+    while ((result = rename_(REMAP_PATH(oldPath), REMAP_PATH(newPath))) < 0 && errno == EINTR)
         ;
     return result;
 }
@@ -502,7 +502,7 @@ int32_t SystemNative_Rename(const char* oldPath, const char* newPath)
 int32_t SystemNative_RmDir(const char* path)
 {
     int32_t result = 0;
-    while ((result = rmdir(REMAP_PATH(path))) < 0 && errno == EINTR)
+    while ((result = rmdir_(REMAP_PATH(path))) < 0 && errno == EINTR)
         ;
     return result;
 }
@@ -583,7 +583,7 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destinationFd)
 #else
     // Get the stats on the source file.
     int ret;
-    struct stat_ sourceStat;
+    struct stat sourceStat;
     bool copied = false;
 
     // First, stat the source file.
