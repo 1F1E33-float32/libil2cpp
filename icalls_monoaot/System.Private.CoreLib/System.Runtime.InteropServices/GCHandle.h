@@ -25,6 +25,7 @@ namespace InteropServices
     public:
         static intptr_t InternalAlloc(Il2CppObject* value, int32_t type);
         static Il2CppObject* InternalGet(intptr_t handle);
+        static Il2CppObject* InternalGetFromRuntime(intptr_t handle);
         static void InternalFree(intptr_t handle);
         static void InternalSet(intptr_t handle, Il2CppObject* value);
     };

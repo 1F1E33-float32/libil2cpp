@@ -422,7 +422,7 @@ namespace os
 
     Thread::ThreadId Thread::Id()
     {
-        return 0;
+        return (Thread::ThreadId)(size_t)0x1337;
     }
 
     void Thread::SetName(const char* name)
@@ -498,7 +498,7 @@ namespace os
 
     size_t Thread::CurrentThreadId()
     {
-        return 0;
+        return 0x1337;
     }
 
     Thread* Thread::GetCurrentThread()

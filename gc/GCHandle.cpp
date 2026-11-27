@@ -164,6 +164,12 @@ namespace gc
         return (Il2CppGCHandle)((uintptr_t)handle | (uintptr_t)1);
     }
 
+    static Il2CppGCHandle
+    handle_tag_weak(Il2CppGCHandle handle)
+    {
+        return (Il2CppGCHandle)((uintptr_t)handle | (uintptr_t)2);
+    }
+
 #else
     static Il2CppGCHandle
     handle_tag_weak(Il2CppGCHandle handle)
@@ -176,7 +182,7 @@ namespace gc
     static Il2CppGCHandle
     handle_untag(Il2CppGCHandle handle)
     {
-        return (Il2CppGCHandle)((uintptr_t)handle & ~(uintptr_t)1);
+        return (Il2CppGCHandle)((uintptr_t)handle & ~(uintptr_t)3);
     }
 
     static uintptr_t AlignDownTo(uintptr_t size, uintptr_t align)
@@ -242,13 +248,15 @@ namespace gc
 
         res = (Il2CppGCHandle) & handles->entries[slot];
 #if MONO_NET_BCL
+        /*
+         * The BCL uses the lowest bit to indicate pinned GC handle.
+         * The second bit indicates weak GC handle. The BCL dereferences
+         * handles without it directly instead of calling into the runtime.
+        */
         if (HandleTypeIsPinned((GCHandleType)handles->type))
-        {
-            /*
-             * The NET8 BCL uses the lowest bit to indicate pinned GC handle.
-            */
             res = handle_tag_pinned(res);
-        }
+        else if (HandleTypeIsWeak((GCHandleType)handles->type))
+            res = handle_tag_weak(res);
 #else
         if (HandleTypeIsWeak((GCHandleType)handles->type))
         {

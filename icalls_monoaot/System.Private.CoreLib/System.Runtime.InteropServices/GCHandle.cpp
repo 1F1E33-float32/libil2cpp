@@ -38,6 +38,11 @@ namespace InteropServices
         return gc::GCHandle::GetTarget(reinterpret_cast<Il2CppGCHandle>(handle));
     }
 
+    Il2CppObject* GCHandle::InternalGetFromRuntime(intptr_t handle)
+    {
+        return gc::GCHandle::GetTarget(reinterpret_cast<Il2CppGCHandle>(handle));
+    }
+
     void GCHandle::InternalFree(intptr_t handle)
     {
         gc::GCHandle::Free(reinterpret_cast<Il2CppGCHandle>(handle));

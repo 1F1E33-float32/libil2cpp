@@ -1132,6 +1132,11 @@ inline void il2cpp_codegen_read_memory_barrier()
     il2cpp::os::Atomic::ReadMemoryBarrier();
 }
 
+inline void il2cpp_codegen_release_memory_barrier()
+{
+    baselib::atomic_thread_fence(baselib::memory_order_release);
+}
+
 RuntimeArray* SZArrayNew(RuntimeClass* arrayType, uint32_t length);
 
 RuntimeArray* GenArrayNew(RuntimeClass* arrayType, il2cpp_array_size_t* dimensions);

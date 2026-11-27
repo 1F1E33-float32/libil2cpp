@@ -1422,7 +1422,7 @@ bool il2cpp_type_is_unmanaged(const Il2CppType *type)
         return false;
 
     Il2CppClass* klass = il2cpp::vm::Class::FromIl2CppType(type);
-    il2cpp::vm::ClassInlines::InitFromCodegen(klass);
+    il2cpp::vm::Class::Init(klass);
     return !klass->has_references;
 }
 

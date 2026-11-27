@@ -391,6 +391,7 @@ System.ArgIterator::Setup(System.IntPtr,System.IntPtr)|System::Private::CoreLib:
 >icalls_monoaot/System.Private.CoreLib/System.Runtime.InteropServices/GCHandle.h
 System.Runtime.InteropServices.GCHandle::InternalAlloc(System.Object,System.Runtime.InteropServices.GCHandleType)|System::Private::CoreLib::System::Runtime::InteropServices::GCHandle::InternalAlloc|intptr_t (*)(Il2CppObject*, int32_t)
 System.Runtime.InteropServices.GCHandle::InternalGet(System.IntPtr)|System::Private::CoreLib::System::Runtime::InteropServices::GCHandle::InternalGet|Il2CppObject* (*)(intptr_t)
+System.Runtime.InteropServices.GCHandle::InternalGetFromRuntime(System.IntPtr)|System::Private::CoreLib::System::Runtime::InteropServices::GCHandle::InternalGetFromRuntime|Il2CppObject* (*)(intptr_t)
 System.Runtime.InteropServices.GCHandle::InternalFree(System.IntPtr)|System::Private::CoreLib::System::Runtime::InteropServices::GCHandle::InternalFree|void (*)(intptr_t)
 System.Runtime.InteropServices.GCHandle::InternalSet(System.IntPtr,System.Object)|System::Private::CoreLib::System::Runtime::InteropServices::GCHandle::InternalSet|void (*)(intptr_t, Il2CppObject*)
 
