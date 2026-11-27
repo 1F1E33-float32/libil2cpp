@@ -845,7 +845,7 @@ namespace vm
     {
         // The os::Thread object is deallocated in the InternalThread::Thread_free_internal icall, which
         // is called from the managed thread finalizer.
-        os::Thread* osThread = new os::Thread();
+        os::Thread* osThread = os::Thread::Allocate();
         Il2CppThread* managedThread = (Il2CppThread*)Object::New(il2cpp_defaults.thread_class);
 
         SetupInternalManagedThread(managedThread, osThread);
@@ -867,7 +867,7 @@ namespace vm
         il2cpp::os::ErrorCode status = osThread->Run(&ThreadStart, startData);
         if (status != il2cpp::os::kErrorCodeSuccess)
         {
-            delete osThread;
+            os::Thread::Free(osThread);
             return NULL;
         }
 

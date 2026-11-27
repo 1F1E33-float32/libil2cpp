@@ -25,7 +25,7 @@ namespace Threading
         IL2CPP_FREE(_this->name.chars);
         _this->name.chars = NULL;
 
-        delete reinterpret_cast<il2cpp::os::Thread*>(_this->handle);
+        il2cpp::os::Thread::Free(reinterpret_cast<il2cpp::os::Thread*>(_this->handle));
         _this->handle = NULL;
     }
 } // namespace Threading

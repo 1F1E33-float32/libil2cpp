@@ -151,7 +151,7 @@ namespace Threading
         IL2CPP_FREE(thisPtr->name.chars);
         thisPtr->name.chars = NULL;
 
-        delete reinterpret_cast<il2cpp::os::Thread*>(thisPtr->handle);
+        il2cpp::os::Thread::Free(reinterpret_cast<il2cpp::os::Thread*>(thisPtr->handle));
         thisPtr->handle = NULL;
     }
 
@@ -159,7 +159,7 @@ namespace Threading
     {
         // The os::Thread object is deallocated in the InternalThread::Thread_free_internal icall, which
         // is called from the managed thread finalizer.
-        vm::Thread::SetupInternalManagedThread(thread, new os::Thread());
+        vm::Thread::SetupInternalManagedThread(thread, os::Thread::Allocate());
         thread->state = vm::kThreadStateUnstarted;
     }
 
