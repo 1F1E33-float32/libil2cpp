@@ -96,6 +96,16 @@ namespace os
         }
     }
 
+    Thread* Thread::Allocate()
+    {
+        return new Thread();
+    }
+
+    void Thread::Free(Thread* thread)
+    {
+        delete thread;
+    }
+
     void Thread::Init()
     {
         il2cpp::os::ThreadImpl::AllocateStaticData();
@@ -401,6 +411,16 @@ namespace os
 
     Thread::~Thread()
     {
+    }
+
+    Thread* Thread::Allocate()
+    {
+        return new Thread();
+    }
+
+    void Thread::Free(Thread* thread)
+    {
+        delete thread;
     }
 
     void Thread::Init()

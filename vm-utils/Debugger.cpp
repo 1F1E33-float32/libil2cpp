@@ -321,7 +321,7 @@ namespace utils
     {
 #if defined(RUNTIME_IL2CPP)
         // This thread is allocated here once and never deallocated.
-        s_DebuggerContext->m_DebuggerThread = new os::Thread();
+        s_DebuggerContext->m_DebuggerThread = os::Thread::Allocate();
         s_DebuggerContext->m_DebuggerThread->Run(mono_debugger_run_debugger_thread_func, NULL);
 #else
         IL2CPP_ASSERT(0 && "The managed debugger is only supported for the libil2cpp runtime backend.");
