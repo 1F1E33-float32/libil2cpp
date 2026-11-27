@@ -14,8 +14,6 @@
 #include "os/Emscripten/pal_emscripten.h"
 #elif IL2CPP_TARGET_SWITCH
 #include "pal/pal_switch.h"
-#elif IL2CPP_TARGET_SWITCH2
-#include "pal/pal_switch2.h"
 #elif IL2CPP_TARGET_PS4 || IL2CPP_TARGET_PS5
 #include "pal/pal_playstation.h"
 #endif
@@ -48,21 +46,6 @@
 #endif
 #ifndef readlink_
 #define readlink_ readlink
-#endif
-#ifndef rename_
-#define rename_ rename
-#endif
-#ifndef unlink_
-#define unlink_ unlink
-#endif
-#ifndef mkdir_
-#define mkdir_ mkdir
-#endif
-#ifndef rmdir_
-#define rmdir_ rmdir
-#endif
-#ifndef opendir_
-#define opendir_ opendir
 #endif
 #ifndef geteuid_
 #define geteuid_ geteuid
