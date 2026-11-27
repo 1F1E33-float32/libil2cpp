@@ -128,6 +128,15 @@ namespace utils
         return Utf16ToUtf8(utf16String.c_str(), static_cast<int>(utf16String.length()));
     }
 
+    std::string StringUtils::Utf16ToUtf8Exact(const Il2CppChar* utf16String, size_t length)
+    {
+        std::string utf8String;
+        utf8String.reserve(length);
+        utf8::unchecked::utf16to8(utf16String, utf16String + length, std::back_inserter(utf8String));
+
+        return utf8String;
+    }
+
     UTF16String StringUtils::Utf8ToUtf16(const char* utf8String)
     {
         return Utf8ToUtf16(utf8String, strlen(utf8String));

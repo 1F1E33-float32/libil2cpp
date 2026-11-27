@@ -384,3 +384,17 @@
 #define FASTCALL
 #define THISCALL
 #endif
+
+// CallConvSwift is only supported where Swift is: 64-bit Apple platforms. Elsewhere generated code for a Swift P/Invoke throws
+// NotSupportedException, so these expand to nothing.
+#if IL2CPP_TARGET_DARWIN && (IL2CPP_TARGET_ARM64 || IL2CPP_TARGET_X64) && defined(__clang__)
+#define IL2CPP_SUPPORTS_SWIFTCALL 1
+#define SWIFTCALL __attribute__((swiftcall))
+#define SWIFT_CONTEXT __attribute__((swift_context))
+#define SWIFT_ERROR_RESULT __attribute__((swift_error_result))
+#else
+#define IL2CPP_SUPPORTS_SWIFTCALL 0
+#define SWIFTCALL
+#define SWIFT_CONTEXT
+#define SWIFT_ERROR_RESULT
+#endif

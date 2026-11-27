@@ -43,6 +43,8 @@ namespace utils
         static std::string Utf16ToUtf8(const Il2CppChar* utf16String);
         static std::string Utf16ToUtf8(const Il2CppChar* utf16String, int maximumSize);
         static std::string Utf16ToUtf8(const UTF16String& utf16String);
+        // Unlike the overloads above, this converts exactly length characters instead of stopping at the first NUL.
+        static std::string Utf16ToUtf8Exact(const Il2CppChar* utf16String, size_t length);
         static UTF16String Utf8ToUtf16(const char* utf8String);
         static UTF16String Utf8ToUtf16(const char* utf8String, size_t length);
         static UTF16String Utf8ToUtf16(const std::string& utf8String);

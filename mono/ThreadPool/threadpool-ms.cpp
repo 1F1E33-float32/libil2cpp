@@ -349,6 +349,9 @@ static bool worker_request (Il2CppDomain *domain)
 	if (g_ThreadPool->suspended)
 		return false;
 
+#if !IL2CPP_SUPPORT_THREADS
+	return false;
+#else
 	monitor_ensure_running ();
 
 	if (worker_try_unpark ()) {
@@ -363,6 +366,7 @@ static bool worker_request (Il2CppDomain *domain)
 
 	//mono_trace (G_LOG_LEVEL_DEBUG, MONO_TRACE_THREADPOOL, "[%p] request worker, failed", mono_native_thread_id_get ());
 	return false;
+#endif
 }
 
 static void hill_climbing_change_thread_count (int16_t new_thread_count, ThreadPoolHeuristicStateTransition transition)

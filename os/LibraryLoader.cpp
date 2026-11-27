@@ -158,6 +158,31 @@ namespace os
         return handle;
     }
 
+    template<typename T>
+    static std::make_unsigned_t<T> MakeUnsigned(T value)
+    {
+        using unsigned_type = std::make_unsigned_t<T>;
+        return static_cast<unsigned_type>(value);
+    }
+
+    template<typename T>
+    static constexpr size_t MaxUnsignedDigitCount()
+    {
+        constexpr auto maxValue = std::numeric_limits<std::make_unsigned_t<T> >::max();
+        static_assert(maxValue != 0, "Expected max value of an unsigned type to not be 0");
+
+        size_t digitCount = 0;
+        auto value = maxValue;
+
+        while (value > 0)
+        {
+            value /= 10;
+            digitCount++;
+        }
+
+        return digitCount;
+    }
+
     Il2CppMethodPointer LibraryLoader::GetFunctionPointer(Baselib_DynamicLibrary_Handle handle, const PInvokeArguments& pinvokeArgs, std::string& detailedError)
     {
         if (handle == Baselib_DynamicLibrary_Handle_Invalid)
@@ -165,55 +190,79 @@ namespace os
 
         StringViewAsNullTerminatedStringOf(char, pinvokeArgs.entryPoint, entryPoint);
 
-        // If there's 'no mangle' flag set, just return directly what GetProcAddress returns
-        if (pinvokeArgs.isNoMangle)
+        // If it's not cdecl, also try decorating the name with @<parameterSize>
+        // THIS ONLY APPLIES TO 32-bit x86!
+#if defined(_M_IX86)
+        const bool decorateWithParameterSize = pinvokeArgs.callingConvention != IL2CPP_CALL_C;
+#else
+        const bool decorateWithParameterSize = false;
+#endif
+
+        // If there's 'no mangle' flag set, just return directly what GetFunctionPointer returns, unless it needs decorating
+        if (pinvokeArgs.isNoMangle && !decorateWithParameterSize)
             return GetFunctionPointer(handle, entryPoint, detailedError);
 
-        const size_t kBufferOverhead = 10;
+        // Room after the name for the 'W' or 'A' suffix, '@' and max number of digits for parameter size
+        constexpr size_t kBufferOverhead = 2 + MaxUnsignedDigitCount<decltype(pinvokeArgs.parameterSize)>();
         Il2CppMethodPointer func = nullptr;
-        size_t originalFuncNameLength = strlen(entryPoint) + 1;
+        size_t originalFuncNameEndPos = strlen(entryPoint) + 1; // We index the string from '1', because we might have to prepend an underscore in case of stdcall mangling
         std::string functionName;
 
-        functionName.resize(originalFuncNameLength + kBufferOverhead + 1); // Let's index the string from '1', because we might have to prepend an underscore in case of stdcall mangling
-        memcpy(&functionName[1], entryPoint, originalFuncNameLength);
-        memset(&functionName[1] + originalFuncNameLength, 0, kBufferOverhead);
+        functionName.resize(originalFuncNameEndPos + kBufferOverhead);
+        functionName[0] = '_';
+        memcpy(&functionName[1], entryPoint, originalFuncNameEndPos); // Note: this copies the null terminator from `entryPoint`, which looks weird but is fine
+        memset(&functionName[1] + originalFuncNameEndPos, 0, kBufferOverhead);
+
+        const auto decorateNameWithParameterSize = [functionNamePtr = &functionName[0], bufferLength = functionName.size() + 1 /* std::string has space for null terminator after the string */, parameterSize = MakeUnsigned(pinvokeArgs.parameterSize)](size_t decorationOffset)
+            {
+                // We don't expect parameterSize to ever be negative and we don't allocate space for a minus
+                // However, in case it is in some really bad circumstance, we don't want to overflow the buffer
+                // so we print it as unsigned
+                snprintf(functionNamePtr + decorationOffset, bufferLength - decorationOffset, "@%u", parameterSize);
+            };
 
         // If there's no 'dont mangle' flag set, 'W' function takes priority over original name, but 'A' function does not (yes, really)
-        if (pinvokeArgs.charSet == CHARSET_UNICODE)
+        if (!pinvokeArgs.isNoMangle && pinvokeArgs.charSet == CHARSET_UNICODE)
         {
-            functionName[originalFuncNameLength] = 'W';
+            functionName[originalFuncNameEndPos] = 'W';
             if ((func = GetFunctionPointer(handle, functionName.c_str() + 1, detailedError)))
                 return func;
 
-            // If charset specific function lookup failed, try with original name
-            if ((func = GetFunctionPointer(handle, entryPoint, detailedError)))
-                return func;
-        }
-        else
-        {
-            if ((func = GetFunctionPointer(handle, entryPoint, detailedError)))
-                return func;
-
-            // If original name function lookup failed, try with mangled name
-            functionName[originalFuncNameLength] = 'A';
-            if ((func = GetFunctionPointer(handle, functionName.c_str() + 1, detailedError)))
-                return func;
+            if (decorateWithParameterSize)
+            {
+                decorateNameWithParameterSize(originalFuncNameEndPos + 1);
+                if ((func = GetFunctionPointer(handle, functionName.c_str(), detailedError)))
+                    return func;
+            }
         }
 
-        // TODO is this Win only?
-        // If it's not cdecl, try mangling the name
-        // THIS ONLY APPLIES TO 32-bit x86!
-#if defined(_X86_) && PLATFORM_ARCH_32
-        if (sizeof(void*) == 4 && pinvokeArgs.callingConvention != IL2CPP_CALL_C)
+        // Original name
+        if ((func = GetFunctionPointer(handle, entryPoint, detailedError)))
+            return func;
+
+        if (decorateWithParameterSize)
         {
-            functionName[0] = '_';
-            sprintf(&functionName[0] + originalFuncNameLength, "@%i", pinvokeArgs.parameterSize);
+            decorateNameWithParameterSize(originalFuncNameEndPos);
             if ((func = GetFunctionPointer(handle, functionName.c_str(), detailedError)))
                 return func;
         }
-#endif
 
-        return NULL;
+        if (!pinvokeArgs.isNoMangle && pinvokeArgs.charSet != CHARSET_UNICODE)
+        {
+            functionName[originalFuncNameEndPos] = 'A';
+            functionName[originalFuncNameEndPos + 1] = 0; // The decoration above may have overwritten the zero character here
+            if ((func = GetFunctionPointer(handle, functionName.c_str() + 1, detailedError)))
+                return func;
+
+            if (decorateWithParameterSize)
+            {
+                decorateNameWithParameterSize(originalFuncNameEndPos + 1);
+                if ((func = GetFunctionPointer(handle, functionName.c_str(), detailedError)))
+                    return func;
+            }
+        }
+
+        return nullptr;
     }
 
     Il2CppMethodPointer LibraryLoader::GetFunctionPointer(Baselib_DynamicLibrary_Handle handle, const char* functionName, std::string& detailedError)

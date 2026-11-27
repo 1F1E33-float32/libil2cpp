@@ -48,6 +48,11 @@ namespace utils
                 s_MappedAddressToMappedFileObject[address] = mappedFileHandle;
             s_MappedAddressToMappedLength[address] = length;
         }
+        else
+        {
+            if (os::MemoryMappedFile::OwnsDuplicatedFileHandle(mappedFileHandle))
+                os::MemoryMappedFile::Close(mappedFileHandle);
+        }
 
         return address;
     }

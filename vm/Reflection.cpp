@@ -930,7 +930,9 @@ namespace vm
         Il2CppCustomAttrArgsInfo* argInfos = (Il2CppCustomAttrArgsInfo*)IL2CPP_CALLOC(1, headerSize + collector.Args.size() * sizeof(Il2CppCustomAttributeArg));
         Il2CppCustomAttributeArg* args = (Il2CppCustomAttributeArg*)((uint8_t*)argInfos + headerSize);
 
-        memcpy(args, collector.Args.begin(), collector.Args.size() * sizeof(Il2CppCustomAttributeArg));
+        // Args is empty (and begin() is NULL) when every attribute has no arguments, and memcpy from NULL is undefined.
+        if (!collector.Args.empty())
+            memcpy(args, collector.Args.begin(), collector.Args.size() * sizeof(Il2CppCustomAttributeArg));
 
         for (size_t i = 0; i < attributeCount; i++)
         {

@@ -51,7 +51,10 @@ namespace Interop
 
         LowLevelMonitor* llmon = reinterpret_cast<LowLevelMonitor*>(monitor);
 
-        os::AutoUnlock unlock(&llmon->mutex, true);
+        // Re-acquired non-alertably, as pthread_cond_wait does. The wait is what shutdown interrupts; if
+        // the re-acquire also ran APCs it would run the next queued thread abort from the destructor while
+        // the first one unwinds, and that terminates the process.
+        os::AutoUnlock unlock(&llmon->mutex, false);
         llmon->semaphore.Wait(true);
     }
 
@@ -61,7 +64,8 @@ namespace Interop
 
         LowLevelMonitor* llmon = reinterpret_cast<LowLevelMonitor*>(monitor);
 
-        os::AutoUnlock unlock(&llmon->mutex, true);
+        // Re-acquired non-alertably; see il2cpp_intrinsic_sys_low_level_monitor_wait.
+        os::AutoUnlock unlock(&llmon->mutex, false);
         return llmon->semaphore.Wait(timeoutMilliseconds, true) == kWaitStatusSuccess;
     }
 

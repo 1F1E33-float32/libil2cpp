@@ -652,6 +652,16 @@ Exception_t* il2cpp_codegen_get_not_supported_exception(const char* msg)
     return (Exception_t*)il2cpp::vm::Exception::GetNotSupportedException(msg);
 }
 
+Exception_t* il2cpp_codegen_get_invalid_program_exception(const char* msg)
+{
+    return (Exception_t*)il2cpp::vm::Exception::GetInvalidProgramException(msg);
+}
+
+Exception_t* il2cpp_codegen_get_type_load_exception(const char* msg)
+{
+    return (Exception_t*)il2cpp::vm::Exception::GetTypeLoadException(msg, NULL);
+}
+
 Exception_t* il2cpp_codegen_get_array_type_mismatch_exception()
 {
     return (Exception_t*)il2cpp::vm::Exception::GetArrayTypeMismatchException();
@@ -962,6 +972,16 @@ Il2CppChar* il2cpp_codegen_marshal_bstring(String_t* string)
     return il2cpp::vm::PlatformInvoke::MarshalCSharpStringToCppBString((RuntimeString*)string);
 }
 
+Il2CppChar* il2cpp_codegen_marshal_vbbyref_wstring(String_t* string, int32_t& length)
+{
+    return il2cpp::vm::PlatformInvoke::MarshalCSharpStringToCppVBByRefWString((RuntimeString*)string, length);
+}
+
+char* il2cpp_codegen_marshal_vbbyref_string(String_t* string, int32_t& length)
+{
+    return il2cpp::vm::PlatformInvoke::MarshalCSharpStringToCppVBByRefString((RuntimeString*)string, length);
+}
+
 String_t* il2cpp_codegen_marshal_string_result(const char* value)
 {
     return (String_t*)il2cpp::vm::PlatformInvoke::MarshalCppStringToCSharpStringResult(value);
@@ -975,6 +995,21 @@ String_t* il2cpp_codegen_marshal_wstring_result(const Il2CppChar* value)
 String_t* il2cpp_codegen_marshal_bstring_result(const Il2CppChar* value)
 {
     return (String_t*)il2cpp::vm::PlatformInvoke::MarshalCppBStringToCSharpStringResult(value);
+}
+
+String_t* il2cpp_codegen_marshal_vbbyref_wstring_result(const Il2CppChar* value, int32_t length)
+{
+    return (String_t*)il2cpp::vm::PlatformInvoke::MarshalCppVBByRefWStringToCSharpStringResult(value, length);
+}
+
+String_t* il2cpp_codegen_marshal_vbbyref_string_result(const char* value, int32_t length)
+{
+    return (String_t*)il2cpp::vm::PlatformInvoke::MarshalCppVBByRefStringToCSharpStringResult(value, length);
+}
+
+void il2cpp_codegen_marshal_free_vbbyref_string(void* value)
+{
+    il2cpp::vm::PlatformInvoke::MarshalFreeVBByRefString(value);
 }
 
 void il2cpp_codegen_marshal_free_bstring(Il2CppChar* value)
@@ -1205,7 +1240,10 @@ Il2CppMethodPointer il2cpp_codegen_get_runtime_constrained_call_data(RuntimeClas
         return constrainedMethod->methodPointer;
     }
 
-    IL2CPP_ASSERT(constrainedMethod->klass == il2cpp_defaults.object_class || constrainedMethod->klass == il2cpp_defaults.value_type_class || constrainedMethod->klass == il2cpp_defaults.enum_class);
+    // A reabstracted or ambiguous default interface method resolves to a stub that raises the exception when called
+    // and never reads "this", so it can take the fake box path below
+    IL2CPP_ASSERT(constrainedMethod->klass == il2cpp_defaults.object_class || constrainedMethod->klass == il2cpp_defaults.value_type_class || constrainedMethod->klass == il2cpp_defaults.enum_class
+        || il2cpp::vm::Method::IsAmbiguousMethodInfo(constrainedMethod) || il2cpp::vm::Method::IsEntryPointNotFoundMethodInfo(constrainedMethod));
     IL2CPP_ASSERT(boxBuffer);
 
     // The value type did not override the method, so we're making a call to a method declared on
@@ -1221,6 +1259,38 @@ Il2CppMethodPointer il2cpp_codegen_get_runtime_constrained_call_data(RuntimeClas
     data->thisPtr = new(boxBuffer) Il2CppFakeBoxBuffer(type, objBuffer);
     data->method = constrainedMethod;
     return constrainedMethod->methodPointer;
+}
+
+Il2CppMethodPointer il2cpp_codegen_get_virtual_call_on_value_data(RuntimeClass* type, const RuntimeMethod* virtualMethod, void* objBuffer, Il2CppConstrainedCallData* data, void* boxBuffer)
+{
+    // For a value type, resolve the target the way a constrained call RGCTX entry would. The box of a reference type
+    // is a no-op, and il2cpp_codegen_get_runtime_constrained_call_data makes a plain virtual call for it
+    if (il2cpp::vm::Class::IsValuetype(type))
+    {
+        if (il2cpp::vm::Class::IsNullable(type))
+        {
+            // A Nullable without a value boxes to null
+            if (!il2cpp::vm::Object::NullableHasValue(type, objBuffer))
+                il2cpp_codegen_raise_null_reference_exception();
+            objBuffer = il2cpp::vm::Object::NullableGetValue(type, objBuffer);
+            type = il2cpp::vm::Class::GetNullableArgument(type);
+        }
+
+        il2cpp::vm::ClassInlines::InitFromCodegen(type);
+        virtualMethod = il2cpp::vm::Class::GetVirtualMethod(type, virtualMethod);
+    }
+
+    return il2cpp_codegen_get_runtime_constrained_call_data(type, virtualMethod, objBuffer, data, boxBuffer);
+}
+
+void il2cpp_codegen_castclass_runtime_check(RuntimeClass* fromClass, RuntimeClass* toClass, void* objBuffer)
+{
+    // The box of null is null and a castclass of null succeeds
+    if (!il2cpp_codegen_would_box_to_non_null(fromClass, objBuffer))
+        return;
+
+    if (!il2cpp_codegen_isinst_runtime_check(fromClass, toClass, objBuffer))
+        RaiseInvalidCastException(fromClass, toClass);
 }
 
 Il2CppMethodPointer il2cpp_codegen_get_runtime_static_constrained_call_data(RuntimeClass* type, const RuntimeMethod* constrainedMethod, const RuntimeMethod** resolvedMethod)

@@ -8,7 +8,8 @@ typedef enum Il2CppCallConvention
     IL2CPP_CALL_STDCALL,
     IL2CPP_CALL_THISCALL,
     IL2CPP_CALL_FASTCALL,
-    IL2CPP_CALL_VARARG
+    IL2CPP_CALL_VARARG,
+    IL2CPP_CALL_SWIFTCALL
 } Il2CppCallConvention;
 
 typedef enum Il2CppCharSet

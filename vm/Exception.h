@@ -72,6 +72,7 @@ namespace vm
         static Il2CppException* GetFormatException(const char* msg);
         static Il2CppException* GetSystemException();
         static Il2CppException* GetNotSupportedException(const char* msg);
+        static Il2CppException* GetInvalidProgramException(const char* msg);
         static Il2CppException* GetArrayTypeMismatchException();
         static Il2CppException* GetTypeLoadException(const char* msg, const char* typeName);
         static Il2CppException* GetEntryPointNotFoundException(const char* msg);

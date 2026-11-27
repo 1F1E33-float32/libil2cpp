@@ -73,9 +73,9 @@ typedef struct Il2CppArrayBounds
 #if IL2CPP_COMPILER_MSVC
 #pragma warning( push )
 #pragma warning( disable : 4200 )
-#elif defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#elif defined(__GNUC__) && (defined(__clang__) || defined(__cplusplus))
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winvalid-offsetof"
 #endif
 
 //Warning: Updates to this struct must also be made to IL2CPPArraySize C code
@@ -124,8 +124,8 @@ typedef struct Il2CppString
 
 #if IL2CPP_COMPILER_MSVC
 #pragma warning( pop )
-#elif defined(__clang__)
-#pragma clang diagnostic pop
+#elif defined(__GNUC__) && (defined(__clang__) || defined(__cplusplus))
+#pragma GCC diagnostic pop
 #endif
 
 typedef struct Il2CppReflectionType

@@ -42,12 +42,16 @@ static inline uint64_t __builtin_bitreverse64(uint64_t value)
     return result;
 }
 
-// vrndns_f32 is the scalar form of FRINTN and is missing from this GCC's
-// arm_neon.h. The one-lane vector form is present, so round through that.
+// vrndns_f32 is the scalar form of FRINTN and is missing from older GCC's
+// arm_neon.h (the GCC 8.3 QNX 7.1 ships; the GCC 12.2 QNX 8.0 ships has it).
+// The one-lane vector form is present, so round through that.
+#    if __GNUC__ < 11
 static inline float32_t vrndns_f32(float32_t value)
 {
     return vget_lane_f32(vrndn_f32(vdup_n_f32(value)), 0);
 }
+
+#    endif
 
 #  endif // GCC on AArch64
 

@@ -642,6 +642,11 @@ namespace vm
         return FromNameMsg(vm::Image::GetCorlib(), "System", "NotSupportedException", msg);
     }
 
+    Il2CppException* Exception::GetInvalidProgramException(const char* msg)
+    {
+        return FromNameMsg(vm::Image::GetCorlib(), "System", "InvalidProgramException", msg);
+    }
+
     Il2CppException* Exception::GetArrayTypeMismatchException()
     {
         return FromNameMsg(vm::Image::GetCorlib(), "System", "ArrayTypeMismatchException", NULL);

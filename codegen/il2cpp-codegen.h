@@ -786,6 +786,10 @@ Exception_t* il2cpp_codegen_get_overflow_exception();
 
 Exception_t* il2cpp_codegen_get_not_supported_exception(const char* msg);
 
+Exception_t* il2cpp_codegen_get_invalid_program_exception(const char* msg);
+
+Exception_t* il2cpp_codegen_get_type_load_exception(const char* msg);
+
 Exception_t* il2cpp_codegen_get_array_type_mismatch_exception();
 
 Exception_t* il2cpp_codegen_get_invalid_cast_exception(const char* msg);
@@ -952,6 +956,10 @@ bool il2cpp_codegen_would_box_to_non_null(RuntimeClass* klass, void* objBuffer);
 RuntimeObject* il2cpp_codegen_isinst_runtime(RuntimeClass* fromClass, RuntimeClass* toClass, void* objBuffer);
 RuntimeObject* il2cpp_codegen_isinst_runtime_sealed(RuntimeClass* fromClass, RuntimeClass* toClass, void* objBuffer);
 RuntimeObject* il2cpp_codegen_isinst_runtime_class(RuntimeClass* fromClass, RuntimeClass* toClass, void* objBuffer);
+
+// Raises an InvalidCastException unless a castclass of the boxed obj to toClass would succeed
+// objBuffer is a pointer to the obj - either a pointer to a value type or a pointer to a reference type
+void il2cpp_codegen_castclass_runtime_check(RuntimeClass* fromClass, RuntimeClass* toClass, void* objBuffer);
 
 // objBuffer is a pointer to the obj - either a pointer to a value type or a pointer to a reference type
 bool il2cpp_codegen_isinst_runtime_check(RuntimeClass* fromClass, RuntimeClass* toClass, void* objBuffer);
@@ -1202,13 +1210,23 @@ void il2cpp_codegen_marshal_wstring_fixed(String_t* string, Il2CppChar* buffer, 
 
 Il2CppChar* il2cpp_codegen_marshal_bstring(String_t* string);
 
+Il2CppChar* il2cpp_codegen_marshal_vbbyref_wstring(String_t* string, int32_t& length);
+
+char* il2cpp_codegen_marshal_vbbyref_string(String_t* string, int32_t& length);
+
 String_t* il2cpp_codegen_marshal_string_result(const char* value);
 
 String_t* il2cpp_codegen_marshal_wstring_result(const Il2CppChar* value);
 
 String_t* il2cpp_codegen_marshal_bstring_result(const Il2CppChar* value);
 
+String_t* il2cpp_codegen_marshal_vbbyref_wstring_result(const Il2CppChar* value, int32_t length);
+
+String_t* il2cpp_codegen_marshal_vbbyref_string_result(const char* value, int32_t length);
+
 void il2cpp_codegen_marshal_free_bstring(Il2CppChar* value);
+
+void il2cpp_codegen_marshal_free_vbbyref_string(void* value);
 
 char* il2cpp_codegen_marshal_empty_string_builder(StringBuilder_t* stringBuilder);
 
@@ -1809,6 +1827,12 @@ struct Il2CppConstrainedCallData
 // objBuffer is a pointer to the obj, either a pointer to a struct's data or a pointer to a reference type pointer
 Il2CppMethodPointer il2cpp_codegen_get_runtime_constrained_call_data(RuntimeClass* type, const RuntimeMethod* constrainedMethod, void* objBuffer, Il2CppConstrainedCallData* data, void* boxBuffer);
 
+// Resolves a callvirt made on the value of a 'box type' whose box was removed
+// objBuffer is a pointer to the obj, either a pointer to a struct's data or a pointer to a reference type pointer
+// data->thisPtr is the struct's data when the target is declared on the struct, a fake box in boxBuffer when it is declared on
+// System.Object, System.ValueType or System.Enum, and otherwise a real box
+Il2CppMethodPointer il2cpp_codegen_get_virtual_call_on_value_data(RuntimeClass* type, const RuntimeMethod* virtualMethod, void* objBuffer, Il2CppConstrainedCallData* data, void* boxBuffer);
+
 Il2CppMethodPointer il2cpp_codegen_get_runtime_static_constrained_call_data(RuntimeClass* type, const RuntimeMethod* constrainedMethod, const RuntimeMethod** resolvedMethod);
 
 inline Il2CppMethodPointer il2cpp_codegen_get_runtime_static_constrained_call_data(const RuntimeMethod* constrainedMethod)
@@ -2168,6 +2192,61 @@ void il2cpp_codegen_set_generic_value_icall(THandleOnStack handle, int index, vo
     void *dest = il2cpp_array_addr_with_size(arr, elementSize, index);
     memcpy(dest, value, elementSize);
     il2cpp::gc::GarbageCollector::SetWriteBarrier((void**)dest, elementSize);
+}
+
+// The RuntimeHelpers methods that read field RVA data. These are only called when the field handle came from
+// an ldtoken, so the conversion can load the RVA data directly - any other call goes to the managed method
+inline void il2cpp_codegen_runtime_helpers_initialize_array(RuntimeArray* array, const Il2CppFieldRvaData& rvaData)
+{
+    if (array == NULL)
+        il2cpp_codegen_raise_exception(il2cpp_codegen_get_argument_null_exception("array"));
+
+    IL2CPP_ASSERT(il2cpp_codegen_class_is_value_type(array->klass->element_class) && !array->klass->element_class->has_references);
+
+    // Like CoreCLR and Mono, fill exactly the array, and refuse a field that is too small to fill it
+    size_t arraySize = (size_t)array->max_length * array->klass->element_size;
+    if (arraySize > rvaData.size)
+        il2cpp_codegen_raise_exception(il2cpp_codegen_get_argument_exception("field_handle", "Field not large enough to fill array"));
+
+    memcpy(il2cpp_array_addr_with_size(array, 0, 0), rvaData.data, arraySize);
+}
+
+template<typename TReadOnlySpan>
+inline TReadOnlySpan il2cpp_codegen_runtime_helpers_create_span(const Il2CppFieldRvaData& rvaData, size_t elementSize)
+{
+#if IL2CPP_BYTE_ORDER != IL2CPP_LITTLE_ENDIAN
+    // The data is encoded little endian, if big endian support is needed a byte swap will be needed
+    IL2CPP_NOT_IMPLEMENTED_INTRINSIC(il2cpp_codegen_runtime_helpers_create_span)
+#endif
+    // Like CoreCLR and Mono, a size that is not a multiple of the element size rounds the length down
+
+    struct SpanData
+    {
+        const char* reference;
+        int32_t length;
+    };
+
+    static_assert(sizeof(SpanData) == sizeof(TReadOnlySpan), "Mismatch in SpanData layout");
+
+    SpanData d = {};
+    d.reference = rvaData.data;
+    d.length = (int32_t)(rvaData.size / elementSize);
+
+    TReadOnlySpan span;
+    memcpy(&span, &d, sizeof(TReadOnlySpan));
+    return span;
+}
+
+inline void* il2cpp_codegen_runtime_helpers_get_span_data_from(const Il2CppFieldRvaData& rvaData, size_t elementSize, int32_t* count)
+{
+#if IL2CPP_BYTE_ORDER != IL2CPP_LITTLE_ENDIAN
+    // The data is encoded little endian, if big endian support is needed a byte swap will be needed
+    IL2CPP_NOT_IMPLEMENTED_INTRINSIC(il2cpp_codegen_runtime_helpers_get_span_data_from)
+#endif
+    // Like CoreCLR and Mono, a size that is not a multiple of the element size rounds the length down
+
+    *count = (int32_t)(rvaData.size / elementSize);
+    return (void*)rvaData.data;
 }
 
 void il2cpp_codegen_delegate_invoke_open_inst(Il2CppMethodPointer methodPtr, const MethodInfo* method, RuntimeDelegate* thisPtr, void** args, void* result);

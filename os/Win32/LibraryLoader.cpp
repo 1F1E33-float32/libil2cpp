@@ -72,6 +72,8 @@ namespace os
         HARDCODED_DEPENDENCY_FUNCTION(GetTempPathW),
 #if IL2CPP_TARGET_WINDOWS_GAMES
         HARDCODED_DEPENDENCY_FUNCTION_BY_NAME("GetTempPath2W", GetTempPathW)
+#else
+        HARDCODED_DEPENDENCY_FUNCTION(LCMapStringEx),
 #endif
     };
 

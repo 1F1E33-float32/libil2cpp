@@ -38,6 +38,14 @@ namespace vm
         static il2cpp_hresult_t MarshalCSharpStringToCppBStringNoThrow(Il2CppString* managedString, Il2CppChar** bstr);
         static Il2CppChar* MarshalCSharpStringToCppBString(Il2CppString* managedString);
 
+        // UnmanagedType.VBByRefStr: native code gets a pointer to the first character of a buffer that has the length of the string in the four bytes before it.
+        // The length is the number of characters for the wide functions and the number of bytes of the converted string for the narrow ones. The result functions need it to read the string back.
+        static Il2CppChar* MarshalCSharpStringToCppVBByRefWString(Il2CppString* managedString, int32_t& characterCount);
+        static char* MarshalCSharpStringToCppVBByRefString(Il2CppString* managedString, int32_t& byteCount);
+        static Il2CppString* MarshalCppVBByRefWStringToCSharpStringResult(const Il2CppChar* value, int32_t characterCount);
+        static Il2CppString* MarshalCppVBByRefStringToCSharpStringResult(const char* value, int32_t byteCount);
+        static void MarshalFreeVBByRefString(void* value);
+
         static Il2CppString* MarshalCppStringToCSharpStringResult(const char* value);
         static Il2CppString* MarshalCppWStringToCSharpStringResult(const Il2CppChar* value);
         static Il2CppString* MarshalCppBStringToCSharpStringResult(const Il2CppChar* value);
@@ -64,6 +72,7 @@ namespace vm
         }
 
     private:
+        static void* MarshalAllocateVBByRefStringBuffer(size_t sizeInBytes, int32_t length);
         static char* MarshalEmptyStringBuilder(Il2CppStringBuilder* stringBuilder, size_t& stringLength, std::vector<std::string>& utf8Chunks, std::vector<Il2CppStringBuilder*>& builders);
         static Il2CppChar* MarshalEmptyWStringBuilder(Il2CppStringBuilder* stringBuilder, size_t& stringLength);
     };

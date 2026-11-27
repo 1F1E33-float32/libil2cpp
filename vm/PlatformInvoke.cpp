@@ -160,6 +160,63 @@ namespace vm
         return bstr;
     }
 
+    void* PlatformInvoke::MarshalAllocateVBByRefStringBuffer(size_t sizeInBytes, int32_t length)
+    {
+        uint8_t* buffer = static_cast<uint8_t*>(MarshalAlloc::Allocate(sizeof(int32_t) + sizeInBytes));
+        *reinterpret_cast<int32_t*>(buffer) = length;
+
+        return buffer + sizeof(int32_t);
+    }
+
+    Il2CppChar* PlatformInvoke::MarshalCSharpStringToCppVBByRefWString(Il2CppString* managedString, int32_t& characterCount)
+    {
+        if (managedString == nullptr)
+            return nullptr;
+
+        characterCount = utils::StringUtils::GetLength(managedString);
+        const size_t characterBytes = static_cast<size_t>(characterCount) * sizeof(Il2CppChar);
+        Il2CppChar* nativeString = static_cast<Il2CppChar*>(MarshalAllocateVBByRefStringBuffer(characterBytes + sizeof(Il2CppChar), characterCount));
+        memcpy(nativeString, utils::StringUtils::GetChars(managedString), characterBytes);
+        nativeString[characterCount] = '\0';
+
+        return nativeString;
+    }
+
+    char* PlatformInvoke::MarshalCSharpStringToCppVBByRefString(Il2CppString* managedString, int32_t& byteCount)
+    {
+        if (managedString == nullptr)
+            return nullptr;
+
+        // The length in the buffer is the number of bytes of the converted string, not the number of characters of the managed string.
+        std::string utf8String = utils::StringUtils::Utf16ToUtf8Exact(utils::StringUtils::GetChars(managedString), static_cast<size_t>(utils::StringUtils::GetLength(managedString)));
+        byteCount = static_cast<int32_t>(utf8String.size());
+        char* nativeString = static_cast<char*>(MarshalAllocateVBByRefStringBuffer(utf8String.size() + 1, byteCount));
+        memcpy(nativeString, utf8String.c_str(), utf8String.size() + 1);
+
+        return nativeString;
+    }
+
+    Il2CppString* PlatformInvoke::MarshalCppVBByRefWStringToCSharpStringResult(const Il2CppChar* value, int32_t characterCount)
+    {
+        // Native code can write NULs, and they are part of the string, so this doesn't look for a terminator.
+        return String::NewUtf16(value, characterCount);
+    }
+
+    Il2CppString* PlatformInvoke::MarshalCppVBByRefStringToCSharpStringResult(const char* value, int32_t byteCount)
+    {
+        // Reads back exactly the bytes that were sent, as the converted string can have more bytes than the managed string had characters.
+        return String::NewLen(value, static_cast<uint32_t>(byteCount));
+    }
+
+    void PlatformInvoke::MarshalFreeVBByRefString(void* value)
+    {
+        // A null string is marshaled as a null pointer without a buffer.
+        if (value == nullptr)
+            return;
+
+        MarshalAlloc::Free(static_cast<uint8_t*>(value) - sizeof(int32_t));
+    }
+
     Il2CppString* PlatformInvoke::MarshalCppStringToCSharpStringResult(const char* value)
     {
         if (value == NULL)

@@ -81,11 +81,15 @@ namespace gc
     private:
         void clear_free_space()
         {
+            // libc++ annotates the storage past size() as poisoned, so ASan reports this write as a
+            // container-overflow. Leaving the slots uncleared only keeps their objects alive longer.
+#if !IL2CPP_SANITIZE_ADDRESS
             if (this->capacity() == this->size())
                 return;
 
             // The slots past size() hold destroyed elements, so it is safe to overwrite their storage.
             memset((void*)(this->data() + this->size()), 0, (this->capacity() - this->size()) * sizeof(T));
+#endif
         }
     };
 }

@@ -20,10 +20,17 @@ namespace utils
         size_t m_Length;
 
         // Intended to only be used by Empty()
+        // Points at an empty string rather than NULL so that passing Str() to memcpy/memcmp with a zero length is well defined.
         inline StringView() :
-            m_String(NULL),
+            m_String(EmptyString()),
             m_Length(0)
         {
+        }
+
+        static inline const CharType* EmptyString()
+        {
+            static const CharType empty = 0;
+            return &empty;
         }
 
     public:

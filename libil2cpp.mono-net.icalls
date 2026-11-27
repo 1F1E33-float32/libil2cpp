@@ -107,7 +107,7 @@ System.Reflection.RuntimeMethodInfo::GetPInvoke(System.Reflection.PInvokeAttribu
 // System.Runtime.CompilerServices.RuntimeHelpers
 >icalls_monoaot/System.Private.CoreLib/System.Runtime.CompilerServices/RuntimeHelpers.h
 System.Runtime.CompilerServices.RuntimeHelpers::SufficientExecutionStack()|System::Private::CoreLib::System::Runtime::CompilerServices::RuntimeHelpers::SufficientExecutionStack|bool (*)()
-System.Runtime.CompilerServices.RuntimeHelpers::GetSpanDataFrom(FieldInfo*,Il2CppType*,int32_t*)|System::Private::CoreLib::System::Runtime::CompilerServices::RuntimeHelpers::GetSpanDataFrom|void* (*)(FieldInfo*, Il2CppType*, int32_t*)
+System.Runtime.CompilerServices.RuntimeHelpers::GetSpanDataFrom(System.IntPtr,System.IntPtr,System.IntPtr)|System::Private::CoreLib::System::Runtime::CompilerServices::RuntimeHelpers::GetSpanDataFrom|void* (*)(FieldInfo*, Il2CppType*, int32_t*)
 System.Runtime.CompilerServices.RuntimeHelpers::InternalGetHashCode(System.Object)|System::Private::CoreLib::System::Runtime::CompilerServices::RuntimeHelpers::InternalGetHashCode|int32_t (*)(Il2CppObject*)
 System.Runtime.CompilerServices.RuntimeHelpers::SizeOf(System.Runtime.CompilerServices.QCallTypeHandle)|System::Private::CoreLib::System::Runtime::CompilerServices::RuntimeHelpers::SizeOf|int32_t (*)(Il2CppQCallTypeHandle)
 System.Runtime.CompilerServices.RuntimeHelpers::GetObjectValue(System.Object)|System::Private::CoreLib::System::Runtime::CompilerServices::RuntimeHelpers::GetObjectValue|Il2CppObject* (*)(Il2CppObject*)
@@ -207,15 +207,6 @@ System.RuntimeFieldHandle::GetFieldDataReferenceInternal(System.Object,System.In
 System.RuntimeFieldHandle::GetValueDirect(System.Reflection.RuntimeFieldInfo,System.RuntimeType,System.Void*,System.RuntimeType)|System::Private::CoreLib::System::RuntimeFieldHandle::GetValueDirect|Il2CppObject* (*)(Il2CppReflectionField*, Il2CppObject*, Il2CppTypedRef*, Il2CppObject*)
 System.RuntimeFieldHandle::SetValueDirect(System.Reflection.RuntimeFieldInfo,System.RuntimeType,System.Void*,System.Object,System.RuntimeType)|System::Private::CoreLib::System::RuntimeFieldHandle::SetValueDirect|void (*)(Il2CppReflectionField*, Il2CppObject*, Il2CppTypedRef*, Il2CppObject*, Il2CppObject*)
 
-// System.Reflection.Emit.CustomAttributeBuilder
->icalls_monoaot/System.Private.CoreLib/System.Reflection.Emit/CustomAttributeBuilder.h
-System.Reflection.Emit.CustomAttributeBuilder::GetBlob(System.Reflection.Assembly,System.Reflection.ConstructorInfo,System.Object[],System.Reflection.PropertyInfo[],System.Object[],System.Reflection.FieldInfo[],System.Object[])|System::Private::CoreLib::System::Reflection::Emit::CustomAttributeBuilder::GetBlob|Il2CppArray* (*)(Il2CppReflectionAssembly*, Il2CppObject*, Il2CppArray*, Il2CppArray*, Il2CppArray*, Il2CppArray*, Il2CppArray*)
-
-// System.Reflection.Emit.SignatureHelper
->icalls_monoaot/System.Private.CoreLib/System.Reflection.Emit/SignatureHelper.h
-System.Reflection.Emit.SignatureHelper::get_signature_field()|System::Private::CoreLib::System::Reflection::Emit::SignatureHelper::get_signature_field|Il2CppArray* (*)(Il2CppObject* thisPtr)
-System.Reflection.Emit.SignatureHelper::get_signature_local()|System::Private::CoreLib::System::Reflection::Emit::SignatureHelper::get_signature_local|Il2CppArray* (*)(Il2CppObject* thisPtr)
-
 // System.Reflection.RuntimeModule
 >icalls_monoaot/System.Private.CoreLib/System.Reflection/RuntimeModule.h
 System.Reflection.RuntimeModule::ResolveSignature(System.IntPtr,System.Int32,System.Reflection.ResolveTokenError&)|System::Private::CoreLib::System::Reflection::RuntimeModule::ResolveSignature|Il2CppArray* (*)(intptr_t, int32_t, int32_t*)
@@ -271,15 +262,6 @@ System.Environment::get_ExitCode()|System::Private::CoreLib::System::Environment
 System.Environment::GetCommandLineArgs()|System::Private::CoreLib::System::Environment::GetCommandLineArgs|Il2CppArray* (*)()
 System.Environment::FailFast(System.String,System.Exception,System.String)|System::Private::CoreLib::System::Environment::FailFast|void (*)(Il2CppString*, Il2CppException*, Il2CppString*)
 System.Environment::set_ExitCode(System.Int32)|System::Private::CoreLib::System::Environment::set_ExitCode|void (*)(int32_t)
-
-// System.Reflection.Emit.RuntimeModuleBuilder
->icalls_monoaot/System.Private.CoreLib/System.Reflection.Emit/RuntimeModuleBuilder.h
-System.Reflection.Emit.RuntimeModuleBuilder::getMethodToken(System.Reflection.Emit.RuntimeModuleBuilder,System.Reflection.MethodBase,System.Type[])|System::Private::CoreLib::System::Reflection::Emit::RuntimeModuleBuilder::getMethodToken|int32_t (*)(Il2CppObject*, Il2CppObject*, Il2CppArray*)
-System.Reflection.Emit.RuntimeModuleBuilder::getToken(System.Reflection.Emit.RuntimeModuleBuilder,System.Object,System.Boolean)|System::Private::CoreLib::System::Reflection::Emit::RuntimeModuleBuilder::getToken|int32_t (*)(Il2CppObject*, Il2CppObject*, bool)
-System.Reflection.Emit.RuntimeModuleBuilder::getUSIndex(System.Reflection.Emit.RuntimeModuleBuilder,System.String)|System::Private::CoreLib::System::Reflection::Emit::RuntimeModuleBuilder::getUSIndex|int32_t (*)(Il2CppObject*, Il2CppString*)
-System.Reflection.Emit.RuntimeModuleBuilder::RegisterToken(System.Object,System.Int32)|System::Private::CoreLib::System::Reflection::Emit::RuntimeModuleBuilder::RegisterToken|void (*)(Il2CppObject* thisPtr, Il2CppObject*, int32_t)
-System.Reflection.Emit.RuntimeModuleBuilder::basic_init(System.Reflection.Emit.RuntimeModuleBuilder)|System::Private::CoreLib::System::Reflection::Emit::RuntimeModuleBuilder::basic_init|void (*)(Il2CppObject*)
-System.Reflection.Emit.RuntimeModuleBuilder::set_wrappers_type(System.Reflection.Emit.RuntimeModuleBuilder,System.Type)|System::Private::CoreLib::System::Reflection::Emit::RuntimeModuleBuilder::set_wrappers_type|void (*)(Il2CppObject*, Il2CppObject*)
 
 // System.Reflection.Metadata.MetadataUpdater
 >icalls_monoaot/System.Private.CoreLib/System.Reflection.Metadata/MetadataUpdater.h
@@ -448,10 +430,6 @@ System.Reflection.FieldInfo::get_marshal_info()|System::Private::CoreLib::System
 >icalls_monoaot/System.Private.CoreLib/System.Reflection/MethodBase.h
 System.Reflection.MethodBase::GetCurrentMethod()|System::Private::CoreLib::System::Reflection::MethodBase::GetCurrentMethod|Il2CppObject* (*)()
 
-// System.Reflection.Emit.RuntimeTypeBuilder
->icalls_monoaot/System.Private.CoreLib/System.Reflection.Emit/RuntimeTypeBuilder.h
-System.Reflection.Emit.RuntimeTypeBuilder::create_runtime_class()|System::Private::CoreLib::System::Reflection::Emit::RuntimeTypeBuilder::create_runtime_class|Il2CppObject* (*)(Il2CppObject* thisPtr)
-
 // System.MathF
 >icalls_monoaot/System.Private.CoreLib/System/MathF.h
 System.MathF::Acos(System.Single)|System::Private::CoreLib::System::MathF::Acos|float (*)(float)
@@ -530,19 +508,6 @@ System.Diagnostics.Tracing.NativeRuntimeEventSource::LogThreadPoolWorkerThreadWa
 System.Diagnostics.Tracing.NativeRuntimeEventSource::LogThreadPoolWorkingThreadCount(System.UInt32,System.UInt16)|System::Private::CoreLib::System::Diagnostics::Tracing::NativeRuntimeEventSource::LogThreadPoolWorkingThreadCount|void (*)(uint32_t, uint16_t)
 System.Diagnostics.Tracing.NativeRuntimeEventSource::LogWaitHandleWaitStart(System.Diagnostics.Tracing.NativeRuntimeEventSource/WaitHandleWaitSourceMap,System.IntPtr,System.UInt16)|System::Private::CoreLib::System::Diagnostics::Tracing::NativeRuntimeEventSource::LogWaitHandleWaitStart|void (*)(uint8_t, intptr_t, uint16_t)
 System.Diagnostics.Tracing.NativeRuntimeEventSource::LogWaitHandleWaitStop(System.UInt16)|System::Private::CoreLib::System::Diagnostics::Tracing::NativeRuntimeEventSource::LogWaitHandleWaitStop|void (*)(uint16_t)
-
-// System.Reflection.Emit.DynamicMethod
->icalls_monoaot/System.Private.CoreLib/System.Reflection.Emit/DynamicMethod.h
-System.Reflection.Emit.DynamicMethod::create_dynamic_method(System.Reflection.Emit.DynamicMethod,System.String,System.Reflection.MethodAttributes,System.Reflection.CallingConventions)|System::Private::CoreLib::System::Reflection::Emit::DynamicMethod::create_dynamic_method|void (*)(Il2CppObject*, Il2CppString*, int32_t, int32_t)
-
-// System.Reflection.Emit.RuntimeAssemblyBuilder
->icalls_monoaot/System.Private.CoreLib/System.Reflection.Emit/RuntimeAssemblyBuilder.h
-System.Reflection.Emit.RuntimeAssemblyBuilder::UpdateNativeCustomAttributes(System.Reflection.Emit.RuntimeAssemblyBuilder)|System::Private::CoreLib::System::Reflection::Emit::RuntimeAssemblyBuilder::UpdateNativeCustomAttributes|void (*)(Il2CppObject*)
-System.Reflection.Emit.RuntimeAssemblyBuilder::basic_init(System.Reflection.Emit.RuntimeAssemblyBuilder)|System::Private::CoreLib::System::Reflection::Emit::RuntimeAssemblyBuilder::basic_init|void (*)(Il2CppObject*)
-
-// System.Reflection.Emit.RuntimeEnumBuilder
->icalls_monoaot/System.Private.CoreLib/System.Reflection.Emit/RuntimeEnumBuilder.h
-System.Reflection.Emit.RuntimeEnumBuilder::setup_enum_type(System.Type)|System::Private::CoreLib::System::Reflection::Emit::RuntimeEnumBuilder::setup_enum_type|void (*)(Il2CppObject* thisPtr, Il2CppObject*)
 
 // System.Reflection.RuntimeCustomAttributeData
 >icalls_monoaot/System.Private.CoreLib/System.Reflection/RuntimeCustomAttributeData.h
