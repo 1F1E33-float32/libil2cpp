@@ -224,14 +224,6 @@ inline void* il2cpp_codegen_unsafe_cast(T* ptr)
 
 bool il2cpp_codegen_is_unmanaged(const RuntimeMethod* method);
 
-inline void il2cpp_codegen_runtime_helpers_initialize_array(RuntimeArray* array, const Il2CppFieldRvaData& rvaData)
-{
-    IL2CPP_ASSERT(array);
-    IL2CPP_ASSERT(array->klass->element_class->byval_arg.valuetype && !array->klass->element_class->has_references);
-
-    memcpy(il2cpp_array_addr_with_size(array, 0, 0), rvaData.data, rvaData.size);
-}
-
 template<typename T, typename U>
 inline typename std::enable_if<!(std::is_pointer<T>::value && std::is_integral<U>::value), T>::type static_cast_with_type_check(U value)
 {

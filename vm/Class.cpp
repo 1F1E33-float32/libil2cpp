@@ -748,8 +748,8 @@ namespace vm
         if (klass == oklass)
             return true;
 
-        ClassInlines::InitFromCodegen(klass);
-        ClassInlines::InitFromCodegen(oklass);
+        Class::Init(klass);
+        Class::Init(oklass);
 
         // Following checks are always going to fail for interfaces
         if (!IsInterface(klass))

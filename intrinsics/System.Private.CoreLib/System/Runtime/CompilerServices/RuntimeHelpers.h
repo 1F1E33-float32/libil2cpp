@@ -3,7 +3,6 @@
 
 #include "codegen/il2cpp-codegen-metadata.h"
 #include "codegen/il2cpp-codegen.h"
-#include "RuntimeHelpers_icalls.h"
 
 namespace il2cpp
 {
@@ -70,40 +69,6 @@ namespace CompilerServices
     inline bool il2cpp_intrinsic_runtime_helpers_is_reference_or_contains_references(const RuntimeMethod* method)
     {
         return il2cpp_codegen_is_reference_or_contains_references(method);
-    }
-
-    /* METHOD MAPPING
-        Method: System.ReadOnlySpan`1<T> System.Runtime.CompilerServices.RuntimeHelpers::CreateSpan(System.RuntimeFieldHandle)
-        AssemblyName: System.Private.CoreLib
-    */
-    template<typename TReadOnlySpan, typename TRuntimeFieldHandle>
-    inline TReadOnlySpan il2cpp_intrinsic_runtime_helpers_create_span(const Il2CppFieldRvaData& rvaData, size_t elementSize)
-    {
-        return il2cpp_intrinsic_runtime_helpers_create_span<TReadOnlySpan>(rvaData.data, rvaData.size, elementSize);
-    }
-
-    /* METHOD MAPPING
-        Method: System.Void System.Runtime.CompilerServices.RuntimeHelpers::InitializeArray(System.Array,System.RuntimeFieldHandle)
-        AssemblyName: System.Private.CoreLib
-    */
-    inline void il2cpp_intrinsic_runtime_helpers_initialize_array(RuntimeArray* array, const Il2CppFieldRvaData& rvaData)
-    {
-        IL2CPP_ASSERT(array);
-        IL2CPP_ASSERT(il2cpp_codegen_class_is_value_type(array->klass->element_class) && !array->klass->element_class->has_references);
-
-        memcpy(il2cpp_array_addr_with_size(array, 0, 0), rvaData.data, rvaData.size);
-    }
-
-    /* METHOD MAPPING
-        Method: System.Void* System.Runtime.CompilerServices.RuntimeHelpers::GetSpanDataFrom(System.RuntimeFieldHandle,System.RuntimeTypeHandle,System.Int32&)
-        AssemblyName: System.Private.CoreLib
-    */
-    inline void* il2cpp_intrinsic_runtime_helpers_get_span_data_from(const Il2CppFieldRvaData& rvaData, size_t elementSize, int32_t* count)
-    {
-        IL2CPP_ASSERT(rvaData.size % elementSize == 0);
-
-        *count = (int32_t)(rvaData.size / elementSize);
-        return (void*)rvaData.data;
     }
 
     /* METHOD MAPPING
