@@ -152,9 +152,21 @@ namespace os
     {
         std::string libraryNameStr = utils::StringUtils::NativeStringToUtf8(libraryName, libraryNameLength);
 
-        // Probe the application directory first - this matches the expected P/Invoke behavior from Win32
         std::string applicationDir = os::Path::GetApplicationFolder();
         std::string libraryPath = utils::PathUtils::Combine(applicationDir, libraryNameStr);
+
+        // Absolute paths are tried as-is first so the real path and dlopen failure lead the error.
+        // The application directory is still probed afterwards because Combine turns "/foo" into
+        // "<appDir>//foo", and existing code may rely on that resolving inside the application directory.
+        if (libraryNameStr[0] == '/')
+        {
+            Baselib_DynamicLibrary_Handle handle = ProbeForLibraryImpl(libraryNameStr, detailedError);
+            if (handle == Baselib_DynamicLibrary_Handle_Invalid)
+                handle = ProbeForLibraryImpl(libraryPath, detailedError);
+            return handle;
+        }
+
+        // Probe the application directory first - this matches the expected P/Invoke behavior from Win32
         Baselib_DynamicLibrary_Handle handle = ProbeForLibraryImpl(libraryPath, detailedError);
 
         // Otherwise use the OS's search paths

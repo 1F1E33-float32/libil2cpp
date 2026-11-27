@@ -55,13 +55,11 @@ namespace CompilerServices
         size_t field_data_size;
         field_data = vm::Field::GetData(field_handle, &field_data_size);
 
-        IL2CPP_NOT_IMPLEMENTED_ICALL_NO_ASSERT(RuntimeHelpers::InitializeArray, "Check type size");
-        //int align;
-        //if (size > mono_type_size (field_handle->type, &align)) {
-        //  MonoException *exc = mono_get_exception_argument("field_handle",
-        //      "Field not large enough to fill array");
-        //  mono_raise_exception (exc);
-        //}
+        if (size > field_data_size)
+        {
+            Il2CppException *exc = vm::Exception::GetArgumentException("field_handle", "Field not large enough to fill array");
+            vm::Exception::Raise(exc);
+        }
 
         IL2CPP_NOT_IMPLEMENTED_ICALL_NO_ASSERT(RuntimeHelpers::InitializeArray, "Ignoring Endianess");
         memcpy(il2cpp_array_addr(array, char, 0), field_data, size);

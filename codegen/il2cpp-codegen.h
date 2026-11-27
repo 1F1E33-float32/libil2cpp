@@ -2047,6 +2047,61 @@ void il2cpp_codegen_set_generic_value_icall(THandleOnStack handle, int index, vo
     il2cpp::gc::GarbageCollector::SetWriteBarrier((void**)dest, elementSize);
 }
 
+// The RuntimeHelpers methods that read field RVA data. These are only called when the field handle came from
+// an ldtoken, so the conversion can load the RVA data directly - any other call goes to the managed method
+inline void il2cpp_codegen_runtime_helpers_initialize_array(RuntimeArray* array, const Il2CppFieldRvaData& rvaData)
+{
+    if (array == NULL)
+        il2cpp_codegen_raise_exception(il2cpp_codegen_get_argument_null_exception("array"));
+
+    IL2CPP_ASSERT(il2cpp_codegen_class_is_value_type(array->klass->element_class) && !array->klass->element_class->has_references);
+
+    // Like CoreCLR and Mono, fill exactly the array, and refuse a field that is too small to fill it
+    size_t arraySize = (size_t)array->max_length * array->klass->element_size;
+    if (arraySize > rvaData.size)
+        il2cpp_codegen_raise_exception(il2cpp_codegen_get_argument_exception("field_handle", "Field not large enough to fill array"));
+
+    memcpy(il2cpp_array_addr_with_size(array, 0, 0), rvaData.data, arraySize);
+}
+
+template<typename TReadOnlySpan>
+inline TReadOnlySpan il2cpp_codegen_runtime_helpers_create_span(const Il2CppFieldRvaData& rvaData, size_t elementSize)
+{
+#if IL2CPP_BYTE_ORDER != IL2CPP_LITTLE_ENDIAN
+    // The data is encoded little endian, if big endian support is needed a byte swap will be needed
+    IL2CPP_NOT_IMPLEMENTED_INTRINSIC(il2cpp_codegen_runtime_helpers_create_span)
+#endif
+    // Like CoreCLR and Mono, a size that is not a multiple of the element size rounds the length down
+
+    struct SpanData
+    {
+        const char* reference;
+        int32_t length;
+    };
+
+    static_assert(sizeof(SpanData) == sizeof(TReadOnlySpan), "Mismatch in SpanData layout");
+
+    SpanData d = {};
+    d.reference = rvaData.data;
+    d.length = (int32_t)(rvaData.size / elementSize);
+
+    TReadOnlySpan span;
+    memcpy(&span, &d, sizeof(TReadOnlySpan));
+    return span;
+}
+
+inline void* il2cpp_codegen_runtime_helpers_get_span_data_from(const Il2CppFieldRvaData& rvaData, size_t elementSize, int32_t* count)
+{
+#if IL2CPP_BYTE_ORDER != IL2CPP_LITTLE_ENDIAN
+    // The data is encoded little endian, if big endian support is needed a byte swap will be needed
+    IL2CPP_NOT_IMPLEMENTED_INTRINSIC(il2cpp_codegen_runtime_helpers_get_span_data_from)
+#endif
+    // Like CoreCLR and Mono, a size that is not a multiple of the element size rounds the length down
+
+    *count = (int32_t)(rvaData.size / elementSize);
+    return (void*)rvaData.data;
+}
+
 void il2cpp_codegen_delegate_invoke_open_inst(Il2CppMethodPointer methodPtr, const MethodInfo* method, RuntimeDelegate* thisPtr, void** args, void* result);
 void il2cpp_codegen_delegate_invoke_closed_static(Il2CppMethodPointer methodPtr, const MethodInfo* method, RuntimeObject* thisPtr, void** args, void* result);
 void il2cpp_codegen_delegate_invoke_open_virtual(Il2CppMethodPointer methodPtr, const MethodInfo* method, RuntimeDelegate* thisPtr, void** args, void* result);
