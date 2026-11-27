@@ -1,7 +1,6 @@
 #include "il2cpp-config.h"
 #include "Buffer.h"
 
-#include "gc/GarbageCollector.h"
 #include "vm/Class.h"
 #include "vm/Type.h"
 

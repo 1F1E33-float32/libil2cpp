@@ -748,8 +748,8 @@ namespace vm
         if (klass == oklass)
             return true;
 
-        Class::Init(klass);
-        Class::Init(oklass);
+        ClassInlines::InitFromCodegen(klass);
+        ClassInlines::InitFromCodegen(oklass);
 
         // Following checks are always going to fail for interfaces
         if (!IsInterface(klass))
@@ -2496,7 +2496,7 @@ namespace vm
 
     static bool is_generic_argument(Il2CppType* type)
     {
-        return type->type == IL2CPP_TYPE_VAR || type->type == IL2CPP_TYPE_MVAR;
+        return type->type == IL2CPP_TYPE_VAR || type->type == IL2CPP_TYPE_VAR;
     }
 
     Il2CppClass* Class::GenericParamGetBaseType(Il2CppClass* klass)
