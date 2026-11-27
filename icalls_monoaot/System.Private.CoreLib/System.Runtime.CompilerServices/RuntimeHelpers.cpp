@@ -11,7 +11,6 @@
 #include "vm/Object.h"
 #include "vm/Runtime.h"
 #include "vm/Type.h"
-#include "utils/HashUtils.h"
 #include <memory>
 
 namespace il2cpp
@@ -37,7 +36,9 @@ namespace CompilerServices
 
     int32_t RuntimeHelpers::InternalGetHashCode(Il2CppObject* o)
     {
-        return (int32_t)utils::HashUtils::AlignedPointerHash(o);
+        // Unreachable from managed code now that ObjectHeader::TryGetHashCode is intrinsified and always
+        // succeeds, but keep it agreeing with that intrinsic so there is one identity hash in il2cpp.
+        return il2cpp::vm::Object::GetHash(o);
     }
 
     int32_t RuntimeHelpers::SizeOf(Il2CppQCallTypeHandle handle)

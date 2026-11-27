@@ -29,6 +29,12 @@ namespace Threading
     bool il2cpp_intrinsic_object_header_is_entered(RuntimeObject* obj);
 
     /* METHOD MAPPING
+        Method: System.Boolean System.Threading.ObjectHeader::TryGetHashCode(System.Object,System.Int32&)
+        AssemblyName: System.Private.CoreLib
+    */
+    bool il2cpp_intrinsic_object_header_try_get_hash_code(RuntimeObject* obj, int32_t* hash);
+
+    /* METHOD MAPPING
         Method: System.Boolean System.Threading.ObjectHeader::TryEnterFast(System.Object)
         AssemblyName: System.Private.CoreLib
     */

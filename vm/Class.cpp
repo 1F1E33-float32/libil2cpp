@@ -2199,6 +2199,92 @@ namespace vm
         }
     }
 
+    static void AddFieldToBitmap(Il2CppClass* klass, FieldInfo* field, size_t offset, size_t* bitmap, size_t& maxSetBit, const il2cpp::os::FastAutoLock* lockPtr)
+    {
+        const Il2CppType* type = Type::GetUnderlyingType(field->type);
+
+        if (type->byref)
+        {
+            ValidateGcFieldOffset(klass, offset);
+            set_bit(bitmap, offset / sizeof(void*));
+            maxSetBit = std::max(maxSetBit, offset / sizeof(void*));
+            return;
+        }
+
+        switch (type->type)
+        {
+            case IL2CPP_TYPE_I1:
+            case IL2CPP_TYPE_U1:
+            case IL2CPP_TYPE_BOOLEAN:
+            case IL2CPP_TYPE_I2:
+            case IL2CPP_TYPE_U2:
+            case IL2CPP_TYPE_CHAR:
+            case IL2CPP_TYPE_I4:
+            case IL2CPP_TYPE_U4:
+            case IL2CPP_TYPE_I8:
+            case IL2CPP_TYPE_U8:
+            case IL2CPP_TYPE_I:
+            case IL2CPP_TYPE_U:
+            case IL2CPP_TYPE_R4:
+            case IL2CPP_TYPE_R8:
+            case IL2CPP_TYPE_PTR:
+            case IL2CPP_TYPE_FNPTR:
+                break;
+            case IL2CPP_TYPE_STRING:
+            case IL2CPP_TYPE_SZARRAY:
+            case IL2CPP_TYPE_CLASS:
+            case IL2CPP_TYPE_OBJECT:
+            case IL2CPP_TYPE_ARRAY:
+            case IL2CPP_TYPE_VAR:
+            case IL2CPP_TYPE_MVAR:
+            case IL2CPP_TYPE_BYREF:
+                ValidateGcFieldOffset(klass, offset);
+                set_bit(bitmap, offset / sizeof(void*));
+                maxSetBit = std::max(maxSetBit, offset / sizeof(void*));
+                break;
+            case IL2CPP_TYPE_GENERICINST:
+                if (!Type::IsValueType(type))
+                {
+                    ValidateGcFieldOffset(klass, offset);
+                    set_bit(bitmap, offset / sizeof(void*));
+                    maxSetBit = std::max(maxSetBit, offset / sizeof(void*));
+                    break;
+                }
+                else
+                {
+                    /* fall through */
+                }
+            case IL2CPP_TYPE_VALUETYPE:
+            {
+                Il2CppClass* fieldClass = Class::FromIl2CppType(field->type);
+
+                if (lockPtr == NULL)
+                    Class::SetupFields(fieldClass);
+                else
+                    SetupFieldsLocked(fieldClass, *lockPtr);
+
+                if (fieldClass->has_references)
+                    GetBitmapNoInit(fieldClass, bitmap, maxSetBit, offset - sizeof(Il2CppObject) /* nested field offset includes padding for boxed structure. Remove for struct fields */, lockPtr);
+                break;
+            }
+            default:
+                IL2CPP_NOT_IMPLEMENTED(Class::GetClassBitmap);
+                break;
+        }
+    }
+
+    // An InlineArrayAttribute type declares a single instance field that is repeated for the length of the inline array.
+    static int32_t GetInlineArrayLength(const Il2CppClass* klass)
+    {
+        const Il2CppClass* definitionClass = klass;
+        if (Class::IsInflated(klass))
+            definitionClass = GenericClass::GetTypeDefinition(klass->generic_class);
+
+        int32_t inlineArrayLength = MetadataCache::GetInlineArrayLengthForType(Class::GetType(definitionClass));
+        IL2CPP_ASSERT(inlineArrayLength >= 0);
+        return inlineArrayLength;
+    }
+
     void GetBitmapNoInit(Il2CppClass* klass, size_t* bitmap, size_t& maxSetBit, size_t parentOffset, const il2cpp::os::FastAutoLock* lockPtr)
     {
         Il2CppClass* currentClass = klass;
@@ -2213,75 +2299,17 @@ namespace vm
 
                 size_t offset = parentOffset + field->offset;
 
-                const Il2CppType* type = Type::GetUnderlyingType(field->type);
-
-                if (type->byref)
+                if (currentClass->has_inline_array)
                 {
-                    ValidateGcFieldOffset(klass, offset);
-                    set_bit(bitmap, offset / sizeof(void*));
-                    maxSetBit = std::max(maxSetBit, offset / sizeof(void*));
-                    continue;
+                    // Every element of the inline array can hold references, not just the first one.
+                    size_t elementSize = il2cpp::metadata::FieldLayout::GetTypeSizeAndAlignment(field->type).size;
+                    int32_t inlineArrayLength = GetInlineArrayLength(currentClass);
+                    for (int32_t element = 0; element < inlineArrayLength; element++)
+                        AddFieldToBitmap(klass, field, offset + element * elementSize, bitmap, maxSetBit, lockPtr);
                 }
-
-                switch (type->type)
+                else
                 {
-                    case IL2CPP_TYPE_I1:
-                    case IL2CPP_TYPE_U1:
-                    case IL2CPP_TYPE_BOOLEAN:
-                    case IL2CPP_TYPE_I2:
-                    case IL2CPP_TYPE_U2:
-                    case IL2CPP_TYPE_CHAR:
-                    case IL2CPP_TYPE_I4:
-                    case IL2CPP_TYPE_U4:
-                    case IL2CPP_TYPE_I8:
-                    case IL2CPP_TYPE_U8:
-                    case IL2CPP_TYPE_I:
-                    case IL2CPP_TYPE_U:
-                    case IL2CPP_TYPE_R4:
-                    case IL2CPP_TYPE_R8:
-                    case IL2CPP_TYPE_PTR:
-                    case IL2CPP_TYPE_FNPTR:
-                        break;
-                    case IL2CPP_TYPE_STRING:
-                    case IL2CPP_TYPE_SZARRAY:
-                    case IL2CPP_TYPE_CLASS:
-                    case IL2CPP_TYPE_OBJECT:
-                    case IL2CPP_TYPE_ARRAY:
-                    case IL2CPP_TYPE_VAR:
-                    case IL2CPP_TYPE_MVAR:
-                    case IL2CPP_TYPE_BYREF:
-                        ValidateGcFieldOffset(klass, offset);
-                        set_bit(bitmap, offset / sizeof(void*));
-                        maxSetBit = std::max(maxSetBit, offset / sizeof(void*));
-                        break;
-                    case IL2CPP_TYPE_GENERICINST:
-                        if (!Type::IsValueType(type))
-                        {
-                            ValidateGcFieldOffset(klass, offset);
-                            set_bit(bitmap, offset / sizeof(void*));
-                            maxSetBit = std::max(maxSetBit, offset / sizeof(void*));
-                            break;
-                        }
-                        else
-                        {
-                            /* fall through */
-                        }
-                    case IL2CPP_TYPE_VALUETYPE:
-                    {
-                        Il2CppClass* fieldClass = Class::FromIl2CppType(field->type);
-
-                        if (lockPtr == NULL)
-                            Class::SetupFields(fieldClass);
-                        else
-                            SetupFieldsLocked(fieldClass, *lockPtr);
-
-                        if (fieldClass->has_references)
-                            GetBitmapNoInit(fieldClass, bitmap, maxSetBit, offset - sizeof(Il2CppObject) /* nested field offset includes padding for boxed structure. Remove for struct fields */, lockPtr);
-                        break;
-                    }
-                    default:
-                        IL2CPP_NOT_IMPLEMENTED(Class::GetClassBitmap);
-                        break;
+                    AddFieldToBitmap(klass, field, offset, bitmap, maxSetBit, lockPtr);
                 }
             }
 

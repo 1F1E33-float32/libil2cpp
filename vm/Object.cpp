@@ -178,7 +178,11 @@ namespace vm
     int32_t Object::GetHash(Il2CppObject* obj)
     {
         // shift away unused bits due to alignment, then use Knuth's multiplicative hash
-        return (((uint32_t)(intptr_t)(obj)) >> kObjectAlignmentShift) * 2654435761u;
+        uint32_t hash = (uint32_t)(((uintptr_t)(obj) >> kObjectAlignmentShift) * 2654435761u);
+
+        // Callers such as ConditionalWeakTable read 0 as "this object
+        // has never been hashed", so never hand it out - CoreCLR enforces the same invariant.
+        return hash != 0 ? (int32_t)hash : 1;
     }
 
     uint32_t Object::GetSize(Il2CppObject* obj)
