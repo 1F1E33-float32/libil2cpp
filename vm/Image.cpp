@@ -141,8 +141,6 @@ const char * Image::GetFileName (const Il2CppImage* image)
 
 const MethodInfo* Image::GetEntryPoint (const Il2CppImage* image)
 {
-	if (image->entryPointIndex == -1)
-		return NULL;
 	return MetadataCache::GetMethodInfoFromMethodDefinitionIndex (image->entryPointIndex);
 }
 

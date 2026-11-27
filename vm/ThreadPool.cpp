@@ -176,12 +176,6 @@ struct SocketPollingThread
 		return asyncResult;
 	}
 
-	bool ResultReady()
-	{
-		os::FastAutoLock lock (&mutex);
-		return !queue.empty();
-	}
-
 	void RunLoop ();
 	void Terminate ();
 
@@ -380,7 +374,7 @@ void SocketPollingThread::RunLoop ()
 #endif
 
 			// See if there's anything new in the queue.
-			while (ResultReady())
+			while (!queue.empty ())
 			{
 				// Grab next request.
 				Il2CppAsyncResult* asyncResult = DequeueRequest ();
@@ -483,24 +477,15 @@ void SocketPollingThread::RunLoop ()
 	}
 }
 
-
-static void FreeThreadHandle (void* data)
-{
-	uint32_t handle = (uint32_t)(uintptr_t)data;
-	gc::GCHandle::Free (handle);
-}
-
 static void SocketPollingThreadEntryPoint (void* data)
 {
 	SocketPollingThread* pollingThread = reinterpret_cast<SocketPollingThread*> (data);
 
 	// Properly attach us to the VM and mark us as a background thread.
 	Il2CppThread* managedThread = vm::Thread::Attach (il2cpp_domain_get());
-	uint32_t handle = gc::GCHandle::New ((Il2CppObject*) managedThread, true);
 	vm::Thread::SetState (managedThread, kThreadStateBackground);
 	managedThread->handle->SetName ("Socket I/O Polling Thread");
 	managedThread->handle->SetPriority (os::kThreadPriorityLow);
-	managedThread->handle->SetCleanupFunction (&FreeThreadHandle, (void*) (uintptr_t)handle);
 
 	// The socket polling thread is not technically a worker pool thread but for all
 	// intents and purposes it is part of the async I/O thread pool. It is important to
@@ -579,13 +564,10 @@ static bool IsCurrentThreadAWorkerThread ()
 
 void ThreadPoolCompartment::QueueWorkItem (Il2CppAsyncResult* asyncResult)
 {
-	bool forceNewThread = false;
 	// Put the item in the queue.
 	{
 		os::FastAutoLock lock (&mutex);
 		queue.push (asyncResult);
-		if (queue.size() > numIdleThreads)
-			forceNewThread = true;
 	}
 
 	// If all our worker threads are tied up and we have room to grow, spawn a
@@ -593,7 +575,7 @@ void ThreadPoolCompartment::QueueWorkItem (Il2CppAsyncResult* asyncResult)
 	// is currently being processed and we don't have idle threads, force a new
 	// thread to be spawned even if we are at max capacity. This prevents deadlocks
 	// if the code queuing the item then goes and waits on the item it just queued.
-	if (forceNewThread &&
+	if (!numIdleThreads &&
 	    (threads.size () < maxThreads || IsCurrentThreadAWorkerThread ()))
 	{
 		SpawnNewWorkerThread ();
@@ -663,7 +645,7 @@ void ThreadPoolCompartment::WorkerThreadRunLoop ()
 		{
 			// There's no work for us to do so decide what to do.
 
-			// If we've exceeded the normal number of threads for the pool (minThreads),
+			// If we've exceeded the maximum amount of threads for the pool,
 			// wait around for a bit and then, if there is no work to do,
 			// terminate.
 			if (threads.size () > minThreads)
@@ -794,7 +776,6 @@ static void WorkerThreadEntryPoint (void* data)
 	// Properly attach us to the VM and mark us as a background
 	// worker thread.
 	Il2CppThread* managedThread = vm::Thread::Attach (il2cpp_domain_get());
-	uint32_t handle = gc::GCHandle::New ((Il2CppObject*) managedThread, true);
 	vm::Thread::SetState (managedThread, kThreadStateBackground);
 	managedThread->threadpool_thread = true;
 	int threadCount = compartment->AttachThread (managedThread);
@@ -804,7 +785,6 @@ static void WorkerThreadEntryPoint (void* data)
 	sprintf (name, "%s Thread #%i", compartment->compartmentName, threadCount - 1);
 	managedThread->handle->SetName (name);
 	managedThread->handle->SetPriority (os::kThreadPriorityLow);
-	managedThread->handle->SetCleanupFunction (&FreeThreadHandle, (void*) (uintptr_t)handle);
 
 	// Do work.
 	try

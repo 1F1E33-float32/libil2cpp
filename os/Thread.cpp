@@ -24,10 +24,7 @@ static ThreadLocalValue s_CurrentThread;
 
 Thread::Thread()
 	: m_Thread (new ThreadImpl ())
-	, m_State (kThreadCreated)
 	, m_ThreadExitedEvent (true) // Manual reset event
-	, m_CleanupFunc (NULL)
-	, m_CleanupFuncArg (NULL)
 {
 }
 
@@ -56,11 +53,6 @@ void Thread::SetPriority (ThreadPriority priority)
 	m_Thread->SetPriority (priority);
 }
 
-void Thread::SetStackSize (size_t stackSize)
-{
-	m_Thread->SetStackSize (stackSize);
-}
-
 struct StartData
 {
 	Thread* thread;
@@ -86,21 +78,14 @@ void Thread::RunWrapper (void* arg)
 	thread->m_ThreadExitedEvent.Reset ();
 
 	// Run user thread start function.
-	thread->m_State = kThreadRunning;
 	startFunction (startFunctionArgument);
-	thread->m_State = kThreadExited;
 
 	// Signal that we've finished execution.
 	thread->m_ThreadExitedEvent.Set ();
-
-	if (thread->m_CleanupFunc)
-		thread->m_CleanupFunc (thread->m_CleanupFuncArg);
 }
 
 ErrorCode Thread::Run (StartFunc func, void* arg)
 {
-	assert (m_State == kThreadCreated || m_State == kThreadExited);
-
 	StartData* startData = new StartData;
 	startData->startFunction = func;
 	startData->startFunctionArgument = arg;
