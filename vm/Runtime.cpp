@@ -1011,9 +1011,13 @@ namespace vm
             }
             else
             {
-                const Il2CppType *type = Class::GetType(klass);
-                std::string n = il2cpp::utils::StringUtils::Printf("The type initializer for '%s' threw an exception.", Type::GetName(type, IL2CPP_TYPE_NAME_FORMAT_IL).c_str());
-                Class::SetClassInitializationError(klass, Exception::GetTypeInitializationException(n.c_str(), exception));
+                // Named as CoreCLR names it: the metadata namespace and name, so a nested type has no namespace or declaring type,
+                // and a generic instance takes its definition's name.
+                const char* namespaze = Class::GetNamespace(klass);
+                std::string typeName = namespaze[0] != '\0'
+                    ? il2cpp::utils::StringUtils::Printf("%s.%s", namespaze, Class::GetName(klass))
+                    : Class::GetName(klass);
+                Class::SetClassInitializationError(klass, Exception::GetTypeInitializationException(typeName.c_str(), exception));
             }
         }
 

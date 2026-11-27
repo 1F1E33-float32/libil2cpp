@@ -170,6 +170,7 @@ namespace metadata
         data.actualClassSize = actualParentSize;
         IL2CPP_ASSERT(parentAlignment <= std::numeric_limits<uint8_t>::max());
         data.minimumAlignment = static_cast<uint8_t>(parentAlignment);
+        bool isFirstField = true;
         for (uint16_t i = 0; i < klass->field_count; i++)
         {
             if (!filter(klass->fields + i))
@@ -177,7 +178,8 @@ namespace metadata
 
             SizeAndAlignment sa = GetTypeSizeAndAlignment(klass->fields[i].type);
 
-            if (i == 0 && klass->has_inline_array && filter == &vm::Field::IsInstance)
+            // The inline array field is the first instance field, but static fields may be declared before it
+            if (isFirstField && klass->has_inline_array && filter == &vm::Field::IsInstance)
             {
                 const Il2CppClass* definitionClass = klass;
                 if (Class::IsInflated(klass))
@@ -187,6 +189,7 @@ namespace metadata
                 IL2CPP_ASSERT(inlineArrayLength >= 0);
                 sa.size *= inlineArrayLength;
             }
+            isFirstField = false;
 
             uint8_t alignment = sa.alignment;
             if (packing > 0)

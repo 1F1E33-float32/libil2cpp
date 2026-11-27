@@ -9,6 +9,8 @@
 #include "os/Atomic.h"
 #include "os/LastError.h"
 #include "metadata/GenericMethod.h"
+#include "metadata/Il2CppTypeCompare.h"
+#include "metadata/Il2CppTypeHash.h"
 #include "gc/GarbageCollector.h"
 #include "gc/WriteBarrier.h"
 #include "vm/Array.h"
@@ -177,6 +179,34 @@ Type_t* il2cpp_codegen_type_get_object(const RuntimeType* type)
     return (Type_t*)il2cpp::vm::Reflection::GetTypeObject(type);
 }
 
+bool il2cpp_codegen_runtime_type_handle_equals_internal(intptr_t left, intptr_t right)
+{
+    // A default RuntimeTypeHandle is only equal to another default one.
+    if (left == 0 || right == 0)
+        return false;
+
+    return il2cpp::metadata::Il2CppTypeEqualityComparer::AreEqual(reinterpret_cast<const Il2CppType*>(left), reinterpret_cast<const Il2CppType*>(right));
+}
+
+bool il2cpp_codegen_runtime_type_handle_equals_object(intptr_t left, RuntimeObject* right)
+{
+    if (right == NULL || right->klass != il2cpp_defaults.typehandle_class)
+        return false;
+
+    IL2CPP_ASSERT(il2cpp_defaults.typehandle_class->field_count == 1);
+    IL2CPP_ASSERT(InitializedTypeInfo(il2cpp_defaults.typehandle_class)->fields[0].type->type == IL2CPP_TYPE_I);
+
+    return il2cpp_codegen_runtime_type_handle_equals(left, reinterpret_cast<intptr_t>(reinterpret_cast<RuntimeTypeHandle_t*>(UnBox(right))->value));
+}
+
+int32_t il2cpp_codegen_runtime_type_handle_hash(intptr_t handle)
+{
+    if (handle == 0)
+        return 0;
+
+    return static_cast<int32_t>(il2cpp::metadata::Il2CppTypeHash::Hash(reinterpret_cast<const Il2CppType*>(handle)));
+}
+
 RuntimeClass* il2cpp_codegen_object_get_class_constrained(void* objBuffer, RuntimeClass* klass)
 {
     if (il2cpp::vm::Class::IsValuetype(klass))
@@ -264,16 +294,6 @@ void il2cpp_codegen_assert_field_offset(RuntimeField* field, size_t offset)
 }
 
 #endif
-
-void il2cpp_codegen_memory_barrier()
-{
-    il2cpp::vm::Thread::FullMemoryBarrier();
-}
-
-void il2cpp_codegen_read_memory_barrier()
-{
-    il2cpp::os::Atomic::ReadMemoryBarrier();
-}
 
 RuntimeArray* SZArrayNew(RuntimeClass* arrayType, uint32_t length)
 {

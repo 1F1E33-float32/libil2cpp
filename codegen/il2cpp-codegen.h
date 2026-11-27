@@ -8,6 +8,8 @@
 #include "il2cpp-object-internals.h"
 #include "il2cpp-pinvoke-support.h"
 #include "il2cpp-tabledefs.h"
+#include "Baselib.h"
+#include "Cpp/Atomic.h"
 #if !MONO_NET_BCL
 #include "icalls/mscorlib/System.Threading/Interlocked.h"
 #endif
@@ -731,6 +733,18 @@ String_t* il2cpp_codegen_string_new_utf16(const il2cpp::utils::StringView<Il2Cpp
 
 Type_t* il2cpp_codegen_type_get_object(const RuntimeType* type);
 
+// Replace the managed bodies of RuntimeTypeHandle::Equals and GetHashCode.
+bool il2cpp_codegen_runtime_type_handle_equals_internal(intptr_t left, intptr_t right);
+inline bool il2cpp_codegen_runtime_type_handle_equals(intptr_t left, intptr_t right)
+{
+    if (left == right)
+        return true;
+    return il2cpp_codegen_runtime_type_handle_equals_internal(left, right);
+}
+
+bool il2cpp_codegen_runtime_type_handle_equals_object(intptr_t left, RuntimeObject* right);
+int32_t il2cpp_codegen_runtime_type_handle_hash(intptr_t handle);
+
 void il2cpp_codegen_raise_execution_engine_exception_if_method_is_not_found(const RuntimeMethod* method);
 
 void il2cpp_codegen_raise_execution_engine_exception(const RuntimeMethod* method);
@@ -1090,7 +1104,15 @@ inline const RuntimeType* il2cpp_codegen_type_from_class(RuntimeClass *klass)
     return &klass->byval_arg;
 }
 
-void il2cpp_codegen_memory_barrier();
+inline void il2cpp_codegen_memory_barrier()
+{
+    il2cpp::os::Atomic::FullMemoryBarrier();
+}
+
+inline void il2cpp_codegen_read_memory_barrier()
+{
+    il2cpp::os::Atomic::ReadMemoryBarrier();
+}
 
 RuntimeArray* SZArrayNew(RuntimeClass* arrayType, uint32_t length);
 
@@ -1345,7 +1367,19 @@ inline uintptr_t il2cpp_array_calc_byte_offset(RuntimeArray* runtimeArray, il2cp
 
 inline void ArrayElementTypeCheck(RuntimeArray* array, void* value)
 {
-    if (value != NULL && IsInst((RuntimeObject*)value, array->klass->element_class) == NULL)
+    if (value == NULL)
+        return;
+
+    // Fast path: the value's class is the element class or derives from it. It never rejects a store;
+    // interfaces, generic variance, array covariance and real mismatches all go on to IsInst.
+    // An element class that failed to initialize has typeHierarchyDepth 0, so skip the fast path and
+    // let IsInst raise its error.
+    RuntimeClass* elementClass = array->klass->element_class;
+    RuntimeClass* valueClass = ((RuntimeObject*)value)->klass;
+    if (valueClass == elementClass || (elementClass->typeHierarchyDepth != 0 && il2cpp::vm::ClassInlines::HasParentUnsafe(valueClass, elementClass)))
+        return;
+
+    if (IsInst((RuntimeObject*)value, elementClass) == NULL)
         il2cpp_codegen_raise_exception(il2cpp_codegen_get_array_type_mismatch_exception());
 }
 
@@ -1894,30 +1928,50 @@ inline int64_t il2cpp_codegen_abs(uint64_t value)
     return llabs(static_cast<int64_t>(value));
 }
 
-void il2cpp_codegen_memory_barrier();
-void il2cpp_codegen_read_memory_barrier();
-
+// Volatile.Read has acquire semantics and Volatile.Write has release semantics.
+// Atomic instructions fault on misaligned addresses, which fields of packed structs can have.
+// Those fall back to a memcpy and a fence. Its pointer is cast to void* so the compiler cannot assume
+// T's alignment, which on ARMv7 would let it use VFP loads and stores that fault when misaligned.
+// CoreCLR throws DataMisalignedException on ARM64 instead, but the access succeeds on x64.
 template<typename T>
 inline T VolatileRead(T* location)
 {
-    T result = *location;
-    il2cpp_codegen_memory_barrier();
+    if (((uintptr_t)location & (sizeof(T) - 1)) == 0)
+    {
+        return baselib::atomic_load_explicit(*location, baselib::memory_order_acquire);
+    }
+
+    T result;
+    memcpy(&result, (void*)location, sizeof(T));
+    baselib::atomic_thread_fence(baselib::memory_order_acquire);
     return result;
+}
+
+template<typename T>
+inline void Il2CppVolatileStore(T* location, T value)
+{
+    if (((uintptr_t)location & (sizeof(T) - 1)) == 0)
+    {
+        baselib::atomic_store_explicit(*location, value, baselib::memory_order_release);
+    }
+    else
+    {
+        baselib::atomic_thread_fence(baselib::memory_order_release);
+        memcpy((void*)location, &value, sizeof(T));
+    }
 }
 
 template<typename T, typename U>
 inline void VolatileWrite(T** location, U* value)
 {
-    il2cpp_codegen_memory_barrier();
-    *location = value;
+    Il2CppVolatileStore<T*>(location, value);
     Il2CppCodeGenWriteBarrier((void**)location, value);
 }
 
 template<typename T, typename U>
 inline void VolatileWrite(T* location, U value)
 {
-    il2cpp_codegen_memory_barrier();
-    *location = value;
+    Il2CppVolatileStore<T>(location, value);
 }
 
 inline void il2cpp_codegen_write_to_stdout(const char* str)

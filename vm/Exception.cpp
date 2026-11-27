@@ -439,9 +439,25 @@ namespace vm
         return ex;
     }
 
-    Il2CppException * Exception::GetTypeInitializationException(const char *msg, Il2CppException* innerException)
+    Il2CppException * Exception::GetTypeInitializationException(const char *typeName, Il2CppException* innerException)
     {
-        Il2CppException* ex = FromNameMsg(Image::GetCorlib(), "System", "TypeInitializationException", msg);
+        // The parameterless constructor FromNameMsg runs is private and unused, so the linker removes it and FromNameMsg runs
+        // SystemException's instead, which leaves the exception with SystemException's HResult and no TypeName. The corelib keeps
+        // this constructor for the runtime. Class::GetMethodFromNameFlagsAndSig searches the base classes too, and they declare
+        // one with the same signature, so check where it found it.
+        Il2CppClass* exceptionClass = Class::FromName(Image::GetCorlib(), "System", "TypeInitializationException");
+        const Il2CppType* argTypes[] = { &il2cpp_defaults.string_class->byval_arg, &il2cpp_defaults.exception_class->byval_arg };
+        const MethodInfo* constructor = exceptionClass != NULL ? Class::GetMethodFromNameFlagsAndSig(exceptionClass, ".ctor", 2, 0, argTypes) : NULL;
+        if (constructor != NULL && constructor->klass == exceptionClass)
+        {
+            Il2CppException* ex = (Il2CppException*)Object::New(exceptionClass);
+            void* args[] = { String::New(typeName), innerException };
+            Runtime::Invoke(constructor, ex, args, NULL);
+            return ex;
+        }
+
+        std::string msg = utils::StringUtils::Printf("The type initializer for '%s' threw an exception.", typeName);
+        Il2CppException* ex = FromNameMsg(Image::GetCorlib(), "System", "TypeInitializationException", msg.c_str());
 
         if (innerException != NULL)
             IL2CPP_OBJECT_SETREF(ex, inner_ex, innerException);

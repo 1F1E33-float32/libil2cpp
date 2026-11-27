@@ -54,7 +54,7 @@ namespace vm
         static Il2CppException* GetArgumentException(const utils::StringView<Il2CppChar>& arg, const utils::StringView<Il2CppChar>& msg);
         static Il2CppException* GetArgumentNullException(const char *arg);
         static Il2CppException* GetArgumentOutOfRangeException(const char *arg);
-        static Il2CppException* GetTypeInitializationException(const char *msg, Il2CppException* innerException);
+        static Il2CppException* GetTypeInitializationException(const char *typeName, Il2CppException* innerException);
         static Il2CppException* GetIndexOutOfRangeException();
         static Il2CppException* GetIndexOutOfRangeException(const utils::StringView<Il2CppChar>& msg);
         static Il2CppException* GetNullReferenceException(const utils::StringView<Il2CppChar>& msg);
