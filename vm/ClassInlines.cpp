@@ -32,7 +32,8 @@ namespace vm
         else
         {
             IL2CPP_ASSERT(method->klass->generic_class);
-            Class::Init(method->klass);
+            // Raises the class initialization error, e.g. if the class rgctx could not be inflated
+            InitFromCodegenSlow(method->klass);
         }
 
         if (exc)

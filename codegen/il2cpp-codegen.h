@@ -62,6 +62,12 @@ typedef Il2CppStringBuilder RuntimeStringBuilder;
 template<typename T>
 using no_infer = typename std::common_type<T>::type;
 
+// The smaller of a native alignment and a #pragma pack size, for an alignas in a generated type definition.
+constexpr size_t il2cpp_codegen_min_alignment(size_t alignment, size_t packingSize)
+{
+    return alignment < packingSize ? alignment : packingSize;
+}
+
 #if IL2CPP_ENABLE_WRITE_BARRIERS
 void Il2CppCodeGenWriteBarrier(void** targetAddress, void* object);
 void Il2CppCodeGenWriteBarrierForType(const Il2CppType* type, void** targetAddress, void* object);
@@ -1098,8 +1104,9 @@ inline RuntimeClass* InitializedTypeInfo(RuntimeClass* klass)
 
 inline const Il2CppRGCTXData* il2cpp_codegen_method_rgctx(const MethodInfo* method)
 {
-    IL2CPP_ASSERT(method->rgctx_data != NULL);
-    return method->rgctx_data;
+    const Il2CppRGCTXData* rgctx_data = il2cpp::os::Atomic::LoadPointerRelaxed(&method->rgctx_data);
+    IL2CPP_ASSERT(rgctx_data != NULL);
+    return rgctx_data;
 }
 
 inline const Il2CppRGCTXData* il2cpp_codegen_initialized_method_rgctx(const MethodInfo* method)
@@ -1109,8 +1116,9 @@ inline const Il2CppRGCTXData* il2cpp_codegen_initialized_method_rgctx(const Meth
 
 inline const Il2CppRGCTXData* il2cpp_codegen_class_rgctx(const MethodInfo* method)
 {
-    IL2CPP_ASSERT(method->klass->rgctx_data != NULL);
-    return method->klass->rgctx_data;
+    const Il2CppRGCTXData* rgctx_data = il2cpp::os::Atomic::LoadPointerRelaxed(&method->klass->rgctx_data);
+    IL2CPP_ASSERT(rgctx_data != NULL);
+    return rgctx_data;
 }
 
 inline const Il2CppRGCTXData* il2cpp_codegen_initialized_class_rgctx(const MethodInfo* method)
@@ -1393,7 +1401,7 @@ inline size_t il2cpp_rgctx_offset(const Il2CppRGCTXData* rgctxVar, int32_t index
 inline bool il2cpp_rgctx_is_initialized(const RuntimeMethod* method)
 {
     IL2CPP_ASSERT(method->is_inflated);
-    return method->rgctx_data != NULL;
+    return il2cpp::os::Atomic::LoadPointerRelaxed(&method->rgctx_data) != NULL;
 }
 
 inline void il2cpp_rgctx_method_init(const RuntimeMethod* method)
@@ -2083,6 +2091,11 @@ inline void il2cpp_codegen_code_coverage_sequence_point_hit(const MethodInfo* me
     il2cpp::os::Atomic::Increment64Relaxed(&method->sequencePointHits[localIndex]);
 }
 
+#else
+// Code converted with code coverage must still compile without IL2CPP_CODE_COVERAGE, as the debugger checks do without IL2CPP_MONO_DEBUGGER.
+// Nothing is counted, and il2cpp_code_coverage_is_built_in reports false.
+inline void il2cpp_codegen_code_coverage_ensure_sequence_point_hits_allocated(const MethodInfo* method, int32_t count) {}
+inline void il2cpp_codegen_code_coverage_sequence_point_hit(const MethodInfo* method, int32_t localIndex) {}
 #endif
 
 inline void il2cpp_codegen_check_pause_point()

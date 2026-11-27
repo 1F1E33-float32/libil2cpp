@@ -7,13 +7,18 @@
 
 NORETURN void RaiseInterlockedTypeNotSupportedException();
 
+// Exchange<T> and CompareExchange<T> only support reference, primitive and enum types, which are the pointer, integral and
+// floating point types in C++. Other types must not reach the Baselib atomics: those only compile for operands of 1, 2, 4 or 8
+// bytes (16 on 64-bit), so e.g. a 12-byte struct would fail the C++ build instead of throwing NotSupportedException.
+template<typename T>
+constexpr bool is_interlocked_supported_type()
+{
+    return std::is_pointer<T>::value || std::is_integral<T>::value || std::is_floating_point<T>::value;
+}
+
 template<typename T, typename U>
 inline typename std::enable_if<!(std::is_pointer<T>::value && std::is_integral<U>::value), T>::type static_cast_with_type_check(U value)
 {
-    if constexpr (!std::is_pointer<T>::value && !std::is_integral<T>::value && !std::is_floating_point<T>::value)
-    {
-        RaiseInterlockedTypeNotSupportedException();
-    }
     return static_cast<T>(value);
 }
 
@@ -105,17 +110,25 @@ namespace Threading
     template<typename T, typename U = T>
     inline T il2cpp_intrinsic_interlocked_exchange(T* location1, U value)
     {
-        T updated = baselib::atomic_exchange(*location1, static_cast_with_type_check<T>(value));
+        if constexpr (!is_interlocked_supported_type<T>())
+        {
+            RaiseInterlockedTypeNotSupportedException();
+            return *location1;
+        }
+        else
+        {
+            T updated = baselib::atomic_exchange(*location1, static_cast_with_type_check<T>(value));
 #if IL2CPP_TARGET_ARM64
-        Baselib_atomic_thread_fence_seq_cst();
+            Baselib_atomic_thread_fence_seq_cst();
 #endif
 
-        if constexpr (std::is_base_of<RuntimeObject, typename std::remove_pointer<T>::type>::value)
-        {
-            il2cpp::gc::GarbageCollector::SetWriteBarrier((void**)location1);
-        }
+            if constexpr (std::is_base_of<RuntimeObject, typename std::remove_pointer<T>::type>::value)
+            {
+                il2cpp::gc::GarbageCollector::SetWriteBarrier((void**)location1);
+            }
 
-        return updated;
+            return updated;
+        }
     }
 
     /* METHOD MAPPING
@@ -177,18 +190,26 @@ namespace Threading
     template<typename T, typename U = T, typename V = T>
     inline T il2cpp_intrinsic_interlocked_compare_exchange(T* location1, U value, V comparand)
     {
-        T oldValue = static_cast_with_type_check<T>(comparand);
-
-        baselib::atomic_compare_exchange_strong(*location1, oldValue, static_cast_with_type_check<T>(value));
-#if IL2CPP_TARGET_ARM64
-        Baselib_atomic_thread_fence_seq_cst();
-#endif
-        if constexpr (std::is_base_of<RuntimeObject, typename std::remove_pointer<T>::type>::value)
+        if constexpr (!is_interlocked_supported_type<T>())
         {
-            il2cpp::gc::GarbageCollector::SetWriteBarrier((void**)location1);
+            RaiseInterlockedTypeNotSupportedException();
+            return *location1;
         }
+        else
+        {
+            T oldValue = static_cast_with_type_check<T>(comparand);
 
-        return oldValue;
+            baselib::atomic_compare_exchange_strong(*location1, oldValue, static_cast_with_type_check<T>(value));
+#if IL2CPP_TARGET_ARM64
+            Baselib_atomic_thread_fence_seq_cst();
+#endif
+            if constexpr (std::is_base_of<RuntimeObject, typename std::remove_pointer<T>::type>::value)
+            {
+                il2cpp::gc::GarbageCollector::SetWriteBarrier((void**)location1);
+            }
+
+            return oldValue;
+        }
     }
 } // namespace Threading
 } // namespace System

@@ -493,7 +493,7 @@ bool il2cpp::vm::GlobalMetadata::Initialize(int32_t* imagesCount, int32_t* assem
 
     s_GlobalMetadataHeader = (const Il2CppGlobalMetadataHeader*)s_GlobalMetadata;
     IL2CPP_ASSERT(s_GlobalMetadataHeader->sanity == 0xFAB11BAF);
-    IL2CPP_ASSERT(s_GlobalMetadataHeader->version == 111);
+    IL2CPP_ASSERT(s_GlobalMetadataHeader->version == 112);
     IL2CPP_ASSERT(s_GlobalMetadataHeader->stringLiterals.offset == sizeof(Il2CppGlobalMetadataHeader));
 
     s_MetadataImagesCount = *imagesCount = s_GlobalMetadataHeader->images.count;
@@ -504,7 +504,7 @@ bool il2cpp::vm::GlobalMetadata::Initialize(int32_t* imagesCount, int32_t* assem
         GetIndexSize(s_GlobalMetadataHeader->genericParameters.count),
         GetIndexSize(s_GlobalMetadataHeader->genericContainers.count),
         GetIndexSize(s_GlobalMetadataHeader->typeDefinitions.count),
-        GetIndexSize(s_GlobalMetadataHeader->parameters.count),
+        GetParameterIndexSize(s_GlobalMetadataHeader->parameters.count),
         GetIndexSize(s_GlobalMetadataHeader->interfaceOffsets.count),
         GetIndexSize(s_GlobalMetadataHeader->events.count),
         GetIndexSize(s_GlobalMetadataHeader->properties.count),
@@ -1397,36 +1397,57 @@ int il2cpp::vm::GlobalMetadata::GetFieldMarshaledSizeForField(const FieldInfo* f
     return -1;
 }
 
-static int CompareInlineArrayLength(const void* pkey, const void* pelem)
+static int CompareTypeIndexAndLength(const void* pkey, const void* pelem)
 {
-    const auto elem = DeserializeInlineArrayLength(static_cast<const char*>(pelem), s_SerializedIndexSizes);
-    return (int)(((Il2CppInlineArrayLength*)pkey)->typeIndex - elem.typeIndex);
+    const auto elem = DeserializeTypeIndexAndLength(static_cast<const char*>(pelem), s_SerializedIndexSizes);
+    return (int)(((Il2CppTypeIndexAndLength*)pkey)->typeIndex - elem.typeIndex);
 }
 
-int32_t il2cpp::vm::GlobalMetadata::GetInlineArrayLengthForType(const Il2CppType* type)
+static int32_t GetLengthForTypeFromSection(const Il2CppType* type, Il2CppSectionMetadata section)
 {
+    // data.typeHandle is only valid for a type definition; a generic instance's data is its generic_class
     IL2CPP_ASSERT(type->type == IL2CPP_TYPE_CLASS || type->type == IL2CPP_TYPE_VALUETYPE);
 
     uint32_t typeIndex = GetIndexForTypeDefinitionInternal(type->data.typeHandle);
 
-    Il2CppInlineArrayLength key;
+    Il2CppTypeIndexAndLength key;
     key.typeIndex = typeIndex;
 
-    const auto* start = (const char*)s_GlobalMetadata + s_GlobalMetadataHeader->typeInlineArrays.offset;
-    const auto numInlineArrays = s_GlobalMetadataHeader->typeInlineArrays.count;
+    const auto* start = (const char*)s_GlobalMetadata + section.offset;
+    const auto count = section.count;
+    if (count <= 0)
+        return -1;
+
     const auto* res = (const char*)bsearch(
         &key,
         start,
-        numInlineArrays,
-        s_GlobalMetadataHeader->typeInlineArrays.size / numInlineArrays,
-        CompareInlineArrayLength
+        count,
+        section.size / count,
+        CompareTypeIndexAndLength
     );
 
     if (res != NULL)
     {
-        const auto deserializedResult = DeserializeInlineArrayLength(res, s_SerializedIndexSizes);
+        const auto deserializedResult = DeserializeTypeIndexAndLength(res, s_SerializedIndexSizes);
         return deserializedResult.length;
     }
+    return -1;
+}
+
+int32_t il2cpp::vm::GlobalMetadata::GetInlineArrayLengthForType(const Il2CppType* type)
+{
+    return GetLengthForTypeFromSection(type, s_GlobalMetadataHeader->typeInlineArrays);
+}
+
+int32_t il2cpp::vm::GlobalMetadata::GetExplicitSizeForType(const Il2CppType* type)
+{
+    // A generic instance has the Size of its generic type definition
+    if (type->type == IL2CPP_TYPE_GENERICINST)
+        type = type->data.generic_class->type;
+
+    if (type->type == IL2CPP_TYPE_CLASS || type->type == IL2CPP_TYPE_VALUETYPE)
+        return GetLengthForTypeFromSection(type, s_GlobalMetadataHeader->typeExplicitSizes);
+
     return -1;
 }
 

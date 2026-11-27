@@ -31,6 +31,8 @@
 // These types are used in debugger-agent.c for field access
 // (not via an API), so we need to map them to the IL2CPP types
 // so that the field layout is correct.
+// The exception is MonoGenericContainer: it is a handle to a serialized record whose
+// layout differs from Il2CppGenericContainer, so use the il2cpp_generic_container_* functions.
 #define MonoArray Il2CppArraySize
 #define MonoAssembly Il2CppAssembly
 #define MonoGenericContainer Il2CppGenericContainer
@@ -128,6 +130,7 @@ MonoType* il2cpp_generic_inst_get_argv(MonoGenericInst * inst, int index);
 MonoObject* il2cpp_debugger_assembly_get_object(MonoDomain * domain, MonoAssembly * assembly, MonoError * error);
 const MonoType* il2cpp_get_type_from_index(int index);
 void il2cpp_thread_info_safe_suspend_and_run(size_t id, int32_t interrupt_kernel, MonoSuspendThreadCallback callback, void* user_data);
+int il2cpp_generic_container_get_argc(MonoGenericContainer * gc);
 MonoGenericParam* il2cpp_generic_container_get_param(MonoGenericContainer * gc, int i);
 int32_t il2cpp_mono_methods_match(MonoMethod* left, MonoMethod* right);
 void il2cpp_field_static_get_value_checked(MonoVTable * vt, MonoClassField * field, void* value, MonoError * error);

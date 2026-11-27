@@ -132,7 +132,7 @@ static inline void _mm_storeu_si32(void* mem_addr, __m128i a)
 #  ifndef IL2CPP_X86BASE_IS_SUPPORTED
 #    define IL2CPP_X86BASE_IS_SUPPORTED 1 //base instructions
 #  endif
-#  ifndef IL2CPP_X86BASE_X64_IS_SUPPORTED
+#  if !defined(IL2CPP_X86BASE_X64_IS_SUPPORTED) && (defined(__x86_64__) || defined(_M_X64))
 #    define IL2CPP_X86BASE_X64_IS_SUPPORTED 1 //base 64-bit instructions
 #  endif
 #endif // __AVX__ || __AVX2__
@@ -278,40 +278,35 @@ static inline void _mm_storeu_si32(void* mem_addr, __m128i a)
 #      define IL2CPP_SSE2_IS_SUPPORTED 1
 #      define IL2CPP_SSE2_X64_IS_SUPPORTED 1   // emmintrin.h checks for _M_X64 || (_M_ARM64 && USE_SOFT_INTRINSICS)
 #    endif
-#    ifndef IL2CPP_SSE3_IS_SUPPORTED
-#      define IL2CPP_SSE3_IS_SUPPORTED 1
-#      define IL2CPP_SSE3_X64_IS_SUPPORTED 1
-#    endif
-#    ifndef IL2CPP_SSSE3_IS_SUPPORTED
-#      define IL2CPP_SSSE3_IS_SUPPORTED 1
-#      define IL2CPP_SSSE3_X64_IS_SUPPORTED 1
-#    endif
-#    ifndef IL2CPP_SSE41_IS_SUPPORTED
-#      define IL2CPP_SSE41_IS_SUPPORTED 1
-#      define IL2CPP_SSE41_X64_IS_SUPPORTED 1
-#    endif
-#    ifndef IL2CPP_SSE42_IS_SUPPORTED
-#      define IL2CPP_SSE42_IS_SUPPORTED 1
-#      define IL2CPP_SSE42_X64_IS_SUPPORTED 1
+// MSVC has no macro for SSE3 to SSE4.2 or POPCNT, and its headers declare their intrinsics whatever /arch says, so
+// SSE2 is all an x64 target is known to have. /arch:AVX and above define __AVX__, and every CPU with AVX has these
+// (.NET also treats AVX as implying them).
+#    ifdef __AVX__
+#      ifndef IL2CPP_SSE3_IS_SUPPORTED
+#        define IL2CPP_SSE3_IS_SUPPORTED 1
+#        define IL2CPP_SSE3_X64_IS_SUPPORTED 1
+#      endif
+#      ifndef IL2CPP_SSSE3_IS_SUPPORTED
+#        define IL2CPP_SSSE3_IS_SUPPORTED 1
+#        define IL2CPP_SSSE3_X64_IS_SUPPORTED 1
+#      endif
+#      ifndef IL2CPP_SSE41_IS_SUPPORTED
+#        define IL2CPP_SSE41_IS_SUPPORTED 1
+#        define IL2CPP_SSE41_X64_IS_SUPPORTED 1
+#      endif
+#      ifndef IL2CPP_SSE42_IS_SUPPORTED
+#        define IL2CPP_SSE42_IS_SUPPORTED 1
+#        define IL2CPP_SSE42_X64_IS_SUPPORTED 1
+#      endif
+#      ifndef IL2CPP_POPCNT_IS_SUPPORTED
+#        define IL2CPP_POPCNT_IS_SUPPORTED 1
+#        define IL2CPP_POPCNT_X64_IS_SUPPORTED 1
+#      endif
 #    endif
 #    ifdef IL2CPP_AVX2_IS_SUPPORTED          // LZCNT and BMI are implied if AVX is supported on Windows
 #      ifndef IL2CPP_LZCNT_IS_SUPPORTED
 #        define IL2CPP_LZCNT_IS_SUPPORTED 1
 #        define IL2CPP_LZCNT_X64_IS_SUPPORTED 1
-#      endif
-#    endif
-#    ifdef _INCLUDED_WMM                 // This section should be re-written when we update unity to allow option selection
-#      ifndef IL2CPP_AES_IS_SUPPORTED
-#        define IL2CPP_AES_IS_SUPPORTED 1
-#      endif
-#      ifndef IL2CPP_PCLMULQDQ_IS_SUPPORTED
-#        define IL2CPP_PCLMULQDQ_IS_SUPPORTED 1
-#      endif
-#    endif
-#    ifdef _INCLUDED_NMM                 //if you include <nmmintrin.h> or <intrin.h>, you can assume that the compiler supports the POPCNT. We will have to update this to add a define check when we hook it up for user option selection
-#      ifndef IL2CPP_POPCNT_IS_SUPPORTED
-#        define IL2CPP_POPCNT_IS_SUPPORTED 1
-#        define IL2CPP_POPCNT_X64_IS_SUPPORTED 1
 #      endif
 #    endif
 #  elif _M_IX86_FP == 2
@@ -320,24 +315,17 @@ static inline void _mm_storeu_si32(void* mem_addr, __m128i a)
 #    ifndef IL2CPP_X86BASE_IS_SUPPORTED
 #      define IL2CPP_X86BASE_IS_SUPPORTED 1 //base instructions
 #    endif
-#    ifndef IL2CPP_X86BASE_X64_IS_SUPPORTED
-#      define IL2CPP_X86BASE_X64_IS_SUPPORTED 1 //base 64-bit instructions
-#    endif
 #    ifndef IL2CPP_SSE_IS_SUPPORTED
 #      define IL2CPP_SSE_IS_SUPPORTED 1
 #    endif
 #    ifndef IL2CPP_SSE2_IS_SUPPORTED
 #      define IL2CPP_SSE2_IS_SUPPORTED 1
-#      define IL2CPP_SSE2_X64_IS_SUPPORTED 1   // emmintrin.h checks for _M_X64 || (_M_ARM64 && USE_SOFT_INTRINSICS)
 #    endif
 // only SSE1 is set if _M_IX86_FP is 1
 #  elif _M_IX86_FP == 1
 #    include <immintrin.h>
 #    ifndef IL2CPP_X86BASE_IS_SUPPORTED
 #      define IL2CPP_X86BASE_IS_SUPPORTED 1 //base instructions
-#    endif
-#    ifndef IL2CPP_X86BASE_X64_IS_SUPPORTED
-#      define IL2CPP_X86BASE_X64_IS_SUPPORTED 1 //base 64-bit instructions
 #    endif
 #    ifndef IL2CPP_SSE_IS_SUPPORTED
 #      define IL2CPP_SSE_IS_SUPPORTED 1
@@ -360,14 +348,16 @@ static inline void _mm_storeu_si32(void* mem_addr, __m128i a)
 #  endif
 #endif //__LZCNT__
 
-// AES macro only defined under -maes on GCC/Clang, or if wmmintrin.h is included. See msvc section to follow _INCLUDED_WMM
+// AES macro only defined under -maes on GCC/Clang. No /arch level implies AES on MSVC, so there it is only supported
+// when the build defines IL2CPP_AES_IS_SUPPORTED
 #ifdef __AES__
 #  ifndef IL2CPP_AES_IS_SUPPORTED
 #    define IL2CPP_AES_IS_SUPPORTED 1
 #  endif
 #endif // __AES__
 
-// Pclmulqdq macro is only defined under -mpclmul on gcc/clang, or if wmmintrin.h is included. See msvc section to follow _INCLUDED_WMM
+// Pclmulqdq macro is only defined under -mpclmul on gcc/clang. As with AES, MSVC needs the build to define
+// IL2CPP_PCLMULQDQ_IS_SUPPORTED
 #ifdef __PCLMUL__
 #  ifndef IL2CPP_PCLMULQDQ_IS_SUPPORTED
 #    define IL2CPP_PCLMULQDQ_IS_SUPPORTED 1

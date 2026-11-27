@@ -831,6 +831,108 @@ namespace vm
         return IsAssignableFrom(klass, klassc);
     }
 
+    bool Class::IsGenericClassAssignableFromVarianceSameDefinition(const Il2CppClass* klass, const Il2CppClass* oklass, const Il2CppClass* implementingClass)
+    {
+        const Il2CppGenericClass* genericClass = klass->generic_class;
+        const Il2CppGenericClass* oGenericClass = oklass->generic_class;
+
+        // For arrays or System.Array/InternalEnumerator<T> we need to follow the array variance rules when looking for an
+        // generic interface i.e. Int32[] should be assignable to IEnumerable<UInt32>
+        const bool useArrayVariance = implementingClass->rank || implementingClass->declaringType == il2cpp_defaults.array_class;
+
+        // Generic instances are unique per argument list, so klass != oklass means some argument differs. With no variant
+        // parameter, only the array variance rules can still make the types assignable. The instance caches whether its
+        // definition has a variant parameter, so this rejects without looking up the definition.
+        const Il2CppGenericInst* genericInst = GenericClass::GetInstance(genericClass);
+        const Il2CppGenericInst* oGenericInst = GenericClass::GetInstance(oGenericClass);
+
+        IL2CPP_ASSERT(oGenericInst->type_argc == genericInst->type_argc);
+
+        const Il2CppType** genericArgs = genericInst->type_argv;
+        const Il2CppType** oGenericArgs = oGenericInst->type_argv;
+
+        uint32_t genericArgCount = genericInst->type_argc;
+
+        if (!klass->has_variant_generic_parameters && !useArrayVariance)
+        {
+#if IL2CPP_DEBUG
+            // Rejecting here relies on distinct instances of a definition having some argument whose class differs. Two
+            // Il2CppTypes that Il2CppTypeEqualityComparer tells apart but that resolve to the same class would break that,
+            // for example IL2CPP_TYPE_OBJECT and an IL2CPP_TYPE_CLASS naming System.Object.
+            bool anyArgumentClassDiffers = false;
+            for (uint32_t argIndex = 0; argIndex < genericArgCount; argIndex++)
+                anyArgumentClassDiffers |= Class::FromIl2CppType(genericArgs[argIndex]) != Class::FromIl2CppType(oGenericArgs[argIndex]);
+            IL2CPP_ASSERT(anyArgumentClassDiffers && "Distinct generic instances resolve every argument to the same class");
+#endif
+            return false;
+        }
+
+        // Only a definition with a variant parameter stores its flags, one entry per generic parameter (GenericClass::CreateClass
+        // asserts that matches every instance's argument count). Without one every parameter is non-variant, so the array
+        // variance rules alone don't need the definition.
+        const bool hasVariance = klass->has_variant_generic_parameters;
+        const uint16_t* parameterVarianceFlags = nullptr;
+        if (hasVariance)
+        {
+            // GenericClass::CreateClass sets up the flags for the generic type definition before any instance exists.
+            Il2CppClass* genericTypeDefinition = GenericClass::GetTypeDefinition_OnlyCached(genericClass);
+            IL2CPP_ASSERT(genericTypeDefinition);
+            parameterVarianceFlags = genericTypeDefinition->genericParameterVarianceFlags;
+            IL2CPP_ASSERT(parameterVarianceFlags);
+        }
+
+        uint32_t i = 0;
+        do
+        {
+            int32_t parameterVariance = hasVariance ? parameterVarianceFlags[i] : IL2CPP_GENERIC_PARAMETER_ATTRIBUTE_NON_VARIANT;
+            const Il2CppType* genericArg = genericArgs[i];
+            const Il2CppType* oGenericArg = oGenericArgs[i];
+
+            // This is intentionally a bitwise OR - these checks are cheap reads and are independent
+            if (Type::IsValueType(genericArg) | Type::IsValueType(oGenericArg))
+                parameterVariance = IL2CPP_GENERIC_PARAMETER_ATTRIBUTE_NON_VARIANT;
+
+            Il2CppClass* genericParameterType = Class::FromIl2CppType(genericArg);
+            Il2CppClass* oGenericParameterType = Class::FromIl2CppType(oGenericArg);
+
+            switch (parameterVariance)
+            {
+                case IL2CPP_GENERIC_PARAMETER_ATTRIBUTE_NON_VARIANT:
+                    if (genericParameterType != oGenericParameterType)
+                    {
+                        if (useArrayVariance)
+                        {
+                            IL2CPP_ASSERT(implementingClass->rank || strcmp(implementingClass->name, "InternalEnumerator`1") == 0);
+
+                            if (metadata::ArrayMetadata::GetArrayVarianceReducedType(genericParameterType) != metadata::ArrayMetadata::GetArrayVarianceReducedType(oGenericParameterType))
+                                return false;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    break;
+                case IL2CPP_GENERIC_PARAMETER_ATTRIBUTE_COVARIANT:
+                    if (!Class::IsAssignableFrom(genericParameterType, oGenericParameterType))
+                        return false;
+                    break;
+                case IL2CPP_GENERIC_PARAMETER_ATTRIBUTE_CONTRAVARIANT:
+                    if (!Class::IsAssignableFrom(oGenericParameterType, genericParameterType))
+                        return false;
+                    break;
+                default:
+                    IL2CPP_ASSERT(false && "Invalid generic parameter variance");
+                    return false;
+            }
+
+            i++;
+        }
+        while (i < genericArgCount);
+
+        return true;
+    }
+
     bool Class::IsGeneric(const Il2CppClass *klass)
     {
         return klass->is_generic;
@@ -1074,7 +1176,7 @@ namespace vm
             }
             else
             {
-#if IL2CPP_ENABLE_VALIDATE_FIELD_LAYOUT
+#if IL2CPP_VALIDATE_FIELD_LAYOUT
                 ValidateFieldOffsets(FIELD_LAYOUT_INSTANCE, klass, instanceSize, layoutData.FieldOffsets);
                 ValidateFieldOffsets(FIELD_LAYOUT_STATIC, klass, staticSize, staticLayoutData.FieldOffsets);
                 ValidateFieldOffsets(FIELD_LAYOUT_THREADSTATIC, klass, threadStaticSize, threadStaticLayoutData.FieldOffsets);
@@ -1649,19 +1751,41 @@ namespace vm
         klass->is_blittable = true;
     }
 
-    static void SetupGenericParameterFlags(Il2CppClass* klass)
+    static uint16_t GetGenericParameterVariance(Il2CppMetadataGenericContainerHandle containerHandle, GenericContainerParameterIndex index)
     {
+        return MetadataCache::GetGenericParameterFlags(MetadataCache::GetGenericParameterFromIndex(containerHandle, index)) & IL2CPP_GENERIC_PARAMETER_ATTRIBUTE_VARIANCE_MASK;
+    }
+
+    bool Class::SetupGenericParameterFlagsLocked(Il2CppClass* klass, const il2cpp::os::FastAutoLock& lock)
+    {
+        // Every definition with no variant parameter points at this sentinel. The variance check only reads the flags of
+        // definitions with a variant parameter, so the sentinel just marks the definition as set up.
+        static const uint16_t s_noVariance = IL2CPP_GENERIC_PARAMETER_ATTRIBUTE_NON_VARIANT;
+
         IL2CPP_ASSERT(Class::IsGenericTypeDefinition(klass));
 
-        auto containerHandle = Class::GetGenericContainer(klass);
-        auto genericParameterCount = MetadataCache::GetGenericContainerCount(containerHandle);
+        if (const uint16_t* existingFlags = klass->genericParameterVarianceFlags)
+            return existingFlags != &s_noVariance;
 
-        GenericParameterFlags* flags = (GenericParameterFlags*)MetadataMalloc(sizeof(GenericParameterFlags) + genericParameterCount * sizeof(uint16_t));
-        flags->count = genericParameterCount;
-        for (uint32_t i = 0; i < flags->count; i++)
-            flags->flags[i] = MetadataCache::GetGenericParameterFlags(MetadataCache::GetGenericParameterFromIndex(containerHandle, i));
+        // Variance is only legal on interface and delegate type parameters, so skip reading the metadata for anything else
+        uint16_t* variantFlags = nullptr;
+        if (Class::CanHaveVariantGenericParameters(klass))
+        {
+            auto containerHandle = Class::GetGenericContainer(klass);
+            auto genericParameterCount = MetadataCache::GetGenericContainerCount(containerHandle);
+            for (uint32_t i = 0; i < genericParameterCount; i++)
+            {
+                uint16_t variance = GetGenericParameterVariance(containerHandle, i);
+                // Allocate on the first variant parameter; the zeroed entries before it are already non-variant
+                if (variance != IL2CPP_GENERIC_PARAMETER_ATTRIBUTE_NON_VARIANT && variantFlags == nullptr)
+                    variantFlags = (uint16_t*)MetadataCalloc(genericParameterCount, sizeof(uint16_t));
+                if (variantFlags != nullptr)
+                    variantFlags[i] = variance;
+            }
+        }
 
-        klass->genericParameterFlags = flags;
+        il2cpp::os::Atomic::PublishPointer(&klass->genericParameterVarianceFlags, variantFlags != nullptr ? variantFlags : &s_noVariance);
+        return variantFlags != nullptr;
     }
 
     bool Class::InitLocked(Il2CppClass *klass, const il2cpp::os::FastAutoLock& lock)
@@ -1742,6 +1866,7 @@ namespace vm
         }
 
         bool canBeInstantiated = !Class::IsGeneric(klass) && !il2cpp::metadata::GenericMetadata::ContainsGenericParameters(klass);
+        const Il2CppRGCTXData* rgctx = NULL;
 
         if (canBeInstantiated && !klass->initializationExceptionGCHandle)
         {
@@ -1753,17 +1878,13 @@ namespace vm
                 if (klass->genericRecursionDepth < il2cpp::metadata::GenericMetadata::GetMaximumRuntimeGenericDepth() || il2cpp::vm::Runtime::IsLazyRGCTXInflationEnabled())
                 {
                     Il2CppException* exc = NULL;
-                    klass->rgctx_data = il2cpp::metadata::GenericMetadata::InflateRGCTXLocked(klass->image, klass->token, GenericClass::GetInstance(klass->generic_class), lock, &exc);
+                    rgctx = il2cpp::metadata::GenericMetadata::InflateRGCTXLocked(klass->image, klass->token, GenericClass::GetInstance(klass->generic_class), lock, &exc);
                     if (exc != NULL)
+                    {
+                        // Leave rgctx_data NULL so generated code takes the slow path and raises the error
+                        rgctx = NULL;
                         Class::SetClassInitializationError(klass, exc);
-                }
-
-                MethodInfo** methods = const_cast<MethodInfo**>(klass->methods);
-                for (int i = 0; i < klass->method_count; i++)
-                {
-                    // All non-generic methods on a generic class should share the same rgctx as the class
-                    if (!Method::IsGeneric(methods[i]))
-                        methods[i]->rgctx_data = klass->rgctx_data;
+                    }
                 }
             }
 
@@ -1776,12 +1897,8 @@ namespace vm
                     vm::Class::InitLocked(method->klass, lock);
             }
         }
-        else if (Class::IsGenericTypeDefinition(klass))
-        {
-            SetupGenericParameterFlags(klass);
-        }
 
-        Class::PublishInitialized(klass);
+        Class::PublishInitialized(klass, rgctx);
 
         ++il2cpp_runtime_stats.initialized_class_count;
 
@@ -1817,6 +1934,14 @@ namespace vm
             IL2CPP_ASSERT(!klass->init_pending);
             InitLocked(klass, lock);
         }
+        else
+        {
+            // Pairs with the barrier in PublishInitialized. Without it, the caller's reads of state written
+            // during initialization (e.g. rgctx_data) can be satisfied before the read of initialized and
+            // observe stale values on weakly ordered CPUs. initialized is a bitfield, so use a fence rather
+            // than an acquire load.
+            il2cpp::os::Atomic::ReadMemoryBarrier();
+        }
     }
 
     void Class::SetClassInitializationError(Il2CppClass *klass, Il2CppException* error)
@@ -1825,8 +1950,24 @@ namespace vm
         PublishInitialized(klass);
     }
 
-    void Class::PublishInitialized(Il2CppClass *klass)
+    void Class::PublishInitialized(Il2CppClass *klass, const Il2CppRGCTXData* rgctx)
     {
+        // Generated code reads rgctx_data without g_MetadataLock and without checking that the class is
+        // initialized, so publish it only once the rest of the class is set up, just before the flags.
+        if (rgctx != NULL)
+        {
+            os::Atomic::PublishPointer(&klass->rgctx_data, rgctx);
+
+            MethodInfo** methods = const_cast<MethodInfo**>(klass->methods);
+            for (int i = 0; i < klass->method_count; i++)
+            {
+                // All non-generic methods on a generic class should share the same rgctx as the class.
+                // The release fence in PublishPointer above already orders these stores after the table.
+                if (!Method::IsGeneric(methods[i]))
+                    os::Atomic::StorePointerRelaxed(&methods[i]->rgctx_data, rgctx);
+            }
+        }
+
         // Update the initialized flags last, so that other threads can't see the class as initialized
         // until after everything else is set up.
         il2cpp::os::Atomic::FullMemoryBarrier();

@@ -105,6 +105,7 @@ namespace os
 #else
     const HardcodedPInvokeDependencyFunction kUser32Functions[] =
     {
+        HARDCODED_DEPENDENCY_FUNCTION(GetProcessWindowStation),
         HARDCODED_DEPENDENCY_FUNCTION(LoadStringW)
     };
 

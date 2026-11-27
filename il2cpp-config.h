@@ -371,6 +371,7 @@ IL2CPP_EXTERN_C void il2cpp_console_printf_error(const char*, ...);
 #endif
 
 #define IL2CPP_SIZEOF_STRUCT_WITH_NO_INSTANCE_FIELDS 1
+// TODO: This has been broken for a while, fix it or remove it
 #define IL2CPP_VALIDATE_FIELD_LAYOUT 0
 
 #if IL2CPP_MONO_DEBUGGER

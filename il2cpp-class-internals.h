@@ -258,12 +258,6 @@ static const int32_t kInvalidInterfaceOffset = -1;
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #endif
 
-typedef struct GenericParameterFlags
-{
-    uint32_t count;
-    uint16_t flags[IL2CPP_ZERO_LEN_ARRAY];
-} GenericParameterFlags;
-
 typedef struct Il2CppClass
 {
     // The following fields are always valid for a Il2CppClass structure
@@ -302,7 +296,10 @@ typedef struct Il2CppClass
     union
     {
         const Il2CppRGCTXData* rgctx_data;                // Initialized in Init for inflated generic classes
-        const GenericParameterFlags* genericParameterFlags; // Initialized in Init for generic type definitions
+        // Initialized for generic type definitions by GenericClass::CreateClass, before their first instance exists. A
+        // definition with a covariant or contravariant parameter stores one entry per generic parameter, holding only its
+        // IL2CPP_GENERIC_PARAMETER_ATTRIBUTE_VARIANCE_MASK bits; any other definition points at a shared sentinel that is never read.
+        const uint16_t* genericParameterVarianceFlags;
     };
 
     // used for fast parent checks
@@ -368,6 +365,7 @@ typedef struct Il2CppClass
     uint8_t is_vtable_initialized : 1;
     uint8_t is_byref_like : 1;
     uint8_t has_inline_array : 1;
+    uint8_t has_variant_generic_parameters : 1; // Set on generic instances whose generic type definition has a covariant or contravariant parameter
     VirtualInvokeData vtable[IL2CPP_ZERO_LEN_ARRAY];
 } Il2CppClass;
 

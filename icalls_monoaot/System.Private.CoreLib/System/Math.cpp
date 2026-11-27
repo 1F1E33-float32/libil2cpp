@@ -101,9 +101,7 @@ namespace System
 
     double Math::FusedMultiplyAdd(double x, double y, double z)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(Math::FusedMultiplyAdd);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return fma(x, y, z);
     }
 
     double Math::Log(double d)
@@ -126,9 +124,7 @@ namespace System
 
     double Math::Log2(double x)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(Math::Log2);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return log2(x);
     }
 
     double Math::ModF(double x, double* d)

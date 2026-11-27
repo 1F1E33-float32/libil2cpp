@@ -117,10 +117,16 @@ namespace os
         }
 
         template<typename T>
+        static inline void StorePointerRelaxed(T** pointer, T* value)
+        {
+            Baselib_atomic_store_ptr_relaxed((intptr_t*)pointer, (intptr_t)value);
+        }
+
+        template<typename T>
         static inline void PublishPointer(T** pointer, T* value)
         {
             Baselib_atomic_thread_fence_release();
-            Baselib_atomic_store_ptr_relaxed((intptr_t*)pointer, (intptr_t)value);
+            StorePointerRelaxed(pointer, value);
         }
 
         static inline int32_t Increment(int32_t* value)

@@ -266,8 +266,8 @@ namespace System
 
     void Array::ClearInternal(Il2CppArray* arr, int32_t index, int32_t count)
     {
-        int sz = il2cpp_array_element_size(arr->klass);
-        memset(il2cpp_array_addr_with_size(arr, sz, index), 0, count * sz);
+        size_t sz = il2cpp_array_element_size(arr->klass);
+        memset(il2cpp_array_addr_with_size(arr, sz, index), 0, (size_t)count * sz);
     }
 
     void Array::SetValue(Il2CppArray* thisPtr, Il2CppObject* value, Il2CppArray* indices)

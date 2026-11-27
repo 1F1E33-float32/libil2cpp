@@ -81,6 +81,7 @@ namespace vm
         static uint32_t GetFieldOffset(const Il2CppClass* klass, int32_t fieldIndexInType, FieldInfo* field);
         static int GetFieldMarshaledSizeForField(const FieldInfo* field);
         static int32_t GetInlineArrayLengthForType(const Il2CppType* type);
+        static int32_t GetExplicitSizeForType(const Il2CppType* type);
 
         static Il2CppMetadataFieldInfo GetFieldInfo(const Il2CppClass* klass, TypeFieldIndex index);
         static Il2CppMetadataMethodInfo GetMethodInfo(const Il2CppClass* klass, TypeMethodIndex index);

@@ -20,6 +20,12 @@ int GetIndexSize(const int numberOfElements)
     }
 }
 
+// A method's parameterStart can be one past the last parameter, so leave room for parameterCount itself
+int GetParameterIndexSize(const int parameterCount)
+{
+    return GetIndexSize(parameterCount + 1);
+}
+
 Il2CppEventDefinition DeserializeEventDefinition(const char* ptr, const SerializedIndexSizes& sizes)
 {
     return Il2CppEventDefinition {
@@ -145,9 +151,9 @@ Il2CppTypeDefinition DeserializeTypeDefinition(const Il2CppMetadataTypeHandle ha
     };
 }
 
-Il2CppInlineArrayLength DeserializeInlineArrayLength(const char* ptr, const SerializedIndexSizes& sizes)
+Il2CppTypeIndexAndLength DeserializeTypeIndexAndLength(const char* ptr, const SerializedIndexSizes& sizes)
 {
-    return Il2CppInlineArrayLength {
+    return Il2CppTypeIndexAndLength {
             ReadIndex<TypeIndex>(ptr, sizes.typeIndex), // typeIndex
             Read<int32_t>(ptr), // length
     };

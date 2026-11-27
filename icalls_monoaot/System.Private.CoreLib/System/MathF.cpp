@@ -34,128 +34,92 @@ namespace System
 
     float MathF::Acos(float x)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(MathF::Acos);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return std::acos(x);
     }
 
     float MathF::Acosh(float x)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(MathF::Acosh);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return std::acosh(x);
     }
 
     float MathF::Asin(float x)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(MathF::Asin);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return std::asin(x);
     }
 
     float MathF::Asinh(float x)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(MathF::Asinh);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return std::asinh(x);
     }
 
     float MathF::Atan(float x)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(MathF::Atan);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return std::atan(x);
     }
 
     float MathF::Atan2(float y, float x)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(MathF::Atan2);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return std::atan2(y, x);
     }
 
     float MathF::Atanh(float x)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(MathF::Atanh);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return std::atanh(x);
     }
 
     float MathF::Cbrt(float x)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(MathF::Cbrt);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return std::cbrt(x);
     }
 
     float MathF::Ceiling(float x)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(MathF::Ceiling);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return std::ceil(x);
     }
 
     float MathF::Cos(float x)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(MathF::Cos);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return std::cos(x);
     }
 
     float MathF::Cosh(float x)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(MathF::Cosh);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return std::cosh(x);
     }
 
     float MathF::Exp(float x)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(MathF::Exp);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return std::exp(x);
     }
 
     float MathF::Floor(float x)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(MathF::Floor);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return std::floor(x);
     }
 
     float MathF::FusedMultiplyAdd(float x, float y, float z)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(MathF::FusedMultiplyAdd);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return std::fma(x, y, z);
     }
 
     float MathF::Log(float x)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(MathF::Log);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return std::log(x);
     }
 
     float MathF::Log10(float x)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(MathF::Log10);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return std::log10(x);
     }
 
     float MathF::Log2(float x)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(MathF::Log2);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return std::log2(x);
     }
 
     float MathF::ModF(float x, float* intptr)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(MathF::ModF);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return std::modf(x, intptr);
     }
 
     float MathF::Pow(float val, float exp)
@@ -208,37 +172,27 @@ namespace System
 
     float MathF::Sin(float x)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(MathF::Sin);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return std::sin(x);
     }
 
     float MathF::Sinh(float x)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(MathF::Sinh);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return std::sinh(x);
     }
 
     float MathF::Sqrt(float x)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(MathF::Sqrt);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return std::sqrt(x);
     }
 
     float MathF::Tan(float x)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(MathF::Tan);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return std::tan(x);
     }
 
     float MathF::Tanh(float x)
     {
-        IL2CPP_NOT_IMPLEMENTED_ICALL(MathF::Tanh);
-        IL2CPP_UNREACHABLE;
-        return 0;
+        return std::tanh(x);
     }
 } // namespace System
 } // namespace CoreLib

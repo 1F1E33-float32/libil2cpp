@@ -3,6 +3,7 @@
 #include "icalls/mscorlib/System.Threading/Thread.h"
 #include "il2cpp-class-internals.h"
 #include "gc/GarbageCollector.h"
+#include "gc/GCEpoch.h"
 #include "os/Atomic.h"
 #include "os/Thread.h"
 #include "os/Mutex.h"
@@ -39,7 +40,15 @@ namespace Threading
         Il2CppDelegate* m_Delegate;
         Il2CppObject* m_StartArg;
         il2cpp::os::Semaphore* m_Semaphore;
+        uint32_t m_GCEpoch;
     };
+
+    static void ReleaseStartData(void* arg)
+    {
+        StartData* startData = (StartData*)arg;
+        delete startData->m_Semaphore;
+        il2cpp::gc::GCEpoch::FreeFixed(startData, startData->m_GCEpoch);
+    }
 
     static void ThreadStart(void* arg)
     {
@@ -52,11 +61,14 @@ namespace Threading
 
             il2cpp::vm::StackTrace::InitializeStackTracesForCurrentThread();
 
-            il2cpp::vm::Thread::InitializeManagedThread(startData->m_Thread, startData->m_Domain);
-            il2cpp::vm::Thread::SetState(startData->m_Thread, vm::kThreadStateRunning);
-
+            bool attachSuccessful = false;
             try
             {
+                il2cpp::vm::Thread::InitializeManagedThread(startData->m_Thread, startData->m_Domain);
+                il2cpp::vm::Thread::SetState(startData->m_Thread, vm::kThreadStateRunning);
+
+                attachSuccessful = true;
+
                 Il2CppException* exc = NULL;
                 void* args[1] = { startData->m_StartArg };
                 vm::Runtime::DelegateInvoke(startData->m_Delegate, args, &exc);
@@ -72,13 +84,25 @@ namespace Threading
 
             il2cpp::vm::Thread::ClrState(startData->m_Thread, vm::kThreadStateRunning);
             il2cpp::vm::Thread::SetState(startData->m_Thread, vm::kThreadStateStopped);
-            il2cpp::vm::Thread::UninitializeManagedThread(startData->m_Thread);
+            if (attachSuccessful)
+            {
+                il2cpp::vm::Thread::UninitializeManagedThread(startData->m_Thread);
+            }
+            else
+            {
+                // Register refused this thread because shutdown has started, but it already registered with
+                // the GC above. Unregister it while that GC is still alive.
+                il2cpp::gc::GCEpoch::Scope scope(startData->m_GCEpoch);
+                if (scope.IsCurrent())
+                    il2cpp::gc::GarbageCollector::UnregisterThread();
+            }
 
             il2cpp::vm::StackTrace::CleanupStackTracesForCurrentThread();
         }
 
-        delete startData->m_Semaphore;
-        GarbageCollector::FreeFixed(startData);
+        // startData keeps the managed thread alive, and its finalizer deletes the os::Thread that
+        // os::Thread::RunWrapper still uses after we return. So release startData after RunWrapper.
+        startData->m_Thread->GetInternalThread()->handle->SetCleanupFunction(ReleaseStartData, startData);
     }
 
     bool Thread::JoinInternal(Il2CppThread* thisPtr, int32_t millisecondsTimeout)
@@ -116,7 +140,9 @@ namespace Threading
         }
 
         // use fixed GC memory since we are storing managed object pointers
-        StartData* startData = (StartData*)GarbageCollector::AllocateFixed(sizeof(StartData), NULL);
+        uint32_t gcEpoch;
+        StartData* startData = (StartData*)il2cpp::gc::GCEpoch::AllocateFixed(sizeof(StartData), NULL, gcEpoch);
+        startData->m_GCEpoch = gcEpoch;
 
         startData->m_Thread = thisPtr;
         GarbageCollector::SetWriteBarrier((void**)&startData->m_Thread);
@@ -133,9 +159,7 @@ namespace Threading
         il2cpp::os::ErrorCode status = thread->Run(&ThreadStart, startData);
         if (status != il2cpp::os::kErrorCodeSuccess)
         {
-            // ThreadStart releases startData, but it never ran.
-            delete startData->m_Semaphore;
-            GarbageCollector::FreeFixed(startData);
+            ReleaseStartData(startData);
             return false;
         }
 

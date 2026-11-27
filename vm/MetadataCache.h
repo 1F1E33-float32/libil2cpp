@@ -160,7 +160,8 @@ namespace vm
         static const uint8_t* GetFieldDefaultValue(const FieldInfo* field, const Il2CppType** type);
         static const uint8_t* GetParameterDefaultValue(const MethodInfo* method, int32_t parameterPosition, const Il2CppType** type, bool* isExplicitlySetNullDefaultValue);
         static int GetFieldMarshaledSizeForField(const FieldInfo* field);
-        static int32_t GetInlineArrayLengthForType(const Il2CppType* field);
+        static int32_t GetInlineArrayLengthForType(const Il2CppType* type);
+        static int32_t GetExplicitSizeForType(const Il2CppType* type);
         static const MethodInfo* GetMethodInfoFromMethodHandle(Il2CppMetadataMethodDefinitionHandle handle);
 
         // returns the compiler computed field offset for type definition fields

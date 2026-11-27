@@ -122,11 +122,11 @@ typedef struct Il2CppTypeDefinition
     uint32_t bitfield;
 } Il2CppTypeDefinition;
 
-typedef struct Il2CppInlineArrayLength
+typedef struct Il2CppTypeIndexAndLength
 {
     TypeIndex typeIndex;
     int32_t length;
-} Il2CppInlineArrayLength;
+} Il2CppTypeIndexAndLength;
 
 typedef struct Il2CppFieldDefinition
 {
@@ -345,7 +345,8 @@ typedef struct Il2CppGlobalMetadataHeader
     Il2CppSectionMetadata vtableMethods; // EncodedMethodIndex
     Il2CppSectionMetadata interfaceOffsets; // Il2CppInterfaceOffsetPair
     Il2CppSectionMetadata typeDefinitions; // Il2CppTypeDefinition
-    Il2CppSectionMetadata typeInlineArrays; // Il2CppInlineArrayLength
+    Il2CppSectionMetadata typeInlineArrays; // Il2CppTypeIndexAndLength
+    Il2CppSectionMetadata typeExplicitSizes; // Il2CppTypeIndexAndLength
     Il2CppSectionMetadata images; // Il2CppImageDefinition
     Il2CppSectionMetadata assemblies; // Il2CppAssemblyDefinition
     Il2CppSectionMetadata fieldRefs; // Il2CppFieldRef

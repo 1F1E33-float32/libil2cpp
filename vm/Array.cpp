@@ -90,6 +90,22 @@ namespace vm
         vm::Exception::Raise(vm::Exception::GetOverflowException("Arithmetic operation resulted in an overflow."));
     }
 
+    static const il2cpp_array_size_t kArraySizeMax = (il2cpp_array_size_t)-1;
+
+    static inline il2cpp_array_size_t SafeMul(il2cpp_array_size_t a, il2cpp_array_size_t b)
+    {
+        if (a != 0 && b > kArraySizeMax / a)
+            vm::Exception::RaiseOutOfMemoryException();
+        return a * b;
+    }
+
+    static inline il2cpp_array_size_t SafeAdd(il2cpp_array_size_t a, il2cpp_array_size_t b)
+    {
+        if (b > kArraySizeMax - a)
+            vm::Exception::RaiseOutOfMemoryException();
+        return a + b;
+    }
+
     Il2CppArray* Array::NewSpecific(Il2CppClass *klass, il2cpp_array_size_t n)
     {
         Il2CppObject *o;
@@ -113,16 +129,8 @@ namespace vm
         }
 
         elem_size = il2cpp_array_element_size(klass);
-        //if (CHECK_MUL_OVERFLOW_UN (n, elem_size)) {
-        //  mono_gc_out_of_memory (MONO_ARRAY_MAX_SIZE);
-        //  return NULL;
-        //}
-        byte_len = n * elem_size;
-        //if (CHECK_ADD_OVERFLOW_UN (byte_len, sizeof (MonoArray))) {
-        //  mono_gc_out_of_memory (MONO_ARRAY_MAX_SIZE);
-        //  return NULL;
-        //}
-        byte_len += kIl2CppSizeOfArray;
+        byte_len = SafeMul(n, elem_size);
+        byte_len = SafeAdd(byte_len, kIl2CppSizeOfArray);
         if (!klass->has_references)
         {
             o = Object::AllocatePtrFree(byte_len, klass);
@@ -198,27 +206,20 @@ namespace vm
             {
                 if (lengths[i] > IL2CPP_ARRAY_MAX_INDEX)  //MONO_ARRAY_MAX_INDEX
                     RaiseOverflowException();
-                //if (CHECK_MUL_OVERFLOW_UN (len, lengths [i]))
-                //  mono_gc_out_of_memory (MONO_ARRAY_MAX_SIZE);
-                len *= lengths[i];
+                len = SafeMul(len, lengths[i]);
             }
+
+            if (len > IL2CPP_ARRAY_MAX_INDEX)
+                vm::Exception::RaiseOutOfMemoryException();
         }
 
-        //if (CHECK_MUL_OVERFLOW_UN (byte_len, len))
-        //  mono_gc_out_of_memory (MONO_ARRAY_MAX_SIZE);
-        byte_len *= len;
-        //if (CHECK_ADD_OVERFLOW_UN (byte_len, sizeof (MonoArray)))
-        //  mono_gc_out_of_memory (MONO_ARRAY_MAX_SIZE);
-        byte_len += kIl2CppSizeOfArray;
+        byte_len = SafeMul(byte_len, len);
+        byte_len = SafeAdd(byte_len, kIl2CppSizeOfArray);
         if (bounds_size)
         {
             /* align */
-            //if (CHECK_ADD_OVERFLOW_UN (byte_len, 3))
-            //  mono_gc_out_of_memory (MONO_ARRAY_MAX_SIZE);
-            byte_len = (byte_len + (IL2CPP_SIZEOF_VOID_P - 1)) & ~(IL2CPP_SIZEOF_VOID_P - 1);
-            //if (CHECK_ADD_OVERFLOW_UN (byte_len, bounds_size))
-            //  mono_gc_out_of_memory (MONO_ARRAY_MAX_SIZE);
-            byte_len += bounds_size;
+            byte_len = SafeAdd(byte_len, IL2CPP_SIZEOF_VOID_P - 1) & ~(IL2CPP_SIZEOF_VOID_P - 1);
+            byte_len = SafeAdd(byte_len, bounds_size);
         }
         /*
          * Following three lines almost taken from mono_object_new ():

@@ -118,6 +118,14 @@ namespace vm
             return klass->flags & TYPE_ATTRIBUTE_INTERFACE;
         }
 
+        // Variance is only legal on interface and delegate type parameters (ECMA-335 II.9.5).
+        // multicastdelegate_class is a required default, and InitIl2CppDefaults sets it up before any generic type
+        // (Il2CppDefaultsTests.MulticastDelegateIsInitializedBeforeAnyGenericType), so no instance is created while it is null.
+        inline static bool CanHaveVariantGenericParameters(const Il2CppClass* klass)
+        {
+            return IsInterface(klass) || klass->parent == il2cpp_defaults.multicastdelegate_class;
+        }
+
         inline static bool IsNullable(const Il2CppClass* klass)
         {
             // Based on benchmarking doing the check on `klass->generic_class != NULL` makes this check faster
@@ -176,6 +184,8 @@ namespace vm
         static Il2CppClass* GetInflatedGenericInstanceClass(Il2CppClass* klass, const Il2CppGenericInst* genericInst);
         static Il2CppClass* InflateGenericClass(Il2CppClass* klass, Il2CppGenericContext *context);
         static const Il2CppType* InflateGenericType(const Il2CppType* type, Il2CppGenericContext *context);
+        // Returns whether any generic parameter of the definition is covariant or contravariant
+        static bool SetupGenericParameterFlagsLocked(Il2CppClass* klass, const il2cpp::os::FastAutoLock& lock);
 
         inline static Il2CppMetadataGenericContainerHandle GetGenericContainer(const Il2CppClass* klass)
         {
@@ -215,7 +225,7 @@ namespace vm
         static VTableIndex VTableIndexForMethod(Il2CppClass* klass, const MethodInfo* virtualMethod);
 
         static void SetClassInitializationError(Il2CppClass* klass, Il2CppException* error);
-        static void PublishInitialized(Il2CppClass* klass);
+        static void PublishInitialized(Il2CppClass* klass, const Il2CppRGCTXData* rgctx = NULL);
 
         static bool IsGlobalModuleClass(const Il2CppClass* klass);
 
@@ -224,82 +234,21 @@ namespace vm
             return klass == oklass || IsGenericClassAssignableFromVariance(klass, oklass, implementingClass);
         }
 
-        static IL2CPP_FORCE_INLINE bool IsGenericClassAssignableFromVariance(const Il2CppClass* klass, const Il2CppClass* oklass, const Il2CppClass* implementingClass = il2cpp_defaults.missing_class)
+        // Callers scan every interface of a class, and nearly all of them have a different generic type
+        // definition. Keep that rejection small enough to inline at each call site, and keep the
+        // per-argument variance walk out of line in Class.cpp.
+        static inline bool IsGenericClassAssignableFromVariance(const Il2CppClass* klass, const Il2CppClass* oklass, const Il2CppClass* implementingClass = il2cpp_defaults.missing_class)
         {
             IL2CPP_ASSERT(klass != oklass && "IsGenericClassAssignableFromVariance is for generic variance checks - you should call IsGenericClassAssignableFrom instead");
 
-            const Il2CppGenericClass* genericClass = klass->generic_class;
             const Il2CppGenericClass* oGenericClass = oklass->generic_class;
-
-            if (oGenericClass == NULL || !GenericClass::HasSameGenericTypeDefinition(oGenericClass, genericClass))
+            if (oGenericClass == NULL || !GenericClass::HasSameGenericTypeDefinition(oGenericClass, klass->generic_class))
                 return false;
 
-            const Il2CppGenericInst* genericInst = GenericClass::GetInstance(genericClass);
-            const Il2CppGenericInst* oGenericInst = GenericClass::GetInstance(oGenericClass);
-            Il2CppMetadataGenericContainerHandle genericContainer = Class::GetGenericContainer(klass);
-
-            Il2CppClass* genericTypeDefintion = GenericClass::GetTypeDefinition(genericClass);
-            Class::Init(genericTypeDefintion);
-            const uint16_t* genericContainerFlags = genericTypeDefintion->genericParameterFlags->flags;
-
-            IL2CPP_ASSERT(oGenericInst->type_argc == genericInst->type_argc);
-            IL2CPP_ASSERT(genericTypeDefintion->genericParameterFlags->count == genericInst->type_argc);
-
-            const Il2CppType** genericArgs = genericInst->type_argv;
-            const Il2CppType** oGenericArgs = oGenericInst->type_argv;
-
-            uint32_t genericArgCount = genericInst->type_argc;
-            uint32_t i = 0;
-            do
-            {
-                uint16_t flags = genericContainerFlags[i];
-                int32_t parameterVariance = flags & IL2CPP_GENERIC_PARAMETER_ATTRIBUTE_VARIANCE_MASK;
-                Il2CppClass* genericParameterType = Class::FromIl2CppType(genericArgs[i]);
-                Il2CppClass* oGenericParameterType = Class::FromIl2CppType(oGenericArgs[i]);
-
-                // This is intentionally a bitwise OR - these checks are cheap reads and are independent
-                if (Class::IsValuetype(genericParameterType) | Class::IsValuetype(oGenericParameterType))
-                    parameterVariance = IL2CPP_GENERIC_PARAMETER_ATTRIBUTE_NON_VARIANT;
-
-                switch (parameterVariance)
-                {
-                    case IL2CPP_GENERIC_PARAMETER_ATTRIBUTE_NON_VARIANT:
-                        if (genericParameterType != oGenericParameterType)
-                        {
-                            if (implementingClass->rank || implementingClass->declaringType == il2cpp_defaults.array_class)
-                            {
-                                // For arrays or System.Array/InternalEnumerator<T> we need to follow the array variance rules when looking for an
-                                // generic interface i.e. Int32[] should be assignable to IEnumerable<UInt32>
-                                IL2CPP_ASSERT(implementingClass->rank || strcmp(implementingClass->name, "InternalEnumerator`1") == 0);
-
-                                if (metadata::ArrayMetadata::GetArrayVarianceReducedType(genericParameterType) != metadata::ArrayMetadata::GetArrayVarianceReducedType(oGenericParameterType))
-                                    return false;
-                            }
-                            else
-                            {
-                                return false;
-                            }
-                        }
-                        break;
-                    case IL2CPP_GENERIC_PARAMETER_ATTRIBUTE_COVARIANT:
-                        if (!Class::IsAssignableFrom(genericParameterType, oGenericParameterType))
-                            return false;
-                        break;
-                    case IL2CPP_GENERIC_PARAMETER_ATTRIBUTE_CONTRAVARIANT:
-                        if (!Class::IsAssignableFrom(oGenericParameterType, genericParameterType))
-                            return false;
-                        break;
-                    default:
-                        IL2CPP_ASSERT(false && "Invalid generic parameter variance");
-                        return false;
-                }
-
-                i++;
-            }
-            while (i < genericArgCount);
-
-            return true;
+            return IsGenericClassAssignableFromVarianceSameDefinition(klass, oklass, implementingClass);
         }
+
+        static bool IsGenericClassAssignableFromVarianceSameDefinition(const Il2CppClass* klass, const Il2CppClass* oklass, const Il2CppClass* implementingClass);
 
         static void SetDebugName(Il2CppClass* klass)
 #if IL2CPP_DEBUG

@@ -194,19 +194,24 @@ namespace vm
             //klass->type_token = definition->type_token;
             klass->generic_class = gclass;
 
-            Il2CppClass* genericTypeDefinition = GenericClass::GetTypeDefinition(klass->generic_class);
+            // Set up the definition's flags before any instance exists, so the variance check can read them without initializing
+            // the definition. The instance caches whether it has a variant parameter, so the check can reject the common case
+            // without looking up the definition.
+            klass->has_variant_generic_parameters = Class::SetupGenericParameterFlagsLocked(definition, lock);
             const Il2CppGenericInst* classInst = GenericClass::GetInstance(klass->generic_class);
+            // The flags have one entry per generic parameter and no count, so the variance check relies on every instance having exactly that many arguments
+            IL2CPP_ASSERT(classInst->type_argc == MetadataCache::GetGenericContainerCount(Class::GetGenericContainer(definition)));
 
-            if (genericTypeDefinition->parent)
-                klass->parent = Class::FromIl2CppType(metadata::GenericMetadata::InflateIfNeeded(&genericTypeDefinition->parent->byval_arg, classInst, false));
+            if (definition->parent)
+                klass->parent = Class::FromIl2CppType(metadata::GenericMetadata::InflateIfNeeded(&definition->parent->byval_arg, classInst, false));
 
-            if (genericTypeDefinition->declaringType)
-                klass->declaringType = Class::FromIl2CppType(metadata::GenericMetadata::InflateIfNeeded(&genericTypeDefinition->declaringType->byval_arg, classInst, false));
+            if (definition->declaringType)
+                klass->declaringType = Class::FromIl2CppType(metadata::GenericMetadata::InflateIfNeeded(&definition->declaringType->byval_arg, classInst, false));
 
             klass->this_arg.type = klass->byval_arg.type = IL2CPP_TYPE_GENERICINST;
             klass->this_arg.data.generic_class = klass->byval_arg.data.generic_class = gclass;
             klass->this_arg.byref = true;
-            klass->byval_arg.valuetype = genericTypeDefinition->byval_arg.valuetype;
+            klass->byval_arg.valuetype = definition->byval_arg.valuetype;
 
             klass->event_count = definition->event_count;
             klass->field_count = definition->field_count;
@@ -226,7 +231,7 @@ namespace vm
             klass->token = definition->token;
             klass->interopData = MetadataCache::GetInteropDataForType(&klass->byval_arg);
 
-            if (GenericClass::GetTypeDefinition(klass->generic_class) == il2cpp_defaults.generic_nullable_class)
+            if (definition == il2cpp_defaults.generic_nullable_class)
             {
                 klass->element_class = klass->castClass = Class::FromIl2CppType(classInst->type_argv[0]);
                 klass->nullabletype = true;
@@ -254,6 +259,11 @@ namespace vm
     Il2CppClass* GenericClass::GetTypeDefinition(const Il2CppGenericClass *gclass)
     {
         return MetadataCache::GetTypeInfoFromType(gclass->type);
+    }
+
+    Il2CppClass* GenericClass::GetTypeDefinition_OnlyCached(const Il2CppGenericClass *gclass)
+    {
+        return MetadataCache::GetTypeInfoFromType_OnlyCached(gclass->type);
     }
 
     bool GenericClass::IsEnum(Il2CppGenericClass *gclass)

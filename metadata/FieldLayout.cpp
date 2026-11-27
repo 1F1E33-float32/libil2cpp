@@ -166,6 +166,12 @@ namespace metadata
 
     void FieldLayout::LayoutFields(const Il2CppClass* klass, FieldInfoFilter filter, size_t parentSize, size_t actualParentSize, size_t parentAlignment, uint8_t packing, bool isExplicitLayout, FieldLayoutData& data)
     {
+        const Il2CppClass* definitionClass = klass;
+        if (Class::IsInflated(klass))
+            definitionClass = GenericClass::GetTypeDefinition(klass->generic_class);
+        
+        int32_t explicitSize = vm::MetadataCache::GetExplicitSizeForType(vm::Class::GetType(definitionClass));
+
         data.classSize = parentSize;
         data.actualClassSize = actualParentSize;
         IL2CPP_ASSERT(parentAlignment <= std::numeric_limits<uint8_t>::max());
@@ -181,10 +187,6 @@ namespace metadata
             // The inline array field is the first instance field, but static fields may be declared before it
             if (isFirstField && klass->has_inline_array && filter == &vm::Field::IsInstance)
             {
-                const Il2CppClass* definitionClass = klass;
-                if (Class::IsInflated(klass))
-                    definitionClass = GenericClass::GetTypeDefinition(klass->generic_class);
-
                 int32_t inlineArrayLength = vm::MetadataCache::GetInlineArrayLengthForType(vm::Class::GetType(definitionClass));
                 IL2CPP_ASSERT(inlineArrayLength >= 0);
                 sa.size *= inlineArrayLength;
@@ -205,6 +207,21 @@ namespace metadata
         }
 
         data.classSize = AlignTo(data.actualClassSize, data.minimumAlignment);
+
+        // A Size must give the same size as the generated C++ struct, which pads its fields to the Size with a union
+        // (TypeDefinitionPaddingWriter). Only an explicit layout type without references is emitted under
+        // #pragma pack(1), so only it is exactly Size bytes, i.e. a Size of 23 gives 23 rather than a larger value;
+        // the C++ compiler rounds any other padded struct up to its alignment.
+        if ((filter == &vm::Field::IsInstance) && (explicitSize > 0))
+        {
+            size_t explicitSizeWithHeader = (size_t)(sizeof(Il2CppObject) + explicitSize);
+            const bool isEmittedWithExactSize = isExplicitLayout && !klass->has_references;
+            if (!isEmittedWithExactSize)
+                explicitSizeWithHeader = AlignTo(explicitSizeWithHeader, data.minimumAlignment);
+
+            data.actualClassSize = std::max(data.actualClassSize, explicitSizeWithHeader);
+            data.classSize = std::max(data.classSize, explicitSizeWithHeader);
+        }
 
         // C++ ABI difference between MS and Clang
 #if IL2CPP_CXX_ABI_MSVC

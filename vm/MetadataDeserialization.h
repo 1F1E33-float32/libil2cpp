@@ -27,6 +27,7 @@ struct SerializedIndexSizes
 };
 
 int GetIndexSize(const int numberOfElements);
+int GetParameterIndexSize(const int parameterCount);
 
 template<typename T>
 T ReadIndex(const char*& ptr, const int serializedSize)
@@ -72,7 +73,7 @@ Il2CppGenericParameter DeserializeGenericParameter(const Il2CppMetadataGenericPa
 Il2CppGenericContainer DeserializeGenericContainer(const Il2CppMetadataGenericContainerHandle ptr, const SerializedIndexSizes& sizes);
 Il2CppImageDefinition DeserializeImageDefinition(const char* ptr, const SerializedIndexSizes& sizes);
 Il2CppWindowsRuntimeTypeNamePair DeserializeWindowsRuntimeTypeNamePair(const char* ptr, const SerializedIndexSizes& sizes);
-Il2CppInlineArrayLength DeserializeInlineArrayLength(const char* ptr, const SerializedIndexSizes& sizes);
+Il2CppTypeIndexAndLength DeserializeTypeIndexAndLength(const char* ptr, const SerializedIndexSizes& sizes);
 Il2CppFieldRef DeserializeFieldRef(const char* ptr, const SerializedIndexSizes& sizes);
 Il2CppPropertyDefinition DeserializePropertyDefinition(const char* ptr, const SerializedIndexSizes& sizes);
 Il2CppMethodSpecOnGenericType DeserializeMethodSpecOnGenericType(const char* ptr, const SerializedIndexSizes& sizes);

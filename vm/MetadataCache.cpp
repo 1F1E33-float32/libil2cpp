@@ -1155,6 +1155,11 @@ int32_t il2cpp::vm::MetadataCache::GetInlineArrayLengthForType(const Il2CppType*
     return il2cpp::vm::GlobalMetadata::GetInlineArrayLengthForType(type);
 }
 
+int32_t il2cpp::vm::MetadataCache::GetExplicitSizeForType(const Il2CppType* type)
+{
+    return il2cpp::vm::GlobalMetadata::GetExplicitSizeForType(type);
+}
+
 int32_t il2cpp::vm::MetadataCache::GetFieldOffsetFromIndexLocked(const Il2CppClass* klass, int32_t fieldIndexInType, FieldInfo* field, const il2cpp::os::FastAutoLock& lock)
 {
     int32_t offset = il2cpp::vm::GlobalMetadata::GetFieldOffset(klass, fieldIndexInType, field);

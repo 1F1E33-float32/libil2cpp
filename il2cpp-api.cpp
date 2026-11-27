@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "gc/WriteBarrier.h"
+#include "os/Atomic.h"
 #include "os/StackTrace.h"
 #include "os/Image.h"
 #include "vm/AndroidRuntime.h"
@@ -621,7 +622,10 @@ void il2cpp_unhandled_exception(Il2CppException* exc)
 void il2cpp_native_stack_trace(const Il2CppException * ex, uintptr_t** addresses, int* numFrames, char** imageUUID, char** imageName)
 {
 #if IL2CPP_ENABLE_NATIVE_INSTRUCTION_POINTER_EMISSION
-    if (ex == NULL || ex->native_trace_ips == NULL)
+    // Read native_trace_ips once - another thread that throws the same exception instance
+    // again replaces it, or nulls it out, while we copy it.
+    Il2CppArray* nativeTraceIps = ex != NULL ? il2cpp::os::Atomic::LoadPointerRelaxed(&ex->native_trace_ips) : NULL;
+    if (nativeTraceIps == NULL)
     {
         *numFrames = 0;
         *addresses = NULL;
@@ -630,7 +634,7 @@ void il2cpp_native_stack_trace(const Il2CppException * ex, uintptr_t** addresses
         return;
     }
 
-    *numFrames = il2cpp_array_length(ex->native_trace_ips);
+    *numFrames = il2cpp_array_length(nativeTraceIps);
 
     if (*numFrames <= 0)
     {
@@ -643,7 +647,7 @@ void il2cpp_native_stack_trace(const Il2CppException * ex, uintptr_t** addresses
         *addresses = static_cast<uintptr_t*>(il2cpp_alloc((*numFrames) * sizeof(uintptr_t)));
         for (int i = 0; i < *numFrames; i++)
         {
-            uintptr_t ptrAddr = il2cpp_array_get(ex->native_trace_ips, uintptr_t, i);
+            uintptr_t ptrAddr = il2cpp_array_get(nativeTraceIps, uintptr_t, i);
             (*addresses)[i] = ptrAddr;
         }
 
@@ -1419,6 +1423,11 @@ bool il2cpp_type_is_unmanaged(const Il2CppType *type)
         return true;
 
     if (!type->valuetype)
+        return false;
+
+    // has_references cannot answer for an open type: a generic type definition is never laid out,
+    // so it is not computed, and an open instance counts a generic parameter as no reference.
+    if (Type::IsOpenConstructedType(type))
         return false;
 
     Il2CppClass* klass = il2cpp::vm::Class::FromIl2CppType(type);

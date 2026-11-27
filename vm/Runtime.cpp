@@ -51,6 +51,7 @@
 #include "il2cpp-object-internals.h"
 #include "Il2CppDefaultsAsserts.h"
 #include "il2cpp-tabledefs.h"
+#include "gc/GCEpoch.h"
 #include "gc/GarbageCollector.h"
 #include "gc/WriteBarrier.h"
 #include "vm/InternalCalls.h"
@@ -197,6 +198,8 @@ namespace vm
 
         Assembly::Initialize();
         gc::GarbageCollector::Initialize();
+        // Before anything allocates with GCEpoch, so its allocations name this GC
+        gc::GCEpoch::Begin();
 
         // Thread needs GC initialized
         Thread::Initialize();
@@ -458,6 +461,9 @@ namespace vm
 
         // We need to do this before UninitializeGC because it uses (fixed) GC memory
         Reflection::ClearStatics();
+
+        // Must come before the GC is torn down: once the epoch moves on, threads exiting late leave the GC alone
+        il2cpp::gc::GCEpoch::End();
 
         // We need to do this after thread shut down because it is freeing GC fixed memory
         il2cpp::gc::GarbageCollector::UninitializeGC();

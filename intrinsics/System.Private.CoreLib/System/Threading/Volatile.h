@@ -273,8 +273,8 @@ namespace Threading
     */
     inline void il2cpp_intrinsic_volatile_read_barrier()
     {
-        IL2CPP_NOT_IMPLEMENTED_INTRINSIC(il2cpp_intrinsic_volatile_read_barrier);
-        IL2CPP_UNREACHABLE;
+        // Loads before the barrier can't move after any memory access following it: an acquire fence
+        il2cpp_codegen_read_memory_barrier();
     }
 
     /* METHOD MAPPING
@@ -283,8 +283,8 @@ namespace Threading
     */
     inline void il2cpp_intrinsic_volatile_write_barrier()
     {
-        IL2CPP_NOT_IMPLEMENTED_INTRINSIC(il2cpp_intrinsic_volatile_write_barrier);
-        IL2CPP_UNREACHABLE;
+        // Stores after the barrier can't move before any memory access preceding it: a release fence
+        il2cpp_codegen_release_memory_barrier();
     }
 } // namespace Threading
 } // namespace System

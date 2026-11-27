@@ -834,7 +834,7 @@ namespace System
         Il2CppArray* arr = vm::Array::New(il2cpp_defaults.systemtype_class, (il2cpp_array_size_t)itfs.size());
         int i = 0;
         for (InterfaceVector::const_iterator iter = itfs.begin(); iter != itfs.end(); ++iter, ++i)
-            il2cpp_array_setref(arr, i, vm::Reflection::GetTypeObject(&(*iter)->byval_arg));
+            il2cpp_array_setref(arr, i, vm::Reflection::GetTypeObject(*iter));
 
         res = arr;
     }

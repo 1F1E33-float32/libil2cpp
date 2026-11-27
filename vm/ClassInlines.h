@@ -4,6 +4,7 @@
 #include "il2cpp-config.h"
 #include "il2cpp-class-internals.h"
 #include "il2cpp-object-internals.h"
+#include "os/Atomic.h"
 
 namespace il2cpp
 {
@@ -24,9 +25,12 @@ namespace vm
             return InitFromCodegenSlow(klass);
         }
 
+        // rgctx_data is published by another thread (with a release fence) once the class or generic
+        // method is set up. Everything read from the table depends on the loaded pointer, which orders
+        // those reads on all supported CPUs, so a relaxed load suffices on this hot path.
         static IL2CPP_FORCE_INLINE const Il2CppRGCTXData* InitMethodRgctxFromCodegen(const MethodInfo *method)
         {
-            const Il2CppRGCTXData* rgctx_data = method->rgctx_data;
+            const Il2CppRGCTXData* rgctx_data = os::Atomic::LoadPointerRelaxed(&method->rgctx_data);
             if (rgctx_data)
                 return rgctx_data;
             return InitMethodRgctxFromCodegenSlow(method);
@@ -34,7 +38,7 @@ namespace vm
 
         static IL2CPP_FORCE_INLINE const Il2CppRGCTXData* InitClassRgctxFromCodegen(const MethodInfo* method)
         {
-            const Il2CppRGCTXData* rgctx_data = method->klass->rgctx_data;
+            const Il2CppRGCTXData* rgctx_data = os::Atomic::LoadPointerRelaxed(&method->klass->rgctx_data);
             if (rgctx_data)
                 return rgctx_data;
             return InitClassRgctxFromCodegenSlow(method);

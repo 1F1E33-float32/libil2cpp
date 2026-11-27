@@ -28,6 +28,7 @@ namespace vm
         }
 
         static Il2CppClass* GetTypeDefinition(const Il2CppGenericClass *gclass);
+        static Il2CppClass* GetTypeDefinition_OnlyCached(const Il2CppGenericClass* gclass);
         static bool IsEnum(Il2CppGenericClass *gclass);
 
         inline static bool IsValueType(Il2CppGenericClass* gclass)

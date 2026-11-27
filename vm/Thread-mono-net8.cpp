@@ -359,9 +359,11 @@ namespace vm
 
         // Kill all threads but the finalizer and current one. We temporarily flush out
         // the entire list and then just put the two threads back.
-        while (attachedThreadsCopy.size())
+        // Keep attachedThreadsCopy intact until the joins below are done: it keeps the threads alive,
+        // and the finalizer of a thread that exits meanwhile would free the os::Thread joined below.
+        for (size_t i = 0; i < attachedThreadsCopy.size(); ++i)
         {
-            Il2CppThread* thread = attachedThreadsCopy.back();
+            Il2CppThread* thread = attachedThreadsCopy[i];
             os::Thread* osThread = thread->handle;
 
             if (gc::GarbageCollector::IsFinalizerThread(thread))
@@ -374,13 +376,7 @@ namespace vm
                 osThread->QueueUserAPC(TerminateThread, NULL);
                 activeThreads.push_back(osThread);
             }
-
-            attachedThreadsCopy.pop_back();
         }
-        // In theory, we don't need a write barrier here for Boehm, because we keep a
-        // reference to the object on the stack during it's lifetime. But for validation
-        // tests, we turn off GC, and thus we need it to pass.
-        gc::GarbageCollector::SetWriteBarrier((void**)attachedThreadsCopy.data(), sizeof(Il2CppThread*) * attachedThreadsCopy.size());
 
         ////FIXME: While we don't have stable thread abortion in place yet, work around problems in
         ////    the current implementation by repeatedly requesting threads to terminate. This works around

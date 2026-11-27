@@ -32,6 +32,7 @@
 #include "il2cpp-api.h"
 #include "gc/GarbageCollector.h"
 #include "gc/GCHandle.h"
+#include "gc/GCTrackedVector.h"
 #include "gc/WriteBarrier.h"
 #include "icalls/mscorlib/System.Runtime.Remoting.Messaging/MonoMethodMessage.h"
 #include "mono/ThreadPool/threadpool-ms.h"
@@ -242,10 +243,15 @@ static void cleanup (void)
 	while (GetMonitorStatus() != MONITOR_STATUS_NOT_RUNNING)
 		il2cpp::vm::Thread::Sleep(1);
 
-	std::vector<Il2CppInternalThread*> working_threads;
+	/* GC tracked, so that a worker that exits meanwhile stays alive until worker_kill is done
+	 * with it: its finalizer frees the longlived data and the os::Thread that Thread::Stop uses. */
+	il2cpp::gc::GCTrackedVector<Il2CppInternalThread*> working_threads;
 
 	g_ThreadPool->active_threads_lock.Acquire();
-	working_threads = g_ThreadPool->working_threads;
+	working_threads.reserve(g_ThreadPool->working_threads.size());
+	for (i = 0; i < g_ThreadPool->working_threads.size(); ++i)
+		working_threads.push_back(g_ThreadPool->working_threads[i]);
+	il2cpp::gc::GarbageCollector::SetWriteBarrier((void**)working_threads.data(), sizeof(Il2CppInternalThread*) * working_threads.size());
 	g_ThreadPool->active_threads_lock.Release();
 
 	/* stop all threadpool->working_threads */

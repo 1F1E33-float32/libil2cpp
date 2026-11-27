@@ -351,6 +351,11 @@ extern "C" {
         callback(NULL, user_data);
     }
 
+    int il2cpp_generic_container_get_argc(MonoGenericContainer* gc)
+    {
+        return il2cpp::vm::MetadataCache::GetGenericContainerCount((Il2CppMetadataGenericContainerHandle)gc);
+    }
+
     MonoGenericParam* il2cpp_generic_container_get_param(MonoGenericContainer *gc, int i)
     {
         return (MonoGenericParam*)il2cpp::vm::GenericContainer::GetGenericParameter((Il2CppMetadataGenericContainerHandle)gc, i);

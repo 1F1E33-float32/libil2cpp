@@ -98,7 +98,7 @@ namespace X86
         EmitTemplateParams: true
     */
     template<typename TRet, typename TArg1, typename TArg2, typename TArg3>
-    inline TRet il2cpp_intrinsic__x86_base_div_rem_CE0F6(uint32_t lower, int32_t upper, int32_t divisor)
+    inline TRet il2cpp_intrinsic__x86_base_div_rem_signed(uint32_t lower, int32_t upper, int32_t divisor)
     {
 #if IL2CPP_X86BASE_IS_SUPPORTED
 #if defined(_MSC_VER)

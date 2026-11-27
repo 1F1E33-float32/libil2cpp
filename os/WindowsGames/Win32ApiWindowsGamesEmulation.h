@@ -58,6 +58,13 @@ extern "C"
         *ppszPath = NULL;
         return E_INVALIDARG;
     }
+
+    // There are no window stations on Windows Games. Environment.UserInteractive treats a NULL window station as
+    // "cannot tell" and reports true
+    inline HANDLE WINAPI GetProcessWindowStation()
+    {
+        return NULL;
+    }
 }
 
 

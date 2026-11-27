@@ -65,25 +65,19 @@ namespace os
         return false;
     }
 
-    static const std::basic_string<Il2CppNativeChar>* FindLibraryNameFromHandle(Baselib_DynamicLibrary_Handle nativeDynamicLibraryHandle)
+    Il2CppMethodPointer LibraryLoader::GetHardcodedPInvokeDependencyFunctionPointer(Baselib_DynamicLibrary_Handle nativeDynamicLibraryHandle, const il2cpp::utils::StringView<char>& entryPoint, Il2CppCharSet charSet)
     {
+        // Hold the lock while the cached library name is in use: other threads can push_back or erase
+        // s_DllCache entries, which moves or destroys the name.
         os::FastAutoLock lock(&s_DllCacheMutex);
 
         for (DllCacheIterator it = s_DllCache.begin(); it != s_DllCache.end(); it++)
         {
             if (it->second == nativeDynamicLibraryHandle)
-                return &it->first;
+                return GetHardcodedPInvokeDependencyFunctionPointer(it->first, entryPoint, charSet);
         }
 
         return NULL;
-    }
-
-    Il2CppMethodPointer LibraryLoader::GetHardcodedPInvokeDependencyFunctionPointer(Baselib_DynamicLibrary_Handle nativeDynamicLibraryHandle, const il2cpp::utils::StringView<char>& entryPoint, Il2CppCharSet charSet)
-    {
-        const std::basic_string<Il2CppNativeChar>* libraryName = FindLibraryNameFromHandle(nativeDynamicLibraryHandle);
-        if (libraryName == NULL)
-            return NULL;
-        return GetHardcodedPInvokeDependencyFunctionPointer(*libraryName, entryPoint, charSet);
     }
 
     Il2CppMethodPointer LibraryLoader::GetHardcodedPInvokeDependencyFunctionPointer(const il2cpp::utils::StringView<Il2CppNativeChar>& nativeDynamicLibrary, const il2cpp::utils::StringView<char>& entryPoint, Il2CppCharSet charSet)
